@@ -1,4 +1,5 @@
 <?php
+chdir(__DIR__);
 require_once '../config.php';
 require_once '../function.php';
 $textbotlang = languagechange();

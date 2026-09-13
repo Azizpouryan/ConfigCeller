@@ -1966,27 +1966,12 @@ elseif ($datain == "systemsms") {
         update("setting", "statuscopycart", $valuenew);
     } elseif ($type == "score") {
         if ($value == "1") {
-                $crontabBinary = getCrontabBinary();
-                if ($crontabBinary === null) {
-                    error_log('Unable to locate crontab executable; cannot remove lottery cron job.');
-                } else {
-                    $currentCronJobs = runShellCommand(sprintf('%s -l 2>/dev/null', escapeshellarg($crontabBinary)));
-                    $jobToRemove = "*/1 * * * * curl https://$domainhosts/cronbot/lottery.php";
-                    $newCronJobs = preg_replace('/' . preg_quote($jobToRemove, '/') . '/', '', (string) $currentCronJobs);
-                    $tempCronFile = tempnam(sys_get_temp_dir(), 'cron');
-                    if ($tempCronFile === false) {
-                        error_log('Unable to create temporary file for lottery cron job removal.');
-                    } else {
-                        file_put_contents($tempCronFile, trim((string) $newCronJobs) . PHP_EOL);
-                        runShellCommand(sprintf('%s %s', escapeshellarg($crontabBinary), escapeshellarg($tempCronFile)));
-                        unlink($tempCronFile);
-                    }
-                }
+            removeCron(__DIR__ . '/cronbot/lottery.php');
             $valuenew = "0";
         } else {
-            $phpFilePath = "https://$domainhosts/cronbot/lottery.php";
-            $cronCommand = "*/1 * * * * curl $phpFilePath";
-            if (!addCronIfNotExists($cronCommand)) {
+            $phpPath = PHP_BINDIR . '/php';
+            $basePath = __DIR__ . '/cronbot';
+            if (!addCronIfNotExists("*/1 * * * * $phpPath $basePath/lottery.php")) {
                 error_log('Unable to register lottery cron job because shell_exec is unavailable.');
             }
             $valuenew = "1";

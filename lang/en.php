@@ -216,6 +216,7 @@ To enable it, the bot owner needs a Telegram Premium subscription, or the bot mu
 🔄 Please send your username again',
                 'sectionDisabled' => '📛 This section is currently disabled',
                 'selectoption' => 'Choose an option',
+                'invalidCommand' => 'Invalid command',
                 'selectusername' => 'Send a custom username
 ⚠️ The username must not contain extra characters such as @, space, or hyphen. 
 ⚠️ The username must be in English.

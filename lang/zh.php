@@ -216,6 +216,7 @@ return [
 🔄 请重新发送您的用户名',
                 'sectionDisabled' => '📛 此部分当前已停用',
                 'selectoption' => '请选择一个选项',
+                'invalidCommand' => '无效的命令',
                 'selectusername' => '请发送一个自定义用户名
 ⚠️ 用户名不得包含多余字符，如 @、空格或连字符。
 ⚠️ 用户名必须为英文。

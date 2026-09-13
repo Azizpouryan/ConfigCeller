@@ -517,6 +517,7 @@ function mirza_install_writable_paths(): array
         'cronbot' => 'ذخیره users.json و info',
         'api' => 'ذخیره hash.txt',
         'install/state' => 'ثبت وضعیت اجرای کرون‌ها',
+        'lang/override' => 'ذخیره متن‌های ویرایش‌شده ربات از پنل وب',
     ];
 }
 

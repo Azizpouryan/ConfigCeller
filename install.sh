@@ -2361,6 +2361,9 @@ function update_bot() {
     else
         echo -e "\e[93mWarning: config.php not found. Proceeding without backup.\033[0m"
     fi
+    LANG_OVERRIDE_BACKUP="/root/mirzapro_lang_override_backup"
+    rm -rf "$LANG_OVERRIDE_BACKUP"
+    [ -d "$BOT_DIR/lang/override" ] && cp -a "$BOT_DIR/lang/override" "$LANG_OVERRIDE_BACKUP"
     run_step "Backing up vpnbots" "backup_vpnbots '$BOT_DIR'" \
         || { show_step_error
              echo -e "\e[91mError: Failed to backup vpnbots.\033[0m"
@@ -2391,6 +2394,10 @@ function update_bot() {
             echo -e "\e[93mvpnbot backup: ${VPNBOT_BACKUP}\033[0m"
             exit 1
         }
+    fi
+    if [ -d "$LANG_OVERRIDE_BACKUP" ]; then
+        sudo rm -rf "$BOT_DIR/lang/override"
+        sudo mv "$LANG_OVERRIDE_BACKUP" "$BOT_DIR/lang/override"
     fi
     run_step "Restoring vpnbots" "restore_vpnbots '$BOT_DIR'" \
         || { show_step_error

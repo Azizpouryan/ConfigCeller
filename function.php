@@ -2114,6 +2114,9 @@ function languagechange($path_dir = null, string $lang = 'fa')
 }
 function bottext_apply_overrides(array &$base, $lang)
 {
+    $overrideFile = __DIR__ . '/lang/override/' . $lang . '.php';
+    if (is_file($overrideFile) && is_array($overrideTexts = include $overrideFile))
+        $base = array_replace_recursive($base, $overrideTexts);
     customEmojiLabels([]);
     $row = select("setting", "*", null, null, "select");
     $raw = is_array($row) ? ($row['text_edit'] ?? null) : null;

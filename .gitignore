@@ -15,3 +15,4 @@ error_log
 *.xlsx
 graphify-out
 docs
+/lang/override/

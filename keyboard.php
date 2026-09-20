@@ -44,7 +44,7 @@ if (is_array($keyboardLayout) && isset($keyboardLayout['keyboard']) && is_array(
 }
 
 $agentPanelAllowed = $users['agent'] != "f";
-$agentRequestAllowed = $users['agent'] == "f" && $setting['statusagentrequest'] == "onrequestagent";
+$agentRequestAllowed = $users['agent'] == "f";
 if (!empty($keyboardRows)) {
     $allowed_btn_styles = ['primary', 'success', 'danger'];
     foreach ($keyboardRows as $kb_r => $kb_row) {

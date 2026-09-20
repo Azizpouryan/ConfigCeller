@@ -6038,6 +6038,10 @@ if ($text == "/start" || $datain == "start" || $text == "start") {
     update("user", "namecustom", $text, "id", $from_id);
     step("home", $from_id);
 } elseif ($text == $textbotlang['textbot']['requestAgent'] || $datain == "requestagent") {
+    if (!check_active_btn($setting['keyboardmain'], "text_requestagent")) {
+        sendmessage($from_id, $textbotlang['users']['buttonDisabled'], null, 'HTML');
+        return;
+    }
     if ($user['Balance'] < $setting['agentreqprice']) {
         $priceagent = number_format($setting['agentreqprice']);
         sendmessage($from_id, sprintf($textbotlang['users']['agent']['insufficientbalanceagent'], $priceagent), $backuser, 'HTML');

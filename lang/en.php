@@ -1517,7 +1517,6 @@ Number of products sold: %s
                         'statusCategoryTime' => '⏱ Time category',
                         'statusNotifNewUser' => '👤 New user notification',
                         'statusRole' => '♨️ Rules',
-                        'statusShowAgent' => '👨‍💻 Agent request',
                         'statusSubject' => 'Status',
                         'statusTimeExtra' => '⏳ Extra time',
                         'statusUsernameBtn' => '👤 Username button',

@@ -1554,10 +1554,6 @@ elseif ($datain == "systemsms") {
         'onnewuser' => $textbotlang['Admin']['Status']['statuson'],
         'offnewuser' => $textbotlang['Admin']['Status']['statusoff']
     ][$setting['statusnewuser']];
-    $name_status_showagent = [
-        'onrequestagent' => $textbotlang['Admin']['Status']['statuson'],
-        'offrequestagent' => $textbotlang['Admin']['Status']['statusoff']
-    ][$setting['statusagentrequest']];
     $name_status_role = [
         'rolleon' => $textbotlang['Admin']['Status']['statuson'],
         'rolleoff' => $textbotlang['Admin']['Status']['statusoff']
@@ -1699,10 +1695,6 @@ elseif ($datain == "systemsms") {
             [
                 ['text' => $name_status_notifnewuser, 'callback_data' => "editstsuts-notifnew-{$setting['statusnewuser']}"],
                 ['text' => $textbotlang['Admin']['Status']['statusNotifNewUser'], 'callback_data' => "statusnewuser"],
-            ],
-            [
-                ['text' => $name_status_showagent, 'callback_data' => "editstsuts-showagent-{$setting['statusagentrequest']}"],
-                ['text' => $textbotlang['Admin']['Status']['statusShowAgent'], 'callback_data' => "statusnewuser"],
             ],
             [
                 ['text' => $name_status_role, 'callback_data' => "editstsuts-role-{$setting['roll_Status']}"],
@@ -1866,13 +1858,6 @@ elseif ($datain == "systemsms") {
             $valuenew = "onnewuser";
         }
         update("setting", "statusnewuser", $valuenew);
-    } elseif ($type == "showagent") {
-        if ($value == "onrequestagent") {
-            $valuenew = "offrequestagent";
-        } else {
-            $valuenew = "onrequestagent";
-        }
-        update("setting", "statusagentrequest", $valuenew);
     } elseif ($type == "role") {
         if ($value == "rolleon") {
             $valuenew = "rolleoff";
@@ -2119,10 +2104,6 @@ elseif ($datain == "systemsms") {
         'onnewuser' => $textbotlang['Admin']['Status']['statuson'],
         'offnewuser' => $textbotlang['Admin']['Status']['statusoff']
     ][$setting['statusnewuser']];
-    $name_status_showagent = [
-        'onrequestagent' => $textbotlang['Admin']['Status']['statuson'],
-        'offrequestagent' => $textbotlang['Admin']['Status']['statusoff']
-    ][$setting['statusagentrequest']];
     $name_status_role = [
         'rolleon' => $textbotlang['Admin']['Status']['statuson'],
         'rolleoff' => $textbotlang['Admin']['Status']['statusoff']
@@ -2264,10 +2245,6 @@ elseif ($datain == "systemsms") {
             [
                 ['text' => $name_status_notifnewuser, 'callback_data' => "editstsuts-notifnew-{$setting['statusnewuser']}"],
                 ['text' => $textbotlang['Admin']['Status']['statusNotifNewUser'], 'callback_data' => "statusnewuser"],
-            ],
-            [
-                ['text' => $name_status_showagent, 'callback_data' => "editstsuts-showagent-{$setting['statusagentrequest']}"],
-                ['text' => $textbotlang['Admin']['Status']['statusShowAgent'], 'callback_data' => "statusnewuser"],
             ],
             [
                 ['text' => $name_status_role, 'callback_data' => "editstsuts-role-{$setting['roll_Status']}"],

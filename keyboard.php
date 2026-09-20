@@ -31,7 +31,9 @@ $replacements = [
     'text_Tariff_list' => $textbotlang['textbot']['tariffList'],
     'text_affiliates' => $textbotlang['textbot']['affiliates'],
     'text_wheel_luck' => $textbotlang['textbot']['wheelLuck'],
-    'text_extend' => $textbotlang['textbot']['extend']
+    'text_extend' => $textbotlang['textbot']['extend'],
+    'text_agentpanel' => $textbotlang['textbot']['agentPanel'],
+    'text_requestagent' => $textbotlang['textbot']['requestAgent']
 ];
 $admin_idss = select("admin", "*", "id_admin", $from_id, "count");
 $temp_addtional_key = [];
@@ -41,6 +43,8 @@ if (is_array($keyboardLayout) && isset($keyboardLayout['keyboard']) && is_array(
     $keyboardRows = $keyboardLayout['keyboard'];
 }
 
+$agentPanelAllowed = $users['agent'] != "f";
+$agentRequestAllowed = $users['agent'] == "f" && $setting['statusagentrequest'] == "onrequestagent";
 if (!empty($keyboardRows)) {
     $allowed_btn_styles = ['primary', 'success', 'danger'];
     foreach ($keyboardRows as $kb_r => $kb_row) {
@@ -48,11 +52,23 @@ if (!empty($keyboardRows)) {
             continue;
         }
         foreach ($kb_row as $kb_c => $kb_btn) {
-            if (is_array($kb_btn) && isset($kb_btn['style']) && !in_array($kb_btn['style'], $allowed_btn_styles, true)) {
+            if (!is_array($kb_btn)) {
+                continue;
+            }
+            if (isset($kb_btn['style']) && !in_array($kb_btn['style'], $allowed_btn_styles, true)) {
                 unset($keyboardRows[$kb_r][$kb_c]['style']);
             }
+            $kb_text = isset($kb_btn['text']) ? $kb_btn['text'] : '';
+            if (($kb_text === "text_agentpanel" && !$agentPanelAllowed) || ($kb_text === "text_requestagent" && !$agentRequestAllowed)) {
+                unset($keyboardRows[$kb_r][$kb_c]);
+            }
+        }
+        $keyboardRows[$kb_r] = array_values($keyboardRows[$kb_r]);
+        if (empty($keyboardRows[$kb_r])) {
+            unset($keyboardRows[$kb_r]);
         }
     }
+    $keyboardRows = array_values($keyboardRows);
 }
 
 if ($setting['inlinebtnmain'] == "oninline" && !empty($keyboardRows)) {
@@ -89,16 +105,16 @@ if ($setting['inlinebtnmain'] == "oninline" && !empty($keyboardRows)) {
             if ($keyboard['text'] == "text_usertest") {
                 $trace_keyboard[$key][$keyboard_key]['callback_data'] = "usertestbtn";
             }
+            if ($keyboard['text'] == "text_agentpanel") {
+                $trace_keyboard[$key][$keyboard_key]['callback_data'] = "agentpanel";
+            }
+            if ($keyboard['text'] == "text_requestagent") {
+                $trace_keyboard[$key][$keyboard_key]['callback_data'] = "requestagent";
+            }
         }
     }
     if ($admin_idss != 0) {
         $temp_addtional_key[] = ['text' => $textbotlang['Admin']['panelAdmin'], 'callback_data' => "admin"];
-    }
-    if ($users['agent'] != "f") {
-        $temp_addtional_key[] = ['text' => $textbotlang['textbot']['agentPanel'], 'callback_data' => "agentpanel"];
-    }
-    if ($users['agent'] == "f" && $setting['statusagentrequest'] == "onrequestagent") {
-        $temp_addtional_key[] = ['text' => $textbotlang['textbot']['requestAgent'], 'callback_data' => "requestagent"];
     }
     $keyboard = ['inline_keyboard' => []];
     $keyboardcustom = $trace_keyboard;
@@ -109,12 +125,6 @@ if ($setting['inlinebtnmain'] == "oninline" && !empty($keyboardRows)) {
 } else {
     if ($admin_idss != 0) {
         $temp_addtional_key[] = ['text' => $textbotlang['Admin']['panelAdmin']];
-    }
-    if ($users['agent'] != "f") {
-        $temp_addtional_key[] = ['text' => $textbotlang['textbot']['agentPanel']];
-    }
-    if ($users['agent'] == "f" && $setting['statusagentrequest'] == "onrequestagent") {
-        $temp_addtional_key[] = ['text' => $textbotlang['textbot']['requestAgent']];
     }
     $keyboard = ['keyboard' => [], 'resize_keyboard' => true];
     $keyboardcustom = $keyboardRows;

@@ -254,6 +254,8 @@ return [
                         'waiting' => 'Ожидание подтверждения платежа',
                         'zarinpal' => '❌ Ошибка 
     Минимальная сумма оплаты через этот шлюз — 5000 туман.',
+                        'variza' => '❌ Ошибка 
+    Минимальная сумма оплаты через этот шлюз — 5000 туман.',
                         'cardEnabledNotice' => '💳 Уважаемый пользователь, номер карты активирован для вас; теперь вы можете совершить покупку.',
                         'cardInstructionAlt' => 'Для оплаты внесите сумму на номер карты ниже',
                         'giftDepositAlt' => '🎁 Уважаемый пользователь, сумма %s туман зачислена на ваш счёт в качестве подарка.',
@@ -1817,6 +1819,12 @@ nowpayments.io
                         'askAqayePardakhtMerchant' => '💳 Получите ваш код продавца от Aghaye Pardakht и введите его в этом разделе
         
 Ваш текущий код продавца: %s',
+                        'askVarizaApiToken' => '💳 Введите API-токен Variza из панели Variza (Профиль → API-ключ)
+
+Текущий ключ: <code>%s</code>',
+                        'askVarizaWebhookSecret' => '🔐 Введите секретный ключ вебхука Variza из панели Variza (Профиль → Вебхук)
+
+Текущий ключ: <code>%s</code>',
                         'askZarinpalMerchant' => '💳 Получите ваш код продавца от ZarinPal и введите его в этом разделе
         
 Ваш текущий код продавца: %s',
@@ -3692,6 +3700,7 @@ ID пользователя : %s
 🧑‍🦯 Вы можете получить способ подключения, нажав кнопку ниже и выбрав вашу операционную систему',
                 'wheelLuck' => '🎲 Колесо фортуны',
                 'zarinPal' => '🟡 ZarinPal',
+                'variza' => '💳 Variza (автоматический перевод с карты на карту)',
         ],
         'keyboard' => [
                 'acceptRules' => '✅ Я принимаю правила',
@@ -4131,6 +4140,13 @@ ID пользователя : %s
                 'yes' => 'Да',
                 'yesterday' => '☀️ Вчера',
                 'zarinPalGateway' => '🟡 ZarinPal',
+                'varizaGateway' => '💳 Variza',
+                'varizaApiToken' => 'API-токен Variza',
+                'varizaWebhookSecret' => 'Webhook-секрет Variza',
+                'cashbackVariza' => 'Кэшбэк Variza',
+                'minAmountVariza' => 'Минимальная сумма Variza',
+                'maxAmountVariza' => 'Максимальная сумма Variza',
+                'setEducationVariza' => 'Инструкция Variza',
                 'zarinPalMerchant' => 'Продавец ZarinPal',
                 'zeroBalance' => '0️⃣ Обнулить баланс',
                 'panelSetting' => '🎛 Настройка панели',
@@ -4356,6 +4372,7 @@ ID пользователя : %s
                 'paymentMethodRialGateway2' => 'Риаловый шлюз 2',
                 'paymentMethodRialGateway3' => 'Риаловый шлюз 3',
                 'paymentMethodTelegramStar' => 'Telegram Stars',
+                'paymentMethodVariza' => 'Variza',
                 'paymentMethodZarinpal' => 'ZarinPal',
                 'paymentSearchBtn' => 'Общее количество',
                 'paymentSearchTransactionPlaceholder' => 'ID пользователя или номер транзакции...',
@@ -4744,6 +4761,13 @@ ID пользователя : %s
 - 💸 Сумма транзакции %s
 - 📥 Внесённая сумма Tron. : %s
 - 💳 Способ оплаты :  nowpayment',
+                'reportVariza' => '💵 Новый платёж
+- 👤 Имя пользователя : @%s
+- 🆔 Числовой ID пользователя : %s
+- 💸 Сумма транзакции %s
+- 🧾 Номер заказа : %s
+- 🔗 Slug платежа Variza : %s
+- 💳 Способ оплаты : Variza',
                 'invoiceTitle' => 'Счёт на оплату',
                 'invoiceTransactionNo' => 'Номер транзакции:',
                 'invoiceAmount' => 'Оплаченная сумма:',

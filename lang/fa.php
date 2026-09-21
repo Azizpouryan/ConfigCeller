@@ -254,6 +254,8 @@ return [
                         'waiting' => 'در انتظار تایید پرداخت',
                         'zarinpal' => '❌ خطا 
     کمترین مبلغ برای  پرداخت در این درگاه 5000 تومان می باشد.',
+                        'variza' => '❌ خطا 
+    کمترین مبلغ برای  پرداخت در این درگاه 5000 تومان می باشد.',
                         'cardEnabledNotice' => '💳 کاربر عزیز شماره کارت برای شما فعال شد هم اکنون می توانید خرید خود را انجام دهید.',
                         'cardInstructionAlt' => 'جهت پرداخت مبلغ را به شماره کارت زیر واریز نمایید',
                         'giftDepositAlt' => '🎁 کاربر عزیز مبلغ %s تومان به عنوان هدیه واریز به حساب شما واریز گردید.',
@@ -1817,6 +1819,12 @@ nowpayments.io
                         'askZarinpalMerchant' => '💳 مرچنت کد خود را از زرین پال دریافت و در این قسمت وارد کنید
         
 مرچنت کد فعلی شما : %s',
+                        'askVarizaApiToken' => '💳 کلید API واریزا را از پنل واریزا (پروفایل ← کلید API) دریافت و وارد کنید
+
+کلید فعلی شما: <code>%s</code>',
+                        'askVarizaWebhookSecret' => '🔐 کلید امضای وب‌هوک واریزا را از پنل واریزا (پروفایل ← وب‌هوک) دریافت و وارد کنید
+
+کلید فعلی شما: <code>%s</code>',
                         'askMerchant' => '💳 مرچنت کد خود را دریافت و در این قسمت وارد کنید
         
 مرچنت کد فعلی شما : %s',
@@ -3676,6 +3684,7 @@ f,n.n2',
 🧑‍🦯 شما میتوانید شیوه اتصال را  با فشردن دکمه زیر و انتخاب سیستم عامل خود را دریافت کنید',
                 'wheelLuck' => '🎲 گردونه شانس',
                 'zarinPal' => '🟡 زرین پال',
+                'variza' => '💳 واریزا (کارت‌به‌کارت خودکار)',
         ],
         'keyboard' => [
                 'acceptRules' => '✅ قوانین را می پذیرم',
@@ -4115,7 +4124,14 @@ f,n.n2',
                 'yes' => 'بله',
                 'yesterday' => '☀️ دیروز',
                 'zarinPalGateway' => '🟡 زرین پال',
+                'varizaGateway' => '💳 واریزا',
                 'zarinPalMerchant' => 'مرچنت زرین پال',
+                'varizaApiToken' => 'کلید API واریزا',
+                'varizaWebhookSecret' => 'کلید وب‌هوک واریزا',
+                'cashbackVariza' => 'کش‌بک واریزا',
+                'minAmountVariza' => 'حداقل واریز واریزا',
+                'maxAmountVariza' => 'حداکثر واریز واریزا',
+                'setEducationVariza' => 'آموزش واریزا',
                 'zeroBalance' => '0️⃣ صفر کردن موجودی',
                 'panelSetting' => '🎛 تنظیم پنل',
                 'mirzaAgentPanel' => 'نمایندگی میرزا',
@@ -4340,6 +4356,7 @@ f,n.n2',
                 'paymentMethodRialGateway2' => 'درگاه ریالی ۲',
                 'paymentMethodRialGateway3' => 'درگاه ریالی ۳',
                 'paymentMethodTelegramStar' => 'استار تلگرام',
+                'paymentMethodVariza' => 'واریزا',
                 'paymentMethodZarinpal' => 'زرین‌پال',
                 'paymentSearchBtn' => 'تعداد کل',
                 'paymentSearchTransactionPlaceholder' => 'آیدی کاربر یا شماره تراکنش...',
@@ -4728,6 +4745,13 @@ f,n.n2',
 - 💸 مبلغ تراکنش %s
 - 📥 مبلغ واریز شده ترون. : %s
 - 💳 روش پرداخت :  nowpayment',
+                'reportVariza' => '💵 پرداخت جدید
+- 👤 نام کاربری کاربر : @%s
+- 🆔 آیدی عددی کاربر : %s
+- 💸 مبلغ تراکنش %s
+- 🧾 شماره سفارش : %s
+- 🔗 شناسه پرداخت واریزا : %s
+- 💳 روش پرداخت : واریزا',
                 'invoiceTitle' => 'فاکتور پرداخت',
                 'invoiceTransactionNo' => 'شماره تراکنش:',
                 'invoiceAmount' => 'مبلغ پرداختی:',

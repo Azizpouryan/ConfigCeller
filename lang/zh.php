@@ -254,6 +254,8 @@ return [
                         'waiting' => '等待支付确认',
                         'zarinpal' => '❌ 错误 
     通过此网关支付的最低金额为 5000 托曼。',
+                        'variza' => '❌ 错误 
+    通过此网关支付的最低金额为 5000 托曼。',
                         'cardEnabledNotice' => '💳 尊敬的用户，卡号已为您激活；现在您可以进行购买。',
                         'cardInstructionAlt' => '如需付款，请将金额存入下方卡号',
                         'giftDepositAlt' => '🎁 尊敬的用户，%s 托曼已作为礼物存入您的账户。',
@@ -1817,6 +1819,12 @@ nowpayments.io
                         'askAqayePardakhtMerchant' => '💳 从 Aghaye Pardakht 获取您的商户代码并在此部分输入
         
 您当前的商户代码：%s',
+'askVarizaApiToken' => '💳 请从 Variza 控制面板（个人资料 → API 密钥）输入您的 Variza API 令牌
+
+当前密钥：<code>%s</code>',
+'askVarizaWebhookSecret' => '🔐 请从 Variza 控制面板（个人资料 → Webhook）输入您的 Variza Webhook 密钥
+
+当前密钥：<code>%s</code>',
                         'askZarinpalMerchant' => '💳 从 ZarinPal 获取您的商户代码并在此部分输入
         
 您当前的商户代码：%s',
@@ -3692,6 +3700,7 @@ f,n.n2',
 🧑‍🦯 您可以通过按下方按钮并选择您的操作系统来获取连接方法',
                 'wheelLuck' => '🎲 幸运转盘',
                 'zarinPal' => '🟡 ZarinPal',
+                'variza' => '💳 Variza（自动点对点转账',
         ],
         'keyboard' => [
                 'acceptRules' => '✅ 我接受规则',
@@ -4131,6 +4140,13 @@ f,n.n2',
                 'yes' => '是',
                 'yesterday' => '☀️ 昨天',
                 'zarinPalGateway' => '🟡 ZarinPal',
+                'varizaGateway' => '💳 Variza',
+'varizaApiToken' => 'Variza API 令牌',
+'varizaWebhookSecret' => 'Variza Webhook 密钥',
+'cashbackVariza' => 'Variza 返现',
+'minAmountVariza' => 'Variza 最低金额',
+'maxAmountVariza' => 'Variza 最高金额',
+'setEducationVariza' => 'Variza 教程',
                 'zarinPalMerchant' => 'ZarinPal 商户',
                 'zeroBalance' => '0️⃣ 余额清零',
                 'panelSetting' => '🎛 面板设置',
@@ -4356,6 +4372,7 @@ f,n.n2',
                 'paymentMethodRialGateway2' => '里亚尔网关 2',
                 'paymentMethodRialGateway3' => '里亚尔网关 3',
                 'paymentMethodTelegramStar' => 'Telegram Stars',
+                'paymentMethodVariza' => 'Variza',
                 'paymentMethodZarinpal' => 'ZarinPal',
                 'paymentSearchBtn' => '总数',
                 'paymentSearchTransactionPlaceholder' => '用户 ID 或交易编号...',
@@ -4744,6 +4761,13 @@ f,n.n2',
 - 💸 交易金额 %s
 - 📥 已存入的 Tron 金额：%s
 - 💳 支付方式：nowpayment',
+                'reportVariza' => '💵 新付款
+- 👤 用户用户名：@%s
+- 🆔 用户数字 ID：%s
+- 💸 交易金额 %s
+- 🧾 订单 ID：%s
+- 🔗 Variza 支付标识：%s
+- 💳 支付方式：Variza',
                 'invoiceTitle' => '付款发票',
                 'invoiceTransactionNo' => '交易编号：',
                 'invoiceAmount' => '支付金额：',

@@ -2412,7 +2412,9 @@ f,n.n2',
 ✅ 已删除 %s 个未付款订单
 ✅ 已删除 %s 个未激活订单。
 ✅ 已删除 %s 个管理员删除的订单
-✅ 已删除 %s 个测试订单。',
+✅ 已删除 %s 个测试订单。
+✅ 已删除 %s 个用户删除的订单。
+✅ 已删除 %s 个已到期（时间或流量）的订单。',
                         'backupCaption' => '📌 主机器人数据库导出 ',
                         'dailyBot' => '📌 机器人每日运行报告：
 
@@ -4001,7 +4003,7 @@ f,n.n2',
                 'numericIdSequential' => '数字 ID+顺序编号',
                 'offlineGatewayPv' => '💳 私聊中的离线网关',
                 'operation' => '操作',
-                'optimizeBot' => '🗑 优化机器人 ',
+                'optimizeBot' => '🗑 优化机器人',
                 'paidSendReceipt' => '✅ 我已付款 | 发送收据。',
                 'panelFeatureStatus' => '⚙️ 面板功能状态',
                 'panelFeatures' => '🛠 面板功能',

@@ -2412,7 +2412,9 @@ Current amount: %s',
 ✅ %s unpaid orders were deleted
 ✅ %s inactive orders were deleted.
 ✅ %s admin-deleted orders were deleted
-✅ %s test orders were deleted.',
+✅ %s test orders were deleted.
+✅ %s user-deleted orders were deleted.
+✅ %s expired orders (time or volume) were deleted.',
                         'backupCaption' => '📌 Main bot database export ',
                         'dailyBot' => '📌 Daily bot performance report :
 
@@ -4001,7 +4003,7 @@ We hope you had a good experience with the ease and speed of your service. If yo
                 'numericIdSequential' => 'Numeric ID+sequential number',
                 'offlineGatewayPv' => '💳 Offline gateway in PV',
                 'operation' => 'Operation',
-                'optimizeBot' => '🗑 Optimize bot ',
+                'optimizeBot' => '🗑 Optimize bot',
                 'paidSendReceipt' => '✅ I have paid | Send receipt.',
                 'panelFeatureStatus' => '⚙️ Panel feature status',
                 'panelFeatures' => '🛠 Panel features',

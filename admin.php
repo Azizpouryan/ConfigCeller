@@ -6414,31 +6414,29 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     sendmessage($from_id, $textoptimize, $Response, 'HTML');
 } elseif ($datain == "optimizebot") {
     #remove data
+    $testServiceName = $textbotlang['common']['labels']['testServiceName'];
     $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status = 'unpaid' AND name_product != :mp11");
-    $stmt->execute([':mp11' => $textbotlang['common']['labels']['testServiceName']]);
+    $stmt->execute([':mp11' => $testServiceName]);
     $countunpiadorder = $stmt->rowCount();
-    $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status = 'disabled' AND name_product != :mp12");
-    $stmt->execute([':mp12' => $textbotlang['common']['labels']['testServiceName']]);
+    $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status IN ('disabled', 'disabledn', 'disablebyadmin') AND name_product != :mp12");
+    $stmt->execute([':mp12' => $testServiceName]);
     $countdisableorder = $stmt->rowCount();
-    $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status = 'removebyadmin'");
+    $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status IN ('removebyadmin', 'removedbyadmin')");
     $stmt->execute();
     $countremoveadminorder = $stmt->rowCount();
-    $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status = 'removedbyadmin'");
-    $stmt->execute();
-    $countremoveadminorder += $stmt->rowCount();
-    $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status = 'disabled' AND name_product = :mp13");
-    $stmt->execute([':mp13' => $textbotlang['common']['labels']['testServiceName']]);
+    $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status IN ('disabled', 'disabledn', 'disablebyadmin') AND name_product = :mp13");
+    $stmt->execute([':mp13' => $testServiceName]);
     $countdisableordtester = $stmt->rowCount();
-    $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status = 'removeTime'");
+    $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status = 'removebyuser'");
     $stmt->execute();
-    $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status = 'removevolume'");
+    $countremoveuserorder = $stmt->rowCount();
+    $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status IN ('removeTime', 'removevolume')");
     $stmt->execute();
-    $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status = 'removebyuser' ");
-    $stmt->execute();
-    $optimizebot = sprintf($textbotlang['Admin']['report']['optimizeResult'], $countunpiadorder, $countdisableorder, $countremoveadminorder, $countdisableordtester);
+    $countexpiredorder = $stmt->rowCount();
+    $optimizebot = sprintf($textbotlang['Admin']['report']['optimizeResult'], $countunpiadorder, $countdisableorder, $countremoveadminorder, $countdisableordtester, $countremoveuserorder, $countexpiredorder);
     Editmessagetext($from_id, $message_id, $optimizebot, null);
     $time = time();
-    $logss = "optimize_{$countunpiadorder}_{$countdisableorder}_{$countremoveadminorder}_{$countdisableordtester}_$time";
+    $logss = "optimize_{$countunpiadorder}_{$countdisableorder}_{$countremoveadminorder}_{$countdisableordtester}_{$countremoveuserorder}_{$countexpiredorder}_$time";
     @file_put_contents(__DIR__ . '/storage/log.txt', "\n" . $logss, FILE_APPEND);
 } elseif ($datain == "settimecornvolume") {
     sendmessage($from_id, $textbotlang['Admin']['cronjob']['askVolumeAlert'], $backadmin, 'HTML');

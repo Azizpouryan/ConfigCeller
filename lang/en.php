@@ -3636,7 +3636,7 @@ After joining, click the check membership button',
                 'help' => '📚 Tutorial',
                 'iranPay1' => '💸 Rial payment gateway',
                 'iranPay2' => '💸 Second Rial payment gateway',
-                'iranPay3' => '💸 cubpay',
+                'iranPay3' => '💸 CubePay',
                 'iranPay4' => '💳 AbanGateway (card to card)',
                 'manual' => '✅ Service was created successfully
 
@@ -3780,9 +3780,9 @@ We hope you had a good experience with the ease and speed of your service. If yo
                 'cashbackAqayePardakht' => '💰 Aghaye Pardakht cashback',
                 'cashbackCartToCart' => '💰 Card-to-card cashback',
                 'cashbackIranPay1' => '💰 Rial currency cashback',
-                'cashbackIranPay2' => '💰 cubpay cashback',
-                'feeStatusIranPay2' => '🧾 cubpay fee (on/off)',
-                'feeAmountIranPay2' => '💵 cubpay fee value',
+                'cashbackIranPay2' => '💰 CubePay cashback',
+                'feeStatusIranPay2' => '🧾 CubePay fee (on/off)',
+                'feeAmountIranPay2' => '💵 CubePay fee value',
                 'cashbackIranPay3' => '💰 Third Rial currency cashback',
                 'cashbackNowPayment' => '💰 nowpayment cashback',
                 'cashbackPlisio' => '💰 plisio cashback',
@@ -3918,7 +3918,7 @@ We hope you had a good experience with the ease and speed of your service. If yo
                 'infoRefreshed' => '♻️ Information updated',
                 'infoUpdated' => 'Information was updated',
                 'iranPay1Label' => '📌 First Rial currency',
-                'iranPay2Label' => '📌 cubpay',
+                'iranPay2Label' => '📌 CubePay',
                 'iranPay3Label' => '📌Third Rial currency',
                 'iranPay4Label' => '📌 AbanGateway',
                 'apiIranPay4' => '🔑 AbanGateway API key',
@@ -3948,7 +3948,7 @@ We hope you had a good experience with the ease and speed of your service. If yo
                 'maxAmountCartToCart' => '⬆️ Maximum card-to-card amount',
                 'maxAmountCryptoOffline' => '⬆️ Maximum offline crypto amount',
                 'maxAmountIranPay1' => '⬆️ Maximum Rial currency amount',
-                'maxAmountIranPay2' => '⬆️ Maximum cubpay amount',
+                'maxAmountIranPay2' => '⬆️ Maximum CubePay amount',
                 'maxAmountIranPay3' => '⬆️ Maximum third Rial currency amount',
                 'maxAmountNowPayment' => '⬆️ Maximum nowpayment amount',
                 'maxAmountPlisio' => '⬆️ Maximum plisio amount',
@@ -3963,7 +3963,7 @@ We hope you had a good experience with the ease and speed of your service. If yo
                 'minAmountCartToCart' => '⬇️ Minimum card-to-card amount',
                 'minAmountCryptoOffline' => '⬇️ Minimum offline crypto amount',
                 'minAmountIranPay1' => '⬇️ Minimum Rial currency amount',
-                'minAmountIranPay2' => '⬇️ Minimum cubpay amount',
+                'minAmountIranPay2' => '⬇️ Minimum CubePay amount',
                 'minAmountIranPay3' => '⬇️ Minimum third Rial currency amount',
                 'minAmountNowPayment' => '⬇️ Minimum nowpayment amount',
                 'minAmountPlisio' => '⬇️ Minimum plisio amount',
@@ -4055,7 +4055,7 @@ We hope you had a good experience with the ease and speed of your service. If yo
                 'setEducationCartToCart' => '📚 Set card-to-card tutorial',
                 'setEducationCryptoOffline' => '📚 Set offline currency tutorial ',
                 'setEducationIranPay1' => '📚 Set first Rial currency tutorial',
-                'setEducationIranPay2' => '📚 Set cubpay tutorial',
+                'setEducationIranPay2' => '📚 Set CubePay tutorial',
                 'setEducationIranPay3' => '📚 Set third Rial currency tutorial',
                 'setEducationNowPayment' => '📚 Set nowpayment tutorial',
                 'setEducationPlisio' => '📚 Set plisio tutorial',
@@ -4737,7 +4737,7 @@ Payment method : First Rial currency',
 - 👤 User username : @%s
 - 🆔User numeric ID : %s
 - 💸 Transaction amount %s
-- 💳 Payment method : cubpay',
+- 💳 Payment method : CubePay',
                 'reportNowpayment' => '💵 New payment
 - 👤 User username : @%s
 - 🆔User numeric ID : %s

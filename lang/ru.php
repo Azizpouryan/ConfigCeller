@@ -3636,7 +3636,7 @@ ID пользователя : %s
                 'help' => '📚 Инструкция',
                 'iranPay1' => '💸 Риаловый платёжный шлюз',
                 'iranPay2' => '💸 Второй риаловый платёжный шлюз',
-                'iranPay3' => '💸 cubpay',
+                'iranPay3' => '💸 CubePay',
                 'iranPay4' => '💳 AbanGateway (карта — карта)',
                 'manual' => '✅ Сервис успешно создан
 
@@ -3780,9 +3780,9 @@ ID пользователя : %s
                 'cashbackAqayePardakht' => '💰 Кэшбэк Aghaye Pardakht',
                 'cashbackCartToCart' => '💰 Кэшбэк карта на карту',
                 'cashbackIranPay1' => '💰 Кэшбэк риаловой валюты',
-                'cashbackIranPay2' => '💰 Кэшбэк cubpay',
-                'feeStatusIranPay2' => '🧾 Комиссия cubpay (вкл/выкл)',
-                'feeAmountIranPay2' => '💵 Значение комиссии cubpay',
+                'cashbackIranPay2' => '💰 Кэшбэк CubePay',
+                'feeStatusIranPay2' => '🧾 Комиссия CubePay (вкл/выкл)',
+                'feeAmountIranPay2' => '💵 Значение комиссии CubePay',
                 'cashbackIranPay3' => '💰 Кэшбэк третьей риаловой валюты',
                 'cashbackNowPayment' => '💰 Кэшбэк nowpayment',
                 'cashbackPlisio' => '💰 Кэшбэк plisio',
@@ -3918,7 +3918,7 @@ ID пользователя : %s
                 'infoRefreshed' => '♻️ Информация обновлена',
                 'infoUpdated' => 'Информация обновлена',
                 'iranPay1Label' => '📌 Первая риаловая валюта',
-                'iranPay2Label' => '📌 cubpay',
+                'iranPay2Label' => '📌 CubePay',
                 'iranPay3Label' => '📌Третья риаловая валюта',
                 'iranPay4Label' => '📌 AbanGateway',
                 'apiIranPay4' => '🔑 Ключ AbanGateway',
@@ -3948,7 +3948,7 @@ ID пользователя : %s
                 'maxAmountCartToCart' => '⬆️ Максимальная сумма карта на карту',
                 'maxAmountCryptoOffline' => '⬆️ Максимальная сумма офлайн-крипто',
                 'maxAmountIranPay1' => '⬆️ Максимальная сумма риаловой валюты',
-                'maxAmountIranPay2' => '⬆️ Максимальная сумма cubpay',
+                'maxAmountIranPay2' => '⬆️ Максимальная сумма CubePay',
                 'maxAmountIranPay3' => '⬆️ Максимальная сумма третьей риаловой валюты',
                 'maxAmountNowPayment' => '⬆️ Максимальная сумма nowpayment',
                 'maxAmountPlisio' => '⬆️ Максимальная сумма plisio',
@@ -3963,7 +3963,7 @@ ID пользователя : %s
                 'minAmountCartToCart' => '⬇️ Минимальная сумма карта на карту',
                 'minAmountCryptoOffline' => '⬇️ Минимальная сумма офлайн-крипто',
                 'minAmountIranPay1' => '⬇️ Минимальная сумма риаловой валюты',
-                'minAmountIranPay2' => '⬇️ Минимальная сумма cubpay',
+                'minAmountIranPay2' => '⬇️ Минимальная сумма CubePay',
                 'minAmountIranPay3' => '⬇️ Минимальная сумма третьей риаловой валюты',
                 'minAmountNowPayment' => '⬇️ Минимальная сумма nowpayment',
                 'minAmountPlisio' => '⬇️ Минимальная сумма plisio',
@@ -4055,7 +4055,7 @@ ID пользователя : %s
                 'setEducationCartToCart' => '📚 Установить инструкцию карта на карту',
                 'setEducationCryptoOffline' => '📚 Установить инструкцию офлайн-валюты ',
                 'setEducationIranPay1' => '📚 Установить инструкцию первой риаловой валюты',
-                'setEducationIranPay2' => '📚 Установить инструкцию cubpay',
+                'setEducationIranPay2' => '📚 Установить инструкцию CubePay',
                 'setEducationIranPay3' => '📚 Установить инструкцию третьей риаловой валюты',
                 'setEducationNowPayment' => '📚 Установить инструкцию nowpayment',
                 'setEducationPlisio' => '📚 Установить инструкцию plisio',
@@ -4737,7 +4737,7 @@ ID пользователя : %s
 - 👤 Имя пользователя : @%s
 - 🆔Числовой ID пользователя : %s
 - 💸 Сумма транзакции %s
-- 💳 Способ оплаты : cubpay',
+- 💳 Способ оплаты : CubePay',
                 'reportNowpayment' => '💵 Новый платёж
 - 👤 Имя пользователя : @%s
 - 🆔Числовой ID пользователя : %s

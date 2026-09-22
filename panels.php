@@ -482,7 +482,10 @@ class ManagePanel
                 $UsernameData['subscription_url'] = absoluteSubscriptionUrl($UsernameData['subscription_url'] ?? '', $Get_Data_Panel['url_panel']);
                 if ($Get_Data_Panel['version_panel'] == "1") {
                     $UsernameData['expire'] = strtotime($UsernameData['expire'] ?? '');
-                    $links = $UsernameData['links'] ?? base64_decode(outputlink($UsernameData['subscription_url']."/links"));
+                    $links = $UsernameData['links'] ?? outputlink($UsernameData['subscription_url']."/links");
+                    if(isBase64($links)) {
+                        $links = base64_decode($links);
+                    }
                     $UsernameData['links'] = is_array($links) ? $links : explode("\n", (string) $links);
                     $sublist_update = get_list_update($name_panel, $username);
                     if (!empty($sublist_update['error'])) {

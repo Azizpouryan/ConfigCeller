@@ -234,6 +234,7 @@ To enable it, the bot owner needs a Telegram Premium subscription, or the bot mu
 💸 To top up your balance, enter the amount in Toman:
 ✅ Minimum amount %s Toman, maximum amount %s Toman',
                         'linkpayments' => 'Creating payment link...',
+                        'notEnoughBalance' => '❌ Your balance is not enough for this. Please top up your account first.',
                         'maxpurchasereached' => '❌ You have reached your maximum purchase limit. Please first top up your account, then purchase a new service or renew an existing one',
                         'nowpayments' => '❌ Error 
     The minimum amount for payment via this gateway is 1 USD.',

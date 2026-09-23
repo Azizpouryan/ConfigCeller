@@ -2,9 +2,20 @@
 require_once __DIR__ . '/inc/config.php';
 require_once __DIR__ . '/inc/icons.php';
 require_auth();
+setcookie('XSRF-TOKEN', csrf_token(), [
+    'path' => '/',
+    'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+    'samesite' => 'Strict',
+]);
 
 $keyboard = json_decode(file_get_contents("php://input"), true);
 $method = $_SERVER['REQUEST_METHOD'];
+if ($method == "POST" && !csrf_check_value($_SERVER['HTTP_X_XSRF_TOKEN'] ?? '')) {
+    http_response_code(403);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['ok' => false]);
+    exit;
+}
 if ($method == "POST" && is_array($keyboard)) {
     $validKeyboard = count($keyboard) > 0;
     foreach ($keyboard as $row) {

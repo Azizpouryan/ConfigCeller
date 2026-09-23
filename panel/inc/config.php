@@ -47,8 +47,8 @@ function require_auth(): void
         exit;
     }
     try {
-        $admin = db_fetch($pdo, "SELECT id_admin FROM admin WHERE username = ?", [$_SESSION['admin_user']]);
-        if (!$admin) {
+        $admin = db_fetch($pdo, "SELECT id_admin, rule FROM admin WHERE username = ?", [$_SESSION['admin_user']]);
+        if (!$admin || $admin['rule'] !== 'administrator') {
             session_destroy();
             header('Location: login.php');
             exit;

@@ -77,6 +77,38 @@ $backmenu_register(["limitchangeall", "limitfreechangefree"], $keyboardchangelim
 $backmenu_register(["getnamebtnapp", "geturlbtnapp", "edit_app", "get_new_lin_app", "getnameappforremove"], $keyboardlinkapp);
 $backmenu_register(["add_name_panel", "add_link_panel", "add_username_panel", "add_password_panel", "getlimitedpanel"], $keyboardtypepanel);
 
+if ($adminrulecheck['rule'] != "administrator") {
+    $limitedRoleTexts = array_merge($textadmin, [
+        $textbotlang['Admin']['Status']['btn'],
+        $textbotlang['Admin']['backAdminBtn'],
+        $textbotlang['Admin']['backMenuBtn'],
+        $textbotlang['Admin']['btnKeyboard']['manageUser'],
+    ]);
+    $limitedRoleCallbacks = ["admin", "agentlistusers", "alllistusers", "backlistuser", "balanceuserlist", "cartuserlist", "listrefral", "searchorder", "searchuser", "stat_all_bot", "zerobalance"];
+    $limitedRoleCallbackPrefixes = [
+        "Confirm_pay_", "Response_", "acceptblock_", "addbalamceuser_", "addbalanceuser_", "affiliates-", "agenttypshowlist_",
+        "banuserlist_", "blockuserfake_", "carduserhide-", "changeloclimitbyuser_", "changestatusadmin_", "confirmaccountdisableadmin_",
+        "confirmchannel-", "confirmnumber_", "confirmremovefulls-", "confirmserivceadmin-", "disableconfig-", "extendadmin_", "hidepanel_",
+        "limitusertest_", "lowbalanceuser_", "manageinvoice_", "manageuser_", "next_pageinvoice_", "next_pageuseragent_",
+        "previous_pageinvoice_", "previous_pageuseragent_", "reject_pay_", "removeaffiliate-", "removeaffiliateuser-", "removebotsell_",
+        "removefull-", "removehide_", "removeservice-", "removeserviceandback-", "sendmessageuser_", "settimepricesrc_", "setvolumesrc_",
+        "showcarduser-", "statuscronuser-", "unbanuserr_", "unverify-", "updateinfouser_", "verify_", "vieworderuser_", "viewpaymentuser_",
+    ];
+    $limitedRoleSteps = [
+        "GetusernameconfigAndOrdedrs", "addbalancemanual", "addbalanceuser", "addbalanceusercurrent", "adddecriptionblock", "get_number_limit",
+        "getlimitchangenewbyuser", "getmessageAsAdmin", "getpanelhidebotsaz", "getpricetimesrc", "getpricevolumesrc", "getremovehidepanel",
+        "gettimecustomvolomforextendadmin", "getuserhide", "getvolumecustomuserforextendadmin", "reject-dec", "sendmessagetext",
+        "sendmessagetid", "show_info",
+    ];
+    $isAdminButtonText = in_array($text, $textbotlang['keyboard'], true) || in_array($text, $textbotlang['Admin']['btnKeyboard'], true);
+    $isLimitedRoleAllowed = in_array($text, $limitedRoleTexts, true)
+        || in_array($datain, $limitedRoleCallbacks, true)
+        || array_filter($limitedRoleCallbackPrefixes, fn($prefix) => str_starts_with($datain, $prefix))
+        || ($datain == "" && !$isAdminButtonText && (in_array($user['step'], $limitedRoleSteps, true) || str_starts_with($text, "/config ") || str_starts_with($text, "/extend ")));
+    if (!$isLimitedRoleAllowed) {
+        return;
+    }
+}
 $isGatewayOptionClick = preg_match('/^paygwopt-(\w+)$/', $datain, $gatewayOption);
 if ($isGatewayOptionClick) {
     $text = $textbotlang['keyboard'][$gatewayOption[1]] ?? '';
@@ -241,12 +273,11 @@ if ($datain == "paygwback") {
     sendmessage($from_id, $textbotlang['Admin']['manageadmin']['addAdminSet'], $keyboardadmin, 'HTML');
     sendmessage($user['Processing_value'], $textbotlang['Admin']['manageadmin']['adminAddedSendUser'], null, 'HTML');
     step('home', $from_id);
-    $usernamepanel = "root";
-    $randomString = bin2hex(random_bytes(5));
+    $unusablePasswordHash = password_hash(bin2hex(random_bytes(16)), PASSWORD_BCRYPT);
     $stmt = $pdo->prepare("INSERT INTO admin (id_admin, username, password, rule) VALUES (:id_admin, :username, :password, :rule)");
     $stmt->bindParam(':id_admin', $user['Processing_value'], PDO::PARAM_STR);
-    $stmt->bindParam(':username', $usernamepanel, PDO::PARAM_STR);
-    $stmt->bindParam(':password', $randomString, PDO::PARAM_STR);
+    $stmt->bindParam(':username', $user['Processing_value'], PDO::PARAM_STR);
+    $stmt->bindParam(':password', $unusablePasswordHash, PDO::PARAM_STR);
     $stmt->bindParam(':rule', $text, PDO::PARAM_STR);
     $stmt->execute();
     $text_report = sprintf($textbotlang['Admin']['reportgroup']['adminAdded'], $username, $from_id, $text, $user['Processing_value']);
@@ -3731,7 +3762,7 @@ elseif ($datain == "systemsms") {
     $keyboard_json = json_encode($keyboardlists);
     update("user", "pagenumber", $next_page, "id", $from_id);
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['manageUser']['manageUserBtnDesc'], $keyboard_json);
-} elseif (preg_match('/addbalanceuser_(\w+)/', $datain, $dataget) && $adminrulecheck['rule'] == "administrator") {
+} elseif (preg_match('/addbalanceuser_(\w+)/', $datain, $dataget)) {
     $iduser = $dataget[1];
     update("user", "Processing_value", $iduser, "id", $from_id);
     telegram('sendmessage', [
@@ -3777,7 +3808,7 @@ elseif ($datain == "systemsms") {
             'parse_mode' => "HTML"
         ]);
     }
-} elseif (preg_match('/lowbalanceuser_(\w+)/', $datain, $dataget) && $adminrulecheck['rule'] == "administrator") {
+} elseif (preg_match('/lowbalanceuser_(\w+)/', $datain, $dataget)) {
     $iduser = $dataget[1];
     update("user", "Processing_value", $iduser, "id", $from_id);
     telegram('sendmessage', [
@@ -3822,7 +3853,7 @@ elseif ($datain == "systemsms") {
             'parse_mode' => "HTML"
         ]);
     }
-} elseif ((preg_match('/banuserlist_(\w+)/', $datain, $dataget) || preg_match('/blockuserfake_(\w+)/', $datain, $dataget)) && $adminrulecheck['rule'] == "administrator") {
+} elseif ((preg_match('/banuserlist_(\w+)/', $datain, $dataget) || preg_match('/blockuserfake_(\w+)/', $datain, $dataget))) {
     $iduser = $dataget[1];
     $userdata = select("user", "*", "id", $iduser, "select");
     if ($userdata['User_Status'] == "block") {
@@ -3866,7 +3897,7 @@ elseif ($datain == "systemsms") {
             'reply_markup' => $Response
         ]);
     }
-} elseif (preg_match('/verify_(\w+)/', $datain, $dataget) && $adminrulecheck['rule'] == "administrator") {
+} elseif (preg_match('/verify_(\w+)/', $datain, $dataget)) {
     $iduser = $dataget[1];
     update("user", "verify", "1", "id", $iduser);
     sendmessage($from_id, $textbotlang['Admin']['manageUser']['verifiedSuccess'], null, 'HTML');
@@ -3877,7 +3908,7 @@ elseif ($datain == "systemsms") {
     sendmessage($from_id, $textbotlang['Admin']['manageUser']['unverifiedSuccess'], null, 'HTML');
 
 
-} elseif (preg_match('/unbanuserr_(\w+)/', $datain, $dataget) && $adminrulecheck['rule'] == "administrator") {
+} elseif (preg_match('/unbanuserr_(\w+)/', $datain, $dataget)) {
     $iduser = $dataget[1];
     $userdata = select("user", "*", "id", $iduser, "select");
     if ($userdata['User_Status'] == "Active") {
@@ -3906,7 +3937,7 @@ elseif ($datain == "systemsms") {
     sendmessage($from_id, $textbotlang['Admin']['manageUser']['userUnblocked'], $keyboardadmin, 'HTML');
     sendmessage($iduser, $textbotlang['users']['block']['unblockedNotice'], $keyboard, 'HTML');
     step('home', $from_id);
-} elseif (preg_match('/confirmnumber_(\w+)/', $datain, $dataget) && $adminrulecheck['rule'] == "administrator") {
+} elseif (preg_match('/confirmnumber_(\w+)/', $datain, $dataget)) {
     $iduser = $dataget[1];
     update("user", "number", "confrim number by admin", "id", $iduser);
     sendmessage($from_id, $textbotlang['Admin']['phone']['active'], $keyboardadmin, 'HTML');
@@ -5117,10 +5148,6 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     $typepanel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
     outtypepanel($typepanel['type'], $textbotlang['Admin']['algorithmExtend']['saveData']);
     step('home', $from_id);
-} elseif ($text == "/token") {
-    $secret_key = select("admin", "*", "id_admin", $from_id, "select");
-    $secret_key = base64_encode($secret_key['password']);
-    sendmessage($from_id, "<code>$secret_key</code>", null, 'HTML');
 } elseif ($text == "/token2") {
     $token = bin2hex(random_bytes(16));
     file_put_contents('api/hash.txt', $token);

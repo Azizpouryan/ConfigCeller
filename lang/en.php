@@ -1211,7 +1211,6 @@ Message text:
                 'wheelLuck' => [
                         'alreadyParticipated' => '❌ You already participated today. Try your luck again tomorrow',
                         'error' => '❌ An error occurred while getting the game result. Please try again later.',
-                        'featureDisabled' => '❌ This feature is currently turned off',
                         'notWinner' => '🥲 Unfortunately you did not win. Try again another day',
                         'wheelWinner' => '⭕️ A user with username @%s and numeric ID %s won the wheel of fortune',
                         'winnerCongratulations' => '🤩 Congratulations, you won! The amount of %s Toman has been added to your account.',
@@ -1338,7 +1337,6 @@ Received error:  %s',
                         'userLimitTooHigh' => '📌 The usage count per user must be smaller than the total limit',
                         'askProductLocation' => '🎛 Which panel should the discount code apply to?',
                         'askProduct' => '📦 Which product should the discount code apply to?',
-                        'invalidPercent' => 'Invalid percentage',
                         'created' => '
 🎁 Your discount code was created successfully.
 
@@ -1516,12 +1514,6 @@ Number of products sold: %s
                         'cardStatusOffPv' => '⭕ The offline gateway status in PV was turned off',
                         'cardStatusOnPv' => 'The offline gateway status in PV was turned on',
                         'cardTitlePv' => 'In this section you can disable the card-to-card feature and handle the card-to-card process from PV',
-                        'commission' => 'Status of the gift-after-bot-start feature being enabled',
-                        'commissionOff' => 'The commission feature was disabled',
-                        'commissionOn' => 'The commission feature was enabled',
-                        'discountAffiliates' => 'Status of the gift feature being enabled',
-                        'discountAffiliatesOff' => 'The gift feature was disabled',
-                        'discountAffiliatesOn' => 'The gift feature was enabled',
                         'inlinebtns' => '🛡 Make the bot buttons inline',
                         'paydirect' => '🎯 Direct purchase status',
                         'statusBot' => '📡 Bot status',
@@ -1571,18 +1563,17 @@ Number of products sold: %s
                         'askBanner' => '⭕️ Send your referral banner 
 
 ❌ The banner must include an image',
-                        'joinGiftSaved' => '✅ The referral amount was successfully registered',
-                        'percentSaved' => '✅ The deposit percentage for the user was successfully set',
-                        'bannerSaved' => '✅ Your banner was successfully registered.',
                         'invalidBanner' => '❌ The banner you sent is invalid (the banner must be sent with an image)',
                         'askJoinGift' => '📌 Enter the amount you want the user to receive for each new referral',
+                        'settingsTitle' => "🎁 <b>Referral settings</b>\n\n• 🎁 Commission after purchase: %s\n• 🎉 Commission: %s\n• 🧮 Commission percent: %s\n• 🎁 Start gift: %s\n• 💎 Start gift amount: %s Toman\n\n📌 Tap the left button of an item to change it.",
+                        'invalidNumber' => "❌ The value must be a number.",
+                        'saved' => "✅ Saved.",
                         'askPercent' => '📌 Send the percentage you want to be deposited to the user after a purchase',
                         'titleTopic' => '🎁 Commission reports',
                         'noReferrals' => '❌ The user has no referrals.',
                         'idsSent' => '📌 The ID related to the user\'s referrals has been sent.',
                         'userRemoved' => '📌 The user was removed from the referral.',
                         'referralsDeleted' => '📌 The user\'s referrals were deleted.',
-                        'commissionScope' => 'You can decide whether the commission is given to the user only for their referral\'s first purchase or for all of their purchases.',
                 ],
                 'agent' => [
                         'getTypeAgent' => '📌 To add an agent, send the agent type

@@ -388,7 +388,6 @@ $shopkeyboard = json_encode([
     'resize_keyboard' => true
 ]);
 $wheelFeatures = [
-    'wheel_luck' => ['label' => $textbotlang['keyboard']['wheelOfLuck'], 'setting' => 'wheelـluck', 'on' => '1', 'off' => '0'],
     'wheelagentfirst' => ['label' => $textbotlang['keyboard']['firstPurchaseWheel'], 'setting' => 'statusfirstwheel', 'on' => '1', 'off' => '0'],
     'wheelagent' => ['label' => $textbotlang['keyboard']['agentWheelOfLuck'], 'setting' => 'wheelagent', 'on' => '1', 'off' => '0'],
     'Dice' => ['label' => $textbotlang['keyboard']['wheelGameType'], 'setting' => 'Dice', 'on' => '1', 'off' => '0', 'onText' => $textbotlang['keyboard']['wheelModeDice'], 'offText' => $textbotlang['keyboard']['wheelModeSlot']],
@@ -425,8 +424,8 @@ $featureCategories = [
             'changeloc' => ['label' => $textbotlang['keyboard']['locationChangeLimit'], 'setting' => 'statuslimitchangeloc', 'on' => '1', 'off' => '0', 'config' => 'changeloclimit'],
             'statusnamecustom' => ['label' => $textbotlang['keyboard']['configNote'], 'setting' => 'statusnamecustom', 'on' => 'onnamecustom', 'off' => 'offnamecustom'],
             'statusnamecustomf' => ['label' => $textbotlang['keyboard']['userNote'], 'setting' => 'statusnoteforf', 'on' => '1', 'off' => '0'],
-            'affiliatesstatus' => ['label' => $textbotlang['keyboard']['affiliateGift'], 'setting' => 'affiliatesstatus', 'on' => 'onaffiliates', 'off' => 'offaffiliates', 'config' => 'settingaffiliatesf'],
-            'wheel_luck' => $wheelFeatures['wheel_luck'] + ['config' => 'wheelsettings'],
+            'affiliates' => ['label' => $textbotlang['keyboard']['affiliateGift'], 'config' => 'affiliatesettings'],
+            'wheel_luck' => ['label' => $textbotlang['keyboard']['wheelOfLuck'], 'config' => 'wheelsettings'],
             'score' => $lotteryFeatures['score'] + ['config' => 'lotterysettings'],
         ],
     ],
@@ -456,7 +455,12 @@ function featureCategoryKeyboard($categoryKey)
     global $featureCategories, $textbotlang;
     $setting = select("setting", "*");
     $rows = [];
+    $settingsButtons = [];
     foreach ($featureCategories[$categoryKey]['features'] as $featureKey => $feature) {
+        if (!isset($feature['setting']) && !isset($feature['cron'])) {
+            $settingsButtons[] = ['text' => $feature['label'], 'callback_data' => $feature['config']];
+            continue;
+        }
         $row = [
             ['text' => $textbotlang['Admin']['Status'][featureIsOn($feature, $setting) ? 'statuson' : 'statusoff'], 'callback_data' => "feature-$categoryKey-$featureKey"],
             ['text' => $feature['label'], 'callback_data' => "feature-$categoryKey-$featureKey"],
@@ -466,6 +470,7 @@ function featureCategoryKeyboard($categoryKey)
         }
         $rows[] = $row;
     }
+    array_push($rows, ...array_chunk($settingsButtons, 2));
     $categoryKeys = array_keys($featureCategories);
     $page = array_search($categoryKey, $categoryKeys);
     $pageCount = count($categoryKeys);
@@ -519,6 +524,28 @@ function lotterySettingsMenu()
     $text = sprintf($textbotlang['Admin']['Status']['lotterySettings'], number_format((int) ($prizes['one'] ?? 0)), number_format((int) ($prizes['tow'] ?? 0)), number_format((int) ($prizes['theree'] ?? 0)));
     return [$text, json_encode(['inline_keyboard' => $rows])];
 }
+function affiliateSettingsMenu()
+{
+    global $textbotlang;
+    $setting = select("setting", "*");
+    $affiliateSetting = select("affiliates", "*", null, null, "select");
+    $commissionText = $textbotlang['Admin']['Status'][$affiliateSetting['status_commission'] == "oncommission" ? 'statuson' : 'statusoff'];
+    $firstBuyText = $affiliateSetting['porsant_one_buy'] == "on_buy_porsant" ? $textbotlang['keyboard']['firstPurchaseBtn'] : $textbotlang['keyboard']['allPurchases'];
+    $startGiftText = $textbotlang['Admin']['Status'][$affiliateSetting['Discount'] == "onDiscountaffiliates" ? 'statuson' : 'statusoff'];
+    $percentText = ($setting['affiliatespercentage'] ?? 0) . "%";
+    $giftAmountText = number_format((int) $affiliateSetting['price_Discount']);
+    $rows = [
+        [['text' => $commissionText, 'callback_data' => "affiliate-commission"], ['text' => $textbotlang['keyboard']['purchaseCommission'], 'callback_data' => "affiliate-commission"]],
+        [['text' => $firstBuyText, 'callback_data' => "affiliate-firstbuy"], ['text' => $textbotlang['keyboard']['firstPurchaseCommission'], 'callback_data' => "affiliate-firstbuy"]],
+        [['text' => $percentText, 'callback_data' => "affiliate-percent"], ['text' => $textbotlang['keyboard']['setAffiliatePercent'], 'callback_data' => "affiliate-percent"]],
+        [['text' => $startGiftText, 'callback_data' => "affiliate-startgift"], ['text' => $textbotlang['keyboard']['startGift'], 'callback_data' => "affiliate-startgift"]],
+        [['text' => $giftAmountText, 'callback_data' => "affiliate-giftamount"], ['text' => $textbotlang['keyboard']['startGiftAmount'], 'callback_data' => "affiliate-giftamount"]],
+        [['text' => $textbotlang['keyboard']['setAffiliateBanner'], 'callback_data' => "affiliate-banner"]],
+        [['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "featurecat-sales"]],
+    ];
+    $text = sprintf($textbotlang['Admin']['affiliates']['settingsTitle'], $commissionText, $firstBuyText, $percentText, $startGiftText, $giftAmountText);
+    return [$text, json_encode(['inline_keyboard' => $rows])];
+}
 function giftCodesMenu()
 {
     global $pdo, $textbotlang;
@@ -536,6 +563,7 @@ function giftCodesMenu()
 }
 $wheelFlowKeyboard = json_encode(['inline_keyboard' => [[['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "wheelsettings"]]]]);
 $lotteryFlowKeyboard = json_encode(['inline_keyboard' => [[['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "lotterysettings"]]]]);
+$affiliateFlowKeyboard = json_encode(['inline_keyboard' => [[['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "affiliatesettings"]]]]);
 $giftCodeFlowKeyboard = json_encode(['inline_keyboard' => [[['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "giftcode_list"]]]]);
 $discountCodeFlowKeyboard = json_encode(['inline_keyboard' => [[['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "discountcode_list"]]]]);
 function editFlowMessage($text, $keyboard)
@@ -1242,17 +1270,6 @@ if ($setting['statussupportpv'] == "onpvsupport") {
 $adminrule = json_encode([
     'keyboard' => [
         [['text' => "administrator"], ['text' => "Seller"], ['text' => "support"]],
-        [['text' => $textbotlang['Admin']['backAdminBtn']], ['text' => $textbotlang['Admin']['backMenuBtn']]]
-    ],
-    'resize_keyboard' => true
-]);
-$affiliates = json_encode([
-    'keyboard' => [
-        [['text' => $textbotlang['keyboard']['setAffiliatePercent']]],
-        [['text' => $textbotlang['keyboard']['setAffiliateBanner']]],
-        [['text' => $textbotlang['keyboard']['purchaseCommission']], ['text' => $textbotlang['keyboard']['startGift']]],
-        [['text' => $textbotlang['keyboard']['firstPurchaseCommission']]],
-        [['text' => $textbotlang['keyboard']['startGiftAmount']]],
         [['text' => $textbotlang['Admin']['backAdminBtn']], ['text' => $textbotlang['Admin']['backMenuBtn']]]
     ],
     'resize_keyboard' => true

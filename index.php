@@ -214,7 +214,7 @@ if (strpos($text, "/start ") !== false && $user['step'] != "gettextSystemMessage
     $affiliatesid = explode(" ", $text)[1];
     if (!in_array($affiliatesid, ['start', "usertest", "/start", "buy", "help"])) {
         isValidInvitationCode($setting, $from_id, $user['verify']);
-        if ($setting['affiliatesstatus'] == "offaffiliates") {
+        if (!check_active_btn($setting['keyboardmain'], "text_affiliates")) {
             sendmessage($from_id, $textbotlang['users']['affiliates']['offaffiliates'], $keyboard, 'HTML');
             return;
         }
@@ -5822,10 +5822,6 @@ if ($text == "/start" || $datain == "start" || $text == "start") {
         sendmessage($from_id, $textbotlang['users']['buttonDisabled'], null, 'HTML');
         return;
     }
-    if ($setting['affiliatesstatus'] == "offaffiliates") {
-        sendmessage($from_id, $textbotlang['users']['affiliates']['offaffiliates'], null, 'HTML');
-        return;
-    }
     $affiliates = select("affiliates", "*", null, null, "select");
     $textaffiliates = "{$affiliates['description']}\n\n🔗 https://t.me/$usernamebot?start=$from_id";
     if (strlen($affiliates['id_media']) >= 5) {
@@ -6220,10 +6216,6 @@ if ($text == "/start" || $datain == "start" || $text == "start") {
     $countinvoice = $stmt->rowCount();
     if (intval($setting['statusfirstwheel']) == 1 and $countinvoice != 0) {
         sendmessage($from_id, $textbotlang['users']['sell']['noPurchaseUsersOnly'], null, 'HTML');
-        return;
-    }
-    if ($setting['wheelـluck'] == "0" or ($setting['wheelagent'] == "0" and $user['agent'] != "f")) {
-        sendmessage($from_id, $textbotlang['users']['wheelLuck']['featureDisabled'], null, 'HTML');
         return;
     }
     $stmt = $pdo->prepare("SELECT * FROM wheel_list  WHERE id_user = :from_id ORDER BY time DESC LIMIT 1");

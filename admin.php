@@ -72,7 +72,6 @@ $backmenu_register([
     "addchannelid", "limit_usertest_allusers", "getimagebackgroundqr", "getpricereqagent",
     "getcronvolumere", "on_hold_day", "getdaycron", "getvolumewarn", "getdaywarn"
 ], $setting_panel);
-$backmenu_register(["getdiscont", "setbanner", "setpercentage"], $affiliates);
 $backmenu_register(["idsupportset", "getidadmindep", "getdeparteman", "getremovedep"], $supportcenter);
 $backmenu_register(["getnameproduct", "getconfigtext", "getnameremove", "getnameedit"], $optionManualsale);
 $backmenu_register(["getcontentedit"], $configedit);
@@ -726,8 +725,6 @@ if ($datain == "paygwback") {
     $statisticsall = sprintf($textbotlang['Admin']['stats']['selectedRange'], $start_time, $end_time, $count_order, $sum_order, $count_extend, $sum_extend, $count_extra_volume, $sum_extra_volume, $count_extra_time, $sum_extrat_time, $count_change_location, $sum_change_location, $count_test, $countuser_new);
     step('home', $from_id);
     sendmessage($from_id, $statisticsall, $keyboardadmin, 'HTML');
-} elseif ($datain == "settingaffiliatesf") {
-    sendmessage($from_id, $textbotlang['users']['selectoption'], $affiliates, 'HTML');
 } elseif ($text == $textbotlang['Admin']['btnKeyboard']['addPanel'] && $adminrulecheck['rule'] == "administrator") {
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['Inbound']['getPanelType'], $keyboardtypepanel, 'HTML');
 } elseif (preg_match('/typepanel#(.*)/', $datain, $dataget)) {
@@ -4191,29 +4188,7 @@ elseif ($datain == "systemsms") {
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['Inbound']['endInbound'], $optionMarzban, 'HTML');
     step('home', $from_id);
     return;
-} elseif ($text == $textbotlang['keyboard']['setAffiliatePercent'] && $adminrulecheck['rule'] == "administrator") {
-    sendmessage($from_id, $textbotlang['Admin']['affiliates']['askPercent'], $backadmin, 'HTML');
-    step('setpercentage', $from_id);
-} elseif ($user['step'] == "setpercentage") {
-    if (!ctype_digit($text)) {
-        sendmessage($from_id, $textbotlang['Admin']['Discount']['invalidPercent'], $backadmin, 'HTML');
-        return;
-    }
-    sendmessage($from_id, $textbotlang['Admin']['affiliates']['percentSaved'], $affiliates, 'HTML');
-    update("setting", "affiliatespercentage", $text);
-    step('home', $from_id);
-} elseif ($text == $textbotlang['keyboard']['setAffiliateBanner']) {
-    sendmessage($from_id, $textbotlang['Admin']['affiliates']['askBanner'], $backadmin, 'HTML');
-    step('setbanner', $from_id);
-} elseif ($user['step'] == "setbanner") {
-    if (!$photo) {
-        sendmessage($from_id, $textbotlang['Admin']['affiliates']['invalidBanner'], $backadmin, 'HTML');
-        return;
-    }
-    update("affiliates", "id_media", $photoid);
-    update("affiliates", "description", $caption);
-    sendmessage($from_id, $textbotlang['Admin']['affiliates']['bannerSaved'], $affiliates, 'HTML');
-    step('home', $from_id);
+
 } elseif ($text == $textbotlang['keyboard']['supportId'] && $adminrulecheck['rule'] == "administrator") {
     $PaySetting = select("PaySetting", "ValuePay", "NamePay", "CartDirect");
     $textcart = sprintf($textbotlang['Admin']['card']['askUsername'], $PaySetting['ValuePay']);
@@ -4279,77 +4254,6 @@ elseif ($datain == "systemsms") {
             'parse_mode' => "HTML"
         ]);
     }
-    step('home', $from_id);
-} elseif ($text == $textbotlang['keyboard']['purchaseCommission'] && $adminrulecheck['rule'] == "administrator") {
-    $marzbancommission = select("affiliates", "*", null, null, "select");
-    $keyboardcommission = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbancommission['status_commission'], 'callback_data' => $marzbancommission['status_commission']],
-            ],
-        ]
-    ]);
-    sendmessage($from_id, $textbotlang['Admin']['Status']['commission'], $keyboardcommission, 'HTML');
-} elseif ($datain == "oncommission") {
-    update("affiliates", "status_commission", "offcommission");
-    $marzbancommission = select("affiliates", "*", null, null, "select");
-    $keyboardcommission = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbancommission['status_commission'], 'callback_data' => $marzbancommission['status_commission']],
-            ],
-        ]
-    ]);
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['commissionOff'], $keyboardcommission);
-} elseif ($datain == "offcommission") {
-    update("affiliates", "status_commission", "oncommission");
-    $marzbancommission = select("affiliates", "*", null, null, "select");
-    $keyboardcommission = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbancommission['status_commission'], 'callback_data' => $marzbancommission['status_commission']],
-            ],
-        ]
-    ]);
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['commissionOn'], $keyboardcommission);
-} elseif ($text == $textbotlang['keyboard']['startGift'] && $adminrulecheck['rule'] == "administrator") {
-    $marzbanDiscountaffiliates = select("affiliates", "*", null, null, "select");
-    $keyboardDiscountaffiliates = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbanDiscountaffiliates['Discount'], 'callback_data' => $marzbanDiscountaffiliates['Discount']],
-            ],
-        ]
-    ]);
-    sendmessage($from_id, $textbotlang['Admin']['Status']['discountAffiliates'], $keyboardDiscountaffiliates, 'HTML');
-} elseif ($datain == "onDiscountaffiliates") {
-    update("affiliates", "Discount", "offDiscountaffiliates");
-    $marzbanDiscountaffiliates = select("affiliates", "*", null, null, "select");
-    $keyboardDiscountaffiliates = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbanDiscountaffiliates['Discount'], 'callback_data' => $marzbanDiscountaffiliates['Discount']],
-            ],
-        ]
-    ]);
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['discountAffiliatesOff'], $keyboardDiscountaffiliates);
-} elseif ($datain == "offDiscountaffiliates") {
-    update("affiliates", "Discount", "onDiscountaffiliates");
-    $marzbanDiscountaffiliates = select("affiliates", "*", null, null, "select");
-    $keyboardDiscountaffiliates = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbanDiscountaffiliates['Discount'], 'callback_data' => $marzbanDiscountaffiliates['Discount']],
-            ],
-        ]
-    ]);
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['discountAffiliatesOn'], $keyboardDiscountaffiliates);
-} elseif ($text == $textbotlang['keyboard']['startGiftAmount'] && $adminrulecheck['rule'] == "administrator") {
-    sendmessage($from_id, $textbotlang['Admin']['affiliates']['askJoinGift'], $backadmin, 'HTML');
-    step('getdiscont', $from_id);
-} elseif ($user['step'] == "getdiscont") {
-    sendmessage($from_id, $textbotlang['Admin']['affiliates']['joinGiftSaved'], $affiliates, 'HTML');
-    update("affiliates", "price_Discount", $text);
     step('home', $from_id);
 } elseif ($datain == "mainbalanceaccount" && $adminrulecheck['rule'] == "administrator") {
     $PaySetting = json_decode(select("PaySetting", "ValuePay", "NamePay", "minbalance", "select")[$user['agent']], true);
@@ -7618,6 +7522,45 @@ elseif ($text == $textbotlang['keyboard']['hidePanelForUser'] && $adminrulecheck
     step("home", $from_id);
     [$lotteryText, $lotteryKeyboard] = lotterySettingsMenu();
     editFlowMessage($textbotlang['Admin']['price']['rewardSaved'] . "\n\n" . $lotteryText, $lotteryKeyboard);
+} elseif ($datain == "affiliatesettings" && $adminrulecheck['rule'] == "administrator") {
+    step("home", $from_id);
+    [$affiliateText, $affiliateKeyboard] = affiliateSettingsMenu();
+    Editmessagetext($from_id, $message_id, $affiliateText, $affiliateKeyboard);
+} elseif (preg_match('/^affiliate-(commission|firstbuy|startgift)$/', $datain, $dataget) && $adminrulecheck['rule'] == "administrator") {
+    $affiliateSetting = select("affiliates", "*", null, null, "select");
+    [$column, $on, $off] = [
+        'commission' => ['status_commission', 'oncommission', 'offcommission'],
+        'firstbuy' => ['porsant_one_buy', 'on_buy_porsant', 'off_buy_porsant'],
+        'startgift' => ['Discount', 'onDiscountaffiliates', 'offDiscountaffiliates'],
+    ][$dataget[1]];
+    update("affiliates", $column, $affiliateSetting[$column] == $on ? $off : $on);
+    [$affiliateText, $affiliateKeyboard] = affiliateSettingsMenu();
+    Editmessagetext($from_id, $message_id, $affiliateText, $affiliateKeyboard);
+} elseif (preg_match('/^affiliate-(percent|giftamount|banner)$/', $datain, $dataget) && $adminrulecheck['rule'] == "administrator") {
+    [$question, $affiliateStep] = [
+        'percent' => [$textbotlang['Admin']['affiliates']['askPercent'], 'setpercentage'],
+        'giftamount' => [$textbotlang['Admin']['affiliates']['askJoinGift'], 'getdiscont'],
+        'banner' => [$textbotlang['Admin']['affiliates']['askBanner'], 'setbanner'],
+    ][$dataget[1]];
+    savedata("clear", "message_id", $message_id);
+    Editmessagetext($from_id, $message_id, $question, $affiliateFlowKeyboard);
+    step($affiliateStep, $from_id);
+} elseif (in_array($user['step'], ["setpercentage", "getdiscont", "setbanner"])) {
+    if ($user['step'] == "setbanner" ? !$photo : !ctype_digit($text)) {
+        editFlowMessage($textbotlang['Admin']['affiliates'][$user['step'] == "setbanner" ? 'invalidBanner' : 'invalidNumber'], $affiliateFlowKeyboard);
+        return;
+    }
+    if ($user['step'] == "setpercentage") {
+        update("setting", "affiliatespercentage", $text);
+    } elseif ($user['step'] == "getdiscont") {
+        update("affiliates", "price_Discount", $text);
+    } else {
+        update("affiliates", "id_media", $photoid);
+        update("affiliates", "description", $caption);
+    }
+    step("home", $from_id);
+    [$affiliateText, $affiliateKeyboard] = affiliateSettingsMenu();
+    editFlowMessage($textbotlang['Admin']['affiliates']['saved'] . "\n\n" . $affiliateText, $affiliateKeyboard);
 } elseif ($datain == "wheelsettings" && $adminrulecheck['rule'] == "administrator") {
     step("home", $from_id);
     [$wheelText, $wheelKeyboard] = wheelSettingsMenu();
@@ -9203,38 +9146,6 @@ if ($datain == "settimecornday" && $adminrulecheck['rule'] == "administrator") {
     file_put_contents($filename, implode("\n", array_column($listusers, 'id')) . "\n");
     sendDocument($from_id, $filename, $textbotlang['Admin']['card']['enabledUserList']);
     unlink($filename);
-} elseif ($text == $textbotlang['keyboard']['firstPurchaseCommission'] && $adminrulecheck['rule'] == "administrator") {
-    $marzbanporsant_one_buy = select("affiliates", "*", null, null, "select");
-    $keyboardDiscountaffiliates = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbanporsant_one_buy['porsant_one_buy'], 'callback_data' => $marzbanporsant_one_buy['porsant_one_buy']],
-            ],
-        ]
-    ]);
-    sendmessage($from_id, $textbotlang['Admin']['affiliates']['commissionScope'], $keyboardDiscountaffiliates, 'HTML');
-} elseif ($datain == "on_buy_porsant") {
-    update("affiliates", "porsant_one_buy", "off_buy_porsant");
-    $marzbanporsant_one_buy = select("affiliates", "*", null, null, "select");
-    $keyboardDiscountaffiliates = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbanporsant_one_buy['porsant_one_buy'], 'callback_data' => $marzbanporsant_one_buy['porsant_one_buy']],
-            ],
-        ]
-    ]);
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['affiliates']['commissionScope'], $keyboardDiscountaffiliates);
-} elseif ($datain == "off_buy_porsant") {
-    update("affiliates", "porsant_one_buy", "on_buy_porsant");
-    $marzbanporsant_one_buy = select("affiliates", "*", null, null, "select");
-    $keyboardDiscountaffiliates = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbanporsant_one_buy['porsant_one_buy'], 'callback_data' => $marzbanporsant_one_buy['porsant_one_buy']],
-            ],
-        ]
-    ]);
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['affiliates']['commissionScope'], $keyboardDiscountaffiliates);
 } elseif (preg_match('/changestatusadmin_(\w+)/', $datain, $dataget)) {
     $id_invoice = $dataget[1];
     $nameloc = select("invoice", "*", "id_invoice", $id_invoice, "select");

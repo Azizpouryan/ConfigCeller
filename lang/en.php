@@ -159,11 +159,6 @@ To enable it, the bot owner needs a Telegram Premium subscription, or the bot mu
                         'agent' => 'Agent',
                         'normal' => 'Regular',
                 ],
-                'gateways' => [
-                        'perfectMoney' => 'Perfect Money',
-                        'rial1' => 'Rial currency payment',
-                        'rial2' => 'Second Rial currency payment',
-                ],
                 'labels' => [
                         'testServiceName' => 'Test service',
                         'toman' => 'Toman',
@@ -229,7 +224,6 @@ To enable it, the bot owner needs a Telegram Premium subscription, or the bot mu
                         'blockedfake' => '⭕️ Block user',
                         'changeto' => '❌ Error 
     The minimum amount for payment via this gateway is 2 TRON',
-                        'confirmPayAdmin' => '⭕️ The payment has already been confirmed',
                         'confirmPaying' => '✅ Confirm payment',
                         'errorLinkPayment' => '❌ An error occurred while creating the payment link. Please contact support to resolve it.',
                         'errorprice' => '❌ Error 
@@ -245,7 +239,6 @@ To enable it, the bot owner needs a Telegram Premium subscription, or the bot mu
     The minimum amount for payment via this gateway is 1 USD.',
                         'payments' => 'Payment',
                         'receiptimage' => '🖼 Submitted receipt image',
-                        'refunded' => 'The amount has been returned to your wallet',
                         'rejectPay' => '❌ Reject payment',
                         'selectPayment' => '💵 Choose your payment method',
                         'sendReceipt' => '🚀 Your payment receipt has been sent. After approval by the administration, the amount will be deposited into your wallet',
@@ -345,12 +338,6 @@ Use the button below to pay👇🏻',
 
 ⚠️  The minimum amount is <b>%s</b> and the maximum is <b>%s</b> Toman',
                         'giftDeposit' => '🎁 Dear user, the amount of %s Toman has been deposited into your account as a gift.',
-                        'invoiceExpired' => '⭕️ Dear user, the invoice below expired due to non-payment within the specified time .
-❗️Please do not pay any amount for this invoice under any circumstances and create a new invoice .
-
-🛒 Your payment method : %s
-📌 Invoice code : <code>%s</code>
-🪙 Invoice amount :  %s Toman',
                         'giftDepositIranpay' => '🎁 Dear user, the amount of %s Toman has been deposited into your account as a gift.',
                         'invoiceCreated' => '✅ Payment invoice was created.
 
@@ -1276,7 +1263,6 @@ The <code>install</code> folder still exists on the server and the bot could not
                 'notUser' => 'No user was found with this ID',
                 'panelAdmin' => '👨‍💼 Management panel',
                 'saved' => '✅ Saved.',
-                'selectOption' => '📌 Select an option',
                 'selectOption2' => 'Select an option',
                 'selectOption3' => '📌 Select an option from the list below',
                 'selectOption4' => 'Select one of the options below ',
@@ -1341,7 +1327,6 @@ Received error:  %s',
                         'invalidAgentCode' => '❌ The user type is invalid',
                         'priceCode' => 'The code was received. Now send the code\'s amount',
                         'priceCodeSell' => 'The code was received. Now send the code\'s percentage',
-                        'removedCode' => '✅ The code was successfully deleted.',
                         'saveCode' => '✅ The code was successfully registered',
                         'setLimitUse' => '📌 Send the usage limit.
 ⚠️ The limit is for all users',
@@ -2873,11 +2858,6 @@ User balance before purchase : %s
   - Referrer balance before gift : %s
  - Referrer balance after gift : %s
  ',
-                        'newPayment' => '💵 New payment
-                
-User numeric ID : %s
-Transaction amount : %s 
-Payment method : First Rial currency gateway',
                         'newPaymentAutoConfirm' => '💵 New payment
         
 User numeric ID : %s
@@ -3885,7 +3865,6 @@ We hope you had a good experience with the ease and speed of your service. If yo
                 'deleteService' => '❌ Delete service',
                 'deleteServiceAlt' => '❌Delete service',
                 'deleteServiceFull' => '🗑 Completely delete service',
-                'deleteTime' => '⚙️ Deletion time',
                 'deleteUserAffiliates' => '🔄 Delete user\'s referrals',
                 'diamondPayment' => '💎 Payment',
                 'disableShowCard' => '💰  Deactivate card number display',
@@ -3915,7 +3894,6 @@ We hope you had a good experience with the ease and speed of your service. If yo
                 'extraVolumePrice' => '➕ Extra volume price',
                 'featureStatus' => '⚙️ Feature status',
                 'financial' => '💎 Financial',
-                'firstConnectTime' => '⚙️ First connection time',
                 'firstConnection' => '📊 First connection',
                 'firstConnectionTest' => '📊 Test account first connection',
                 'firstPurchaseBtn' => 'First purchase',
@@ -4117,7 +4095,6 @@ We hope you had a good experience with the ease and speed of your service. If yo
                 'testAccountVolume' => '💾 Test account volume',
                 'testServiceTime' => '⏳ Test service time',
                 'time' => 'Time',
-                'timeAlert' => '⚙️ Warning time',
                 'timeDuration' => '⏳ Time',
                 'today' => '⛅️ Today',
                 'totalStats' => '⏱️ Total statistics',
@@ -4146,7 +4123,6 @@ We hope you had a good experience with the ease and speed of your service. If yo
                 'viewTutorial' => '📚 View usage tutorial ',
                 'volume' => 'Volume',
                 'volume2' => '🔋 Volume',
-                'volumeAlert' => '⚙️ Warning volume',
                 'volumeResetType' => 'Volume reset type',
                 'apiNowPayment' => 'API NOWPAYMENT',
                 'walletAddress' => 'Wallet address',

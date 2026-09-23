@@ -159,11 +159,6 @@ return [
                         'agent' => '代理',
                         'normal' => '普通',
                 ],
-                'gateways' => [
-                        'perfectMoney' => 'Perfect Money',
-                        'rial1' => '里亚尔货币支付',
-                        'rial2' => '第二里亚尔货币支付',
-                ],
                 'labels' => [
                         'testServiceName' => '测试服务',
                         'toman' => '托曼',
@@ -229,7 +224,6 @@ return [
                         'blockedfake' => '⭕️ 封禁用户',
                         'changeto' => '❌ 错误 
     通过此网关支付的最低金额为 2 TRON',
-                        'confirmPayAdmin' => '⭕️ 该支付已被确认',
                         'confirmPaying' => '✅ 确认支付',
                         'errorLinkPayment' => '❌ 创建支付链接时出错，请联系客服解决。',
                         'errorprice' => '❌ 错误 
@@ -245,7 +239,6 @@ return [
     通过此网关支付的最低金额为 1 美元。',
                         'payments' => '支付',
                         'receiptimage' => '🖼 已提交的收据图片',
-                        'refunded' => '金额已退回到您的钱包',
                         'rejectPay' => '❌ 拒绝支付',
                         'selectPayment' => '💵 请选择您的支付方式',
                         'sendReceipt' => '🚀 您的支付收据已发送。经管理员审核通过后，金额将存入您的钱包',
@@ -345,12 +338,6 @@ return [
 
 ⚠️  最低金额为 <b>%s</b>，最高为 <b>%s</b> 托曼',
                         'giftDeposit' => '🎁 尊敬的用户，%s 托曼已作为礼物存入您的账户。',
-                        'invoiceExpired' => '⭕️ 尊敬的用户，以下发票因未在指定时间内付款而过期。
-❗️请在任何情况下都不要为此发票支付任何金额，并重新创建发票。
-
-🛒 您的支付方式：%s
-📌 发票代码：<code>%s</code>
-🪙 发票金额：%s 托曼',
                         'giftDepositIranpay' => '🎁 尊敬的用户，%s 托曼已作为礼物存入您的账户。',
                         'invoiceCreated' => '✅ 已创建付款发票。
 
@@ -1276,7 +1263,6 @@ https://t.me/%s?start=%s',
                 'notUser' => '未找到具有此ID的用户',
                 'panelAdmin' => '👨‍💼 管理面板',
                 'saved' => '✅ 已保存。',
-                'selectOption' => '📌 请选择一个选项',
                 'selectOption2' => '请选择一个选项',
                 'selectOption3' => '📌 请从下方列表中选择一个选项',
                 'selectOption4' => '请选择下方的一个选项 ',
@@ -1341,7 +1327,6 @@ n2',
                         'invalidAgentCode' => '❌ 用户类型无效',
                         'priceCode' => '已收到代码。现在请发送该代码的金额',
                         'priceCodeSell' => '已收到代码。现在请发送该代码的百分比',
-                        'removedCode' => '✅ 代码已成功删除。',
                         'saveCode' => '✅ 代码已成功登记',
                         'setLimitUse' => '📌 请发送使用次数限制。
 ⚠️ 该限制适用于所有用户',
@@ -2873,11 +2858,6 @@ f,n.n2',
   - 推荐人礼品前余额：%s
  - 推荐人礼品后余额：%s
  ',
-                        'newPayment' => '💵 新付款
-                
-用户数字 ID：%s
-交易金额：%s 
-支付方式：第一里亚尔货币网关',
                         'newPaymentAutoConfirm' => '💵 新付款
         
 用户数字 ID：%s
@@ -3885,7 +3865,6 @@ f,n.n2',
                 'deleteService' => '❌ 删除服务',
                 'deleteServiceAlt' => '❌删除服务',
                 'deleteServiceFull' => '🗑 彻底删除服务',
-                'deleteTime' => '⚙️ 删除时间',
                 'deleteUserAffiliates' => '🔄 删除用户的下线',
                 'diamondPayment' => '💎 付款',
                 'disableShowCard' => '💰  停用卡号显示',
@@ -3915,7 +3894,6 @@ f,n.n2',
                 'extraVolumePrice' => '➕ 额外流量价格',
                 'featureStatus' => '⚙️ 功能状态',
                 'financial' => '💎 财务',
-                'firstConnectTime' => '⚙️ 首次连接时间',
                 'firstConnection' => '📊 首次连接',
                 'firstConnectionTest' => '📊 测试账户首次连接',
                 'firstPurchaseBtn' => '首次购买',
@@ -4117,7 +4095,6 @@ f,n.n2',
                 'testAccountVolume' => '💾 测试账户流量',
                 'testServiceTime' => '⏳ 测试服务时间',
                 'time' => '时间',
-                'timeAlert' => '⚙️ 警告时间',
                 'timeDuration' => '⏳ 时间',
                 'today' => '⛅️ 今天',
                 'totalStats' => '⏱️ 总统计',
@@ -4146,7 +4123,6 @@ f,n.n2',
                 'viewTutorial' => '📚 查看使用教程 ',
                 'volume' => '流量',
                 'volume2' => '🔋 流量',
-                'volumeAlert' => '⚙️ 警告流量',
                 'volumeResetType' => '流量重置类型',
                 'apiNowPayment' => 'API NOWPAYMENT',
                 'walletAddress' => '钱包地址',

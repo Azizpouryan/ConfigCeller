@@ -10,35 +10,6 @@ $domainhostsEscaped = htmlspecialchars($domainhosts, ENT_QUOTES | ENT_SUBSTITUTE
 
 $miniAppInstructionText = sprintf($textbotlang['Admin']['webpanel']['miniAppHelp'], $domainhostsEscaped);
 
-$paymentGateways = [
-    'card' => ['label' => $textbotlang['keyboard']['cartToCartGateway'], 'setting' => 'Cartstatus', 'on' => 'oncard', 'off' => 'offcard', 'config' => 'cartsetting'],
-    'plisio' => ['label' => 'Plisio', 'setting' => 'nowpaymentstatus', 'on' => 'onnowpayment', 'off' => 'offnowpayment', 'config' => 'plisiosetting'],
-    'nowpayment' => ['label' => 'NOWPayments', 'setting' => 'statusnowpayment', 'on' => '1', 'off' => '0', 'config' => 'nowpaymentsetting'],
-    'iranpay1' => ['label' => $textbotlang['keyboard']['iranPay1Label'], 'setting' => 'statusSwapWallet', 'on' => 'onSwapinoBot', 'off' => 'offSwapinoBot', 'config' => 'iranpay1setting'],
-    'iranpay2' => ['label' => $textbotlang['keyboard']['iranPay2Label'], 'setting' => 'statustarnado', 'on' => 'onternado', 'off' => 'offternado', 'config' => 'iranpay2setting'],
-    'iranpay4' => ['label' => $textbotlang['keyboard']['iranPay4Label'], 'setting' => 'statusiranpay4', 'on' => 'oniranpay4', 'off' => 'offiranpay4', 'config' => 'iranpay4setting'],
-    'iranpay3' => ['label' => $textbotlang['keyboard']['iranPay3Label'], 'setting' => 'statusiranpay3', 'on' => 'oniranpay3', 'off' => 'offiranpay3', 'config' => 'iranpay3setting'],
-    'aqayepardakht' => ['label' => $textbotlang['keyboard']['aqayePardakhtGateway'], 'setting' => 'statusaqayepardakht', 'on' => 'onaqayepardakht', 'off' => 'offaqayepardakht', 'config' => 'aqayepardakhtsetting'],
-    'zarinpal' => ['label' => $textbotlang['keyboard']['zarinPalGateway'], 'setting' => 'zarinpalstatus', 'on' => 'onzarinpal', 'off' => 'offzarinpal', 'config' => 'zarinpalsetting'],
-    'variza' => ['label' => $textbotlang['keyboard']['varizaGateway'], 'setting' => 'variza_status', 'on' => 'onvariza', 'off' => 'offvariza', 'config' => 'varizasetting'],
-    'digi' => ['label' => $textbotlang['keyboard']['cryptoOfflinePayment'], 'setting' => 'digistatus', 'on' => 'ondigi', 'off' => 'offdigi', 'config' => 'affilnecurrencysetting'],
-    'star' => ['label' => 'Star Telegram', 'setting' => 'statusstar', 'on' => '1', 'off' => '0', 'config' => 'startelegram'],
-];
-$paymentGatewaysKeyboard = function () use ($paymentGateways, $textbotlang) {
-    $rows = [];
-    foreach ($paymentGateways as $key => $gateway) {
-        $mark = getPaySettingValue($gateway['setting'], $gateway['off']) == $gateway['on'] ? '✅' : '❌';
-        $rows[] = [['text' => "$mark {$gateway['label']}", 'callback_data' => "paygw-$key"]];
-    }
-    $rows[] = [['text' => $textbotlang['keyboard']['gatewaysGeneralSettings'], 'callback_data' => "none"]];
-    $rows[] = [
-        ['text' => $textbotlang['keyboard']['maxChargeBalance'], 'callback_data' => "maxbalanceaccount"],
-        ['text' => $textbotlang['keyboard']['minChargeBalance'], 'callback_data' => "mainbalanceaccount"],
-    ];
-    $rows[] = [['text' => $textbotlang['keyboard']['walletAddress'], 'callback_data' => "walletaddress"]];
-    return json_encode(['inline_keyboard' => $rows]);
-};
-
 $backmenu_panel_steps = [
     "GetNameNew", "GeturlNew", "GeturlNewx", "GetusernameNew", "GetpaawordNew", "getagentpanel",
     "getuuidadmin", "getlimitnew", "updatetime", "val_usertest", "getinboundiid", "confirmremovepanel",
@@ -96,6 +67,7 @@ $backmenu_register(["apiiranpay", "helpiranpay3", "maxbalanceiranpay", "minbalan
 $backmenu_register(["apiiranpay4", "endpointiranpay4", "getcashiranpay4", "getdailyiranpay4", "getmaaxiranpay4", "getmainiranpay4", "helpiranpay4"], $abangatewaykeyboard);
 $backmenu_register(["getmaindigitaltron", "getmaxdigitaltron", "helpofflinearze"], $tronnowpayments);
 $backmenu_register(["chashbackstar", "gethelpstar", "getmainaqstar", "maxbalancestar"], $Startelegram);
+$backmenu_register(["variza_api_token", "variza_webhook_secret", "getcashvariza", "getmainvariza", "getmaaxvariza", "helpvariza"], $keyboardvariza);
 $backmenu_register([
     "addchannelid", "limit_usertest_allusers", "getimagebackgroundqr", "getpricereqagent",
     "getcronvolumere", "on_hold_day", "getdaycron", "getvolumewarn", "getdaywarn"
@@ -110,7 +82,18 @@ $backmenu_register(["getonelotary", "getonelotary2", "getonelotary3"], $lottery)
 $backmenu_register(["getpricewheel"], $wheelkeyboard);
 $backmenu_register(["add_name_panel", "add_link_panel", "add_username_panel", "add_password_panel", "getlimitedpanel"], $keyboardtypepanel);
 
-if (in_array($text, $textadmin) || $datain == "admin") {
+$isGatewayOptionClick = preg_match('/^paygwopt-(\w+)$/', $datain, $gatewayOption);
+if ($isGatewayOptionClick) {
+    $text = $textbotlang['keyboard'][$gatewayOption[1]] ?? '';
+}
+$isGatewaySettingStep = in_array($backmenu_menus[$user['step']] ?? null, array_column($paymentGateways, 'keyboard'), true);
+if ($isGatewayOptionClick || $isGatewaySettingStep) {
+    $backadmin = $backuser = json_encode(['inline_keyboard' => [[['text' => $textbotlang['Admin']['backMenuBtn'], 'callback_data' => "paygwback"]]]]);
+}
+if ($datain == "paygwback") {
+    step('home', $from_id);
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['backMenu'], $backmenu_menus[$user['step']] ?? paymentGatewaysKeyboard());
+} elseif (in_array($text, $textadmin) || $datain == "admin") {
     if ($datain == "admin")
         deletemessage($from_id, $message_id);
     if ($buyreport == "0" || $otherservice == "0" || $otherreport == "0" || $paymentreports == "0" || $reporttest == "0" || $errorreport == "0") {
@@ -3399,7 +3382,7 @@ elseif ($datain == "systemsms") {
     step('home', $from_id);
     $typepanel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
     outtypepanel($typepanel['type'], $textbotlang['Admin']['managepanel']['savedName']);
-} elseif (($datain == "cartsetting" && $adminrulecheck['rule'] == "administrator") || $text == $textbotlang['keyboard']['backToCardSettings']) {
+} elseif ($text == $textbotlang['keyboard']['backToCardSettings']) {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $CartManage, 'HTML');
 } elseif ($text == $textbotlang['keyboard']['setCardNumber'] && $adminrulecheck['rule'] == "administrator") {
     $textcart = $textbotlang['Admin']['card']['askNumber'];
@@ -3435,8 +3418,6 @@ elseif ($datain == "systemsms") {
         sendmessage($from_id, $textbotlang['Admin']['card']['saveFailed'], $backadmin, 'HTML');
         step('home', $from_id);
     }
-} elseif ($datain == "plisiosetting" && $adminrulecheck['rule'] == "administrator") {
-    sendmessage($from_id, $textbotlang['users']['selectoption'], $NowPaymentsManage, 'HTML');
 } elseif ($text == "🧩 api plisio" && $adminrulecheck['rule'] == "administrator") {
     $PaySetting = select("PaySetting", "ValuePay", "NamePay", "apinowpayment")['ValuePay'];
     $textcart = sprintf($textbotlang['Admin']['gateway']['askPlisioApi'], $PaySetting);
@@ -3446,23 +3427,15 @@ elseif ($datain == "systemsms") {
     sendmessage($from_id, $textbotlang['Admin']['SettingnowPayment']['saveApi'], $NowPaymentsManage, 'HTML');
     update("PaySetting", "ValuePay", $text, "NamePay", "apinowpayment");
     step('home', $from_id);
-} elseif ($datain == "iranpay1setting" && $adminrulecheck['rule'] == "administrator") {
-    sendmessage($from_id, $textbotlang['users']['selectoption'], $Swapinokey, 'HTML');
-} elseif ($text == "API NOWPAYMENT") {
+} elseif ($text == $textbotlang['keyboard']['apiNowPayment']) {
     $PaySetting = select("PaySetting", "ValuePay", "NamePay", "marchent_tronseller")['ValuePay'];
     $texttronseller = sprintf($textbotlang['Admin']['gateway']['askNowPaymentsApi'], $PaySetting);
     sendmessage($from_id, $texttronseller, $backadmin, 'HTML');
     step('marchent_tronseller', $from_id);
 } elseif ($user['step'] == "marchent_tronseller") {
-    sendmessage($from_id, $textbotlang['Admin']['SettingnowPayment']['saveApi'], $keyboardadmin, 'HTML');
+    sendmessage($from_id, $textbotlang['Admin']['SettingnowPayment']['saveApi'], $nowpayment_setting_keyboard, 'HTML');
     update("PaySetting", "ValuePay", $text, "NamePay", "marchent_tronseller");
     step('home', $from_id);
-} elseif ($datain == "aqayepardakhtsetting" && $adminrulecheck['rule'] == "administrator") {
-    sendmessage($from_id, $textbotlang['users']['selectoption'], $aqayepardakht, 'HTML');
-} elseif ($datain == "zarinpalsetting" && $adminrulecheck['rule'] == "administrator") {
-    sendmessage($from_id, $textbotlang['Admin']['selectOption'], $keyboardzarinpal, 'HTML');
-} elseif ($datain == "varizasetting" && $adminrulecheck['rule'] == "administrator") {
-    sendmessage($from_id, $textbotlang['Admin']['selectOption'], $keyboardvariza, 'HTML');
 } elseif ($text == $textbotlang['keyboard']['setAqayePardakhtMerchant'] && $adminrulecheck['rule'] == "administrator") {
     $PaySetting = select("PaySetting", "ValuePay", "NamePay", "merchant_id_aqayepardakht")['ValuePay'];
     $textaqayepardakht = sprintf($textbotlang['Admin']['gateway']['askAqayePardakhtMerchant'], $PaySetting);
@@ -6308,8 +6281,6 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
         'show_alert' => false,
         'cache_time' => 5,
     ));
-} elseif ($datain == "iranpay2setting" && $adminrulecheck['rule'] == "administrator") {
-    sendmessage($from_id, $textbotlang['users']['selectoption'], $trnado, 'HTML');
 } elseif ($text == $textbotlang['keyboard']['apiIranPay4'] && $adminrulecheck['rule'] == "administrator") {
     $current = getPaySettingValue('apiiranpay4', '0');
     sendmessage($from_id, sprintf($textbotlang['Admin']['gateway']['askMerchant'], $current), $backadmin, 'HTML');
@@ -6378,10 +6349,6 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     update("PaySetting", "ValuePay", $text, "NamePay", "helpiranpay4");
     sendmessage($from_id, $textbotlang['Admin']['SettingnowPayment']['saveApi'], $abangatewaykeyboard, 'HTML');
     step('home', $from_id);
-} elseif ($datain == "iranpay4setting" && $adminrulecheck['rule'] == "administrator") {
-    sendmessage($from_id, $textbotlang['users']['selectoption'], $abangatewaykeyboard, 'HTML');
-} elseif ($datain == "iranpay3setting" && $adminrulecheck['rule'] == "administrator") {
-    sendmessage($from_id, $textbotlang['users']['selectoption'], $iranpaykeyboard, 'HTML');
 }elseif ($text == "API T" && $adminrulecheck['rule'] == "administrator") {
     $PaySetting = select("PaySetting", "ValuePay", "NamePay", "apiternado", "select");
     $texttronseller = sprintf($textbotlang['Admin']['gateway']['askMerchant'], $PaySetting['ValuePay']);
@@ -6391,8 +6358,6 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     sendmessage($from_id, $textbotlang['Admin']['SettingnowPayment']['saveApi'], $trnado, 'HTML');
     update("PaySetting", "ValuePay", $text, "NamePay", "apiternado");
     step('home', $from_id);
-} elseif ($datain == "affilnecurrencysetting") {
-    sendmessage($from_id, $textbotlang['users']['selectoption'], $tronnowpayments, 'HTML');
 } elseif ($text == $textbotlang['keyboard']['inboundDeactivate'] && $adminrulecheck['rule'] == "administrator") {
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['Inbound']['getProtocol'], $keyboardprotocol, 'HTML');
     step('getprotocoldisable', $from_id);
@@ -6793,11 +6758,11 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     $textnode = $textbotlang['Admin']['node']['deleted'];
     Editmessagetext($from_id, $message_id, $textnode, $backinfoss);
 } elseif ($text == $textbotlang['keyboard']['financial'] && $adminrulecheck['rule'] == "administrator") {
-    $arzireyali1 = getPaySettingValue('statusSwapWallet', 'offSwapinoBot');
-    if ($arzireyali1 != "onSwapinoBot" && $arzireyali1 != "offSwapinoBot") {
+    $swapWalletStatus = getPaySettingValue('statusSwapWallet', 'offSwapinoBot');
+    if ($swapWalletStatus != "onSwapinoBot" && $swapWalletStatus != "offSwapinoBot") {
         update("PaySetting", "ValuePay", "onSwapinoBot", "NamePay", "statusSwapWallet");
     }
-    sendmessage($from_id, $textbotlang['Admin']['gateway']['intro'], $paymentGatewaysKeyboard(), 'HTML');
+    sendmessage($from_id, $textbotlang['Admin']['gateway']['intro'], paymentGatewaysKeyboard(), 'HTML');
 } elseif ($text == $textbotlang['keyboard']['renewalCashback'] && $adminrulecheck['rule'] == "administrator") {
     sendmessage($from_id, $textbotlang['Admin']['price']['askRenewCashback'], $backadmin, 'HTML');
     step('getpricecashback', $from_id);
@@ -6825,27 +6790,19 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     sendmessage($from_id, $textbotlang['Admin']['price']['amountSaved'], $shopkeyboard, 'HTML');
     step('home', $from_id);
 } elseif ($datain == "paygwlist" && $adminrulecheck['rule'] == "administrator") {
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['gateway']['intro'], $paymentGatewaysKeyboard());
-} elseif (preg_match('/^paygw(toggle)?-(\w+)$/', $datain, $dataget) && isset($paymentGateways[$dataget[2]]) && $adminrulecheck['rule'] == "administrator") {
-    $gateway = $paymentGateways[$dataget[2]];
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['gateway']['intro'], paymentGatewaysKeyboard());
+} elseif (preg_match('/^paygw(toggle)?-(\w+)$/', $datain, $gatewayMatch) && isset($paymentGateways[$gatewayMatch[2]]) && $adminrulecheck['rule'] == "administrator") {
+    [, $isToggle, $gatewayKey] = $gatewayMatch;
+    $gateway = $paymentGateways[$gatewayKey];
     $gatewayIsOn = getPaySettingValue($gateway['setting'], $gateway['off']) == $gateway['on'];
-    if ($dataget[1]) {
-        update("PaySetting", "ValuePay", $gatewayIsOn ? $gateway['off'] : $gateway['on'], "NamePay", $gateway['setting']);
+    if ($isToggle) {
         $gatewayIsOn = !$gatewayIsOn;
+        update("PaySetting", "ValuePay", $gatewayIsOn ? $gateway['on'] : $gateway['off'], "NamePay", $gateway['setting']);
     }
     $gatewayStatusText = $textbotlang['Admin']['Status'][$gatewayIsOn ? 'statuson' : 'statusoff'];
-    $gatewayKeyboard = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $gatewayStatusText, 'callback_data' => "paygwtoggle-{$dataget[2]}"],
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => $gateway['config']],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['backToGateways'], 'callback_data' => "paygwlist"],
-            ],
-        ]
-    ]);
-    Editmessagetext($from_id, $message_id, sprintf($textbotlang['Admin']['gateway']['detail'], $gateway['label'], $gatewayStatusText), $gatewayKeyboard);
+    $gatewayRows = json_decode($gateway['keyboard'], true)['inline_keyboard'];
+    array_unshift($gatewayRows, [['text' => $gatewayStatusText, 'callback_data' => "paygwtoggle-$gatewayKey"]]);
+    Editmessagetext($from_id, $message_id, sprintf($textbotlang['Admin']['gateway']['detail'], $gateway['label'], $gatewayStatusText), json_encode(['inline_keyboard' => $gatewayRows]));
 } elseif ($text == $textbotlang['keyboard']['cashbackCartToCart']) {
     sendmessage($from_id, $textbotlang['Admin']['price']['askPaymentCashback'], $backadmin, 'HTML');
     step("getcashcart", $from_id);
@@ -9620,8 +9577,6 @@ if ($datain == "settimecornday" && $adminrulecheck['rule'] == "administrator") {
     }
     $Bot_Status = json_encode($Bot_Status);
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['botTitle'], $Bot_Status);
-} elseif ($datain == "startelegram") {
-    sendmessage($from_id, $textbotlang['users']['selectoption'], $Startelegram, 'HTML');
 } elseif ($text == $textbotlang['keyboard']['minAmountStar']) {
     sendmessage($from_id, $textbotlang['Admin']['Balance']['askMinDeposit'], $backadmin, 'HTML');
     step("getmainaqstar", $from_id);
@@ -10413,8 +10368,6 @@ if ($datain == "settimecornday" && $adminrulecheck['rule'] == "administrator") {
     $userdata = json_decode($user['Processing_value'], true);
     sendmessage($from_id, $textbotlang['Admin']['apps']['updated'], $keyboardlinkapp, 'HTML');
     update("app", "link", $text, "name", $userdata['nameapp']);
-} elseif ($datain == "nowpaymentsetting") {
-    sendmessage($from_id, $textbotlang['users']['selectoption'], $nowpayment_setting_keyboard, 'HTML');
 } elseif ($text == $textbotlang['keyboard']['autoConfirmNoCheckTime']) {
     sendmessage($from_id, sprintf($textbotlang['Admin']['Payment']['askAutoConfirmMinutes'], $setting['timeauto_not_verify']), $backadmin, 'HTML');
     step("gettimeauto", $from_id);

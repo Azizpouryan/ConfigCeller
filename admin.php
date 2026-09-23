@@ -10,6 +10,35 @@ $domainhostsEscaped = htmlspecialchars($domainhosts, ENT_QUOTES | ENT_SUBSTITUTE
 
 $miniAppInstructionText = sprintf($textbotlang['Admin']['webpanel']['miniAppHelp'], $domainhostsEscaped);
 
+$paymentGateways = [
+    'card' => ['label' => $textbotlang['keyboard']['cartToCartGateway'], 'setting' => 'Cartstatus', 'on' => 'oncard', 'off' => 'offcard', 'config' => 'cartsetting'],
+    'plisio' => ['label' => 'Plisio', 'setting' => 'nowpaymentstatus', 'on' => 'onnowpayment', 'off' => 'offnowpayment', 'config' => 'plisiosetting'],
+    'nowpayment' => ['label' => 'NOWPayments', 'setting' => 'statusnowpayment', 'on' => '1', 'off' => '0', 'config' => 'nowpaymentsetting'],
+    'iranpay1' => ['label' => $textbotlang['keyboard']['iranPay1Label'], 'setting' => 'statusSwapWallet', 'on' => 'onSwapinoBot', 'off' => 'offSwapinoBot', 'config' => 'iranpay1setting'],
+    'iranpay2' => ['label' => $textbotlang['keyboard']['iranPay2Label'], 'setting' => 'statustarnado', 'on' => 'onternado', 'off' => 'offternado', 'config' => 'iranpay2setting'],
+    'iranpay4' => ['label' => $textbotlang['keyboard']['iranPay4Label'], 'setting' => 'statusiranpay4', 'on' => 'oniranpay4', 'off' => 'offiranpay4', 'config' => 'iranpay4setting'],
+    'iranpay3' => ['label' => $textbotlang['keyboard']['iranPay3Label'], 'setting' => 'statusiranpay3', 'on' => 'oniranpay3', 'off' => 'offiranpay3', 'config' => 'iranpay3setting'],
+    'aqayepardakht' => ['label' => $textbotlang['keyboard']['aqayePardakhtGateway'], 'setting' => 'statusaqayepardakht', 'on' => 'onaqayepardakht', 'off' => 'offaqayepardakht', 'config' => 'aqayepardakhtsetting'],
+    'zarinpal' => ['label' => $textbotlang['keyboard']['zarinPalGateway'], 'setting' => 'zarinpalstatus', 'on' => 'onzarinpal', 'off' => 'offzarinpal', 'config' => 'zarinpalsetting'],
+    'variza' => ['label' => $textbotlang['keyboard']['varizaGateway'], 'setting' => 'variza_status', 'on' => 'onvariza', 'off' => 'offvariza', 'config' => 'varizasetting'],
+    'digi' => ['label' => $textbotlang['keyboard']['cryptoOfflinePayment'], 'setting' => 'digistatus', 'on' => 'ondigi', 'off' => 'offdigi', 'config' => 'affilnecurrencysetting'],
+    'star' => ['label' => 'Star Telegram', 'setting' => 'statusstar', 'on' => '1', 'off' => '0', 'config' => 'startelegram'],
+];
+$paymentGatewaysKeyboard = function () use ($paymentGateways, $textbotlang) {
+    $rows = [];
+    foreach ($paymentGateways as $key => $gateway) {
+        $mark = getPaySettingValue($gateway['setting'], $gateway['off']) == $gateway['on'] ? '✅' : '❌';
+        $rows[] = [['text' => "$mark {$gateway['label']}", 'callback_data' => "paygw-$key"]];
+    }
+    $rows[] = [['text' => $textbotlang['keyboard']['gatewaysGeneralSettings'], 'callback_data' => "none"]];
+    $rows[] = [
+        ['text' => $textbotlang['keyboard']['maxChargeBalance'], 'callback_data' => "maxbalanceaccount"],
+        ['text' => $textbotlang['keyboard']['minChargeBalance'], 'callback_data' => "mainbalanceaccount"],
+    ];
+    $rows[] = [['text' => $textbotlang['keyboard']['walletAddress'], 'callback_data' => "walletaddress"]];
+    return json_encode(['inline_keyboard' => $rows]);
+};
+
 $backmenu_panel_steps = [
     "GetNameNew", "GeturlNew", "GeturlNewx", "GetusernameNew", "GetpaawordNew", "getagentpanel",
     "getuuidadmin", "getlimitnew", "updatetime", "val_usertest", "getinboundiid", "confirmremovepanel",
@@ -6764,147 +6793,11 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     $textnode = $textbotlang['Admin']['node']['deleted'];
     Editmessagetext($from_id, $message_id, $textnode, $backinfoss);
 } elseif ($text == $textbotlang['keyboard']['financial'] && $adminrulecheck['rule'] == "administrator") {
-    $cartotcart = getPaySettingValue('Cartstatus', 'offcard');
-    $plisio = getPaySettingValue('nowpaymentstatus', 'offnowpayment');
     $arzireyali1 = getPaySettingValue('statusSwapWallet', 'offSwapinoBot');
     if ($arzireyali1 != "onSwapinoBot" && $arzireyali1 != "offSwapinoBot") {
         update("PaySetting", "ValuePay", "onSwapinoBot", "NamePay", "statusSwapWallet");
-        $arzireyali1 = getPaySettingValue('statusSwapWallet', 'offSwapinoBot');
     }
-    $arzireyali2 = getPaySettingValue('statustarnado', 'offternado');
-    $arzireyali3 = getPaySettingValue('statusiranpay3', 'offiranpay3');
-    $abangateway4 = getPaySettingValue('statusiranpay4', 'offiranpay4');
-    $abangateway4text = $abangateway4 == 'oniranpay4'
-        ? $textbotlang['Admin']['Status']['statuson']
-        : $textbotlang['Admin']['Status']['statusoff'];
-    $aqayepardakht = getPaySettingValue('statusaqayepardakht', 'offaqayepardakht');
-    $zarinpal = getPaySettingValue('zarinpalstatus', 'offzarinpal');
-    $variza = getPaySettingValue('variza_status', 'offvariza');
-    $affilnecurrency = getPaySettingValue('digistatus', 'offdigi');
-    $paymentstatussnotverify = getPaySettingValue('paymentstatussnotverify', 'offpaymentstatus');
-    $paymentsstartelegram = getPaySettingValue('statusstar', '0');
-    $payment_status_nowpayment = getPaySettingValue('statusnowpayment', '0');
-    $cartotcartstatus = [
-        'oncard' => $textbotlang['Admin']['Status']['statuson'],
-        'offcard' => $textbotlang['Admin']['Status']['statusoff']
-    ][$cartotcart];
-    $plisiostatus = [
-        'onnowpayment' => $textbotlang['Admin']['Status']['statuson'],
-        'offnowpayment' => $textbotlang['Admin']['Status']['statusoff']
-    ][$plisio];
-    $arzireyali1status = [
-        'onSwapinoBot' => $textbotlang['Admin']['Status']['statuson'],
-        'offSwapinoBot' => $textbotlang['Admin']['Status']['statusoff']
-    ][$arzireyali1];
-    $arzireyali2status = [
-        'onternado' => $textbotlang['Admin']['Status']['statuson'],
-        'offternado' => $textbotlang['Admin']['Status']['statusoff']
-    ][$arzireyali2];
-    $aqayepardakhtstatus = [
-        'onaqayepardakht' => $textbotlang['Admin']['Status']['statuson'],
-        'offaqayepardakht' => $textbotlang['Admin']['Status']['statusoff']
-    ][$aqayepardakht];
-    $zarinpalstatus = [
-        'onzarinpal' => $textbotlang['Admin']['Status']['statuson'],
-        'offzarinpal' => $textbotlang['Admin']['Status']['statusoff']
-    ][$zarinpal];
-    $varizastatus = [
-        'onvariza' => $textbotlang['Admin']['Status']['statuson'],
-        'offvariza' => $textbotlang['Admin']['Status']['statusoff']
-    ][$variza];
-    $affilnecurrencystatus = [
-        'ondigi' => $textbotlang['Admin']['Status']['statuson'],
-        'offdigi' => $textbotlang['Admin']['Status']['statusoff']
-    ][$affilnecurrency];
-    $arzireyali3text = [
-        'oniranpay3' => $textbotlang['Admin']['Status']['statuson'],
-        'offiranpay3' => $textbotlang['Admin']['Status']['statusoff']
-    ][$arzireyali3];
-    $paymentstar = [
-        '1' => $textbotlang['Admin']['Status']['statuson'],
-        '0' => $textbotlang['Admin']['Status']['statusoff']
-    ][$paymentsstartelegram];
-    $now_payment_status = [
-        '1' => $textbotlang['Admin']['Status']['statuson'],
-        '0' => $textbotlang['Admin']['Status']['statusoff']
-    ][$payment_status_nowpayment];
-    $Bot_Status = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $textbotlang['keyboard']['operation'], 'callback_data' => "actions"],
-                ['text' => $textbotlang['Admin']['Status']['statusSubject'], 'callback_data' => "subjectde"],
-                ['text' => $textbotlang['Admin']['Status']['subject'], 'callback_data' => "subject"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "cartsetting"],
-                ['text' => $cartotcartstatus, 'callback_data' => "editpayment-Cartstatus-$cartotcart"],
-                ['text' => $textbotlang['keyboard']['cartToCartGateway'], 'callback_data' => "carttocart"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "plisiosetting"],
-                ['text' => $plisiostatus, 'callback_data' => "editpayment-plisio-$plisio"],
-                ['text' => "📌 plisio", 'callback_data' => "plisio"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "nowpaymentsetting"],
-                ['text' => $now_payment_status, 'callback_data' => "editpayment-nowpayment-$payment_status_nowpayment"],
-                ['text' => "📌 nowpayment", 'callback_data' => "nowpayment"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "iranpay1setting"],
-                ['text' => $arzireyali1status, 'callback_data' => "editpayment-arzireyali1-$arzireyali1"],
-                ['text' => $textbotlang['keyboard']['iranPay1Label'], 'callback_data' => "arzireyali1"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "iranpay2setting"],
-                ['text' => $arzireyali2status, 'callback_data' => "editpayment-arzireyali2-$arzireyali2"],
-                ['text' => $textbotlang['keyboard']['iranPay2Label'], 'callback_data' => "arzireyali2"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "iranpay4setting"],
-                ['text' => $abangateway4text, 'callback_data' => "editpayment-oniranpay4-$abangateway4"],
-                ['text' => $textbotlang['keyboard']['iranPay4Label'], 'callback_data' => "oniranpay4"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "iranpay3setting"],
-                ['text' => $arzireyali3text, 'callback_data' => "editpayment-oniranpay3-$arzireyali3"],
-                ['text' => $textbotlang['keyboard']['iranPay3Label'], 'callback_data' => "oniranpay3"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "aqayepardakhtsetting"],
-                ['text' => $aqayepardakhtstatus, 'callback_data' => "editpayment-aqayepardakht-$aqayepardakht"],
-                ['text' => $textbotlang['keyboard']['aqayePardakhtGateway'], 'callback_data' => "aqayepardakht"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "zarinpalsetting"],
-                ['text' => $zarinpalstatus, 'callback_data' => "editpayment-zarinpal-$zarinpal"],
-                ['text' => $textbotlang['keyboard']['zarinPalGateway'], 'callback_data' => "zarinpal"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "varizasetting"],
-                ['text' => $varizastatus, 'callback_data' => "editpayment-variza-$variza"],
-                ['text' => $textbotlang['keyboard']['varizaGateway'], 'callback_data' => "variza"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "affilnecurrencysetting"],
-                ['text' => $affilnecurrencystatus, 'callback_data' => "editpayment-affilnecurrency-$affilnecurrency"],
-                ['text' => $textbotlang['keyboard']['cryptoOfflinePayment'], 'callback_data' => "affilnecurrency"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "startelegram"],
-                ['text' => $paymentstar, 'callback_data' => "editpayment-startelegram-$paymentsstartelegram"],
-                ['text' => "💫Star Telegram", 'callback_data' => "none"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['maxChargeBalance'], 'callback_data' => "maxbalanceaccount"],
-                ['text' => $textbotlang['keyboard']['minChargeBalance'], 'callback_data' => "mainbalanceaccount"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['walletAddress'], 'callback_data' => "walletaddress"],
-            ],
-        ]
-    ]);
-    sendmessage($from_id, $textbotlang['Admin']['gateway']['intro'], $Bot_Status, 'HTML');
+    sendmessage($from_id, $textbotlang['Admin']['gateway']['intro'], $paymentGatewaysKeyboard(), 'HTML');
 } elseif ($text == $textbotlang['keyboard']['renewalCashback'] && $adminrulecheck['rule'] == "administrator") {
     sendmessage($from_id, $textbotlang['Admin']['price']['askRenewCashback'], $backadmin, 'HTML');
     step('getpricecashback', $from_id);
@@ -6931,223 +6824,28 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     }
     sendmessage($from_id, $textbotlang['Admin']['price']['amountSaved'], $shopkeyboard, 'HTML');
     step('home', $from_id);
-} elseif (preg_match('/^editpayment-(.*)-(.*)/', $datain, $dataget)) {
-    $type = $dataget[1];
-    $value = $dataget[2];
-    if ($type == "Cartstatus") {
-        if ($value == "oncard") {
-            $valuenew = "offcard";
-        } else {
-            $valuenew = "oncard";
-        }
-        update("PaySetting", "ValuePay", $valuenew, "NamePay", "Cartstatus");
-    } elseif ($type == "plisio") {
-        if ($value == "onnowpayment") {
-            $valuenew = "offnowpayment";
-        } else {
-            $valuenew = "onnowpayment";
-        }
-        update("PaySetting", "ValuePay", $valuenew, "NamePay", "nowpaymentstatus");
-    } elseif ($type == "arzireyali1") {
-        if ($value == "onSwapinoBot") {
-            $valuenew = "offSwapinoBot";
-        } else {
-            $valuenew = "onSwapinoBot";
-        }
-        update("PaySetting", "ValuePay", $valuenew, "NamePay", "statusSwapWallet");
-    } elseif ($type == "arzireyali2") {
-        if ($value == "onternado") {
-            $valuenew = "offternado";
-        } else {
-            $valuenew = "onternado";
-        }
-        update("PaySetting", "ValuePay", $valuenew, "NamePay", "statustarnado");
-    } elseif ($type == "aqayepardakht") {
-        if ($value == "onaqayepardakht") {
-            $valuenew = "offaqayepardakht";
-        } else {
-            $valuenew = "onaqayepardakht";
-        }
-        update("PaySetting", "ValuePay", $valuenew, "NamePay", "statusaqayepardakht");
-    } elseif ($type == "zarinpal") {
-        if ($value == "onzarinpal") {
-            $valuenew = "offzarinpal";
-        } else {
-            $valuenew = "onzarinpal";
-        }
-        update("PaySetting", "ValuePay", $valuenew, "NamePay", "zarinpalstatus");
-    } elseif ($type == "affilnecurrency") {
-        if ($value == "ondigi") {
-            $valuenew = "offdigi";
-        } else {
-            $valuenew = "ondigi";
-        }
-        update("PaySetting", "ValuePay", $valuenew, "NamePay", "digistatus");
-    } elseif ($type == "oniranpay4") {
-        $valuenew = $value == "oniranpay4" ? "offiranpay4" : "oniranpay4";
-        update("PaySetting", "ValuePay", $valuenew, "NamePay", "statusiranpay4");
-    } elseif ($type == "variza") {
-        $valuenew = $value == "onvariza" ? "offvariza" : "onvariza";
-        update("PaySetting", "ValuePay", $valuenew, "NamePay", "variza_status");
-    } elseif ($type == "oniranpay3") {
-        if ($value == "oniranpay3") {
-            $valuenew = "offiranpay3";
-        } else {
-            $valuenew = "oniranpay3";
-        }
-        update("PaySetting", "ValuePay", $valuenew, "NamePay", "statusiranpay3");
-    } elseif ($type == "startelegram") {
-        if ($value == "1") {
-            $valuenew = "0";
-        } else {
-            $valuenew = "1";
-        }
-        update("PaySetting", "ValuePay", $valuenew, "NamePay", "statusstar");
-    } elseif ($type == "nowpayment") {
-        if ($value == "1") {
-            $valuenew = "0";
-        } else {
-            $valuenew = "1";
-        }
-        update("PaySetting", "ValuePay", $valuenew, "NamePay", "statusnowpayment");
+} elseif ($datain == "paygwlist" && $adminrulecheck['rule'] == "administrator") {
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['gateway']['intro'], $paymentGatewaysKeyboard());
+} elseif (preg_match('/^paygw(toggle)?-(\w+)$/', $datain, $dataget) && isset($paymentGateways[$dataget[2]]) && $adminrulecheck['rule'] == "administrator") {
+    $gateway = $paymentGateways[$dataget[2]];
+    $gatewayIsOn = getPaySettingValue($gateway['setting'], $gateway['off']) == $gateway['on'];
+    if ($dataget[1]) {
+        update("PaySetting", "ValuePay", $gatewayIsOn ? $gateway['off'] : $gateway['on'], "NamePay", $gateway['setting']);
+        $gatewayIsOn = !$gatewayIsOn;
     }
-    $zarinpal = getPaySettingValue('zarinpalstatus', 'offzarinpal');
-    $variza = getPaySettingValue('variza_status', 'offvariza');
-    $cartotcart = getPaySettingValue('Cartstatus', 'offcard');
-    $plisio = getPaySettingValue('nowpaymentstatus', 'offnowpayment');
-    $arzireyali1 = getPaySettingValue('statusSwapWallet', 'offSwapinoBot');
-    $arzireyali2 = getPaySettingValue('statustarnado', 'offternado');
-    $aqayepardakht = getPaySettingValue('statusaqayepardakht', 'offaqayepardakht');
-    $affilnecurrency = getPaySettingValue('digistatus', 'offdigi');
-    $arzireyali3 = getPaySettingValue('statusiranpay3', 'offiranpay3');
-    $abangateway4 = getPaySettingValue('statusiranpay4', 'offiranpay4');
-    $abangateway4text = $abangateway4 == 'oniranpay4'
-        ? $textbotlang['Admin']['Status']['statuson']
-        : $textbotlang['Admin']['Status']['statusoff'];
-    $paymentstatussnotverify = getPaySettingValue('paymentstatussnotverify', 'offpaymentstatus');
-    $paymentsstartelegram = getPaySettingValue('statusstar', '0');
-    $payment_status_nowpayment = getPaySettingValue('statusnowpayment', '0');
-    $cartotcartstatus = [
-        'oncard' => $textbotlang['Admin']['Status']['statuson'],
-        'offcard' => $textbotlang['Admin']['Status']['statusoff']
-    ][$cartotcart];
-    $plisiostatus = [
-        'onnowpayment' => $textbotlang['Admin']['Status']['statuson'],
-        'offnowpayment' => $textbotlang['Admin']['Status']['statusoff']
-    ][$plisio];
-    $arzireyali1status = [
-        'onSwapinoBot' => $textbotlang['Admin']['Status']['statuson'],
-        'offSwapinoBot' => $textbotlang['Admin']['Status']['statusoff']
-    ][$arzireyali1];
-    $arzireyali2status = [
-        'onternado' => $textbotlang['Admin']['Status']['statuson'],
-        'offternado' => $textbotlang['Admin']['Status']['statusoff']
-    ][$arzireyali2];
-    $aqayepardakhtstatus = [
-        'onaqayepardakht' => $textbotlang['Admin']['Status']['statuson'],
-        'offaqayepardakht' => $textbotlang['Admin']['Status']['statusoff']
-    ][$aqayepardakht];
-    $zarinpalstatus = [
-        'onzarinpal' => $textbotlang['Admin']['Status']['statuson'],
-        'offzarinpal' => $textbotlang['Admin']['Status']['statusoff']
-    ][$zarinpal];
-    $varizastatus = [
-        'onvariza' => $textbotlang['Admin']['Status']['statuson'],
-        'offvariza' => $textbotlang['Admin']['Status']['statusoff']
-    ][$variza];
-    $affilnecurrencystatus = [
-        'ondigi' => $textbotlang['Admin']['Status']['statuson'],
-        'offdigi' => $textbotlang['Admin']['Status']['statusoff']
-    ][$affilnecurrency];
-    $arzireyali3text = [
-        'oniranpay3' => $textbotlang['Admin']['Status']['statuson'],
-        'offiranpay3' => $textbotlang['Admin']['Status']['statusoff']
-    ][$arzireyali3];
-    $paymentstar = [
-        '1' => $textbotlang['Admin']['Status']['statuson'],
-        '0' => $textbotlang['Admin']['Status']['statusoff']
-    ][$paymentsstartelegram];
-    $now_payment_status = [
-        '1' => $textbotlang['Admin']['Status']['statuson'],
-        '0' => $textbotlang['Admin']['Status']['statusoff']
-    ][$payment_status_nowpayment];
-    $Bot_Status = json_encode([
+    $gatewayStatusText = $textbotlang['Admin']['Status'][$gatewayIsOn ? 'statuson' : 'statusoff'];
+    $gatewayKeyboard = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => $textbotlang['keyboard']['operation'], 'callback_data' => "actions"],
-                ['text' => $textbotlang['Admin']['Status']['statusSubject'], 'callback_data' => "subjectde"],
-                ['text' => $textbotlang['Admin']['Status']['subject'], 'callback_data' => "subject"],
+                ['text' => $gatewayStatusText, 'callback_data' => "paygwtoggle-{$dataget[2]}"],
+                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => $gateway['config']],
             ],
             [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "cartsetting"],
-                ['text' => $cartotcartstatus, 'callback_data' => "editpayment-Cartstatus-$cartotcart"],
-                ['text' => $textbotlang['keyboard']['cartToCartGateway'], 'callback_data' => "carttocart"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "plisiosetting"],
-                ['text' => $plisiostatus, 'callback_data' => "editpayment-plisio-$plisio"],
-                ['text' => "📌 plisio", 'callback_data' => "plisio"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "nowpaymentsetting"],
-                ['text' => $now_payment_status, 'callback_data' => "editpayment-nowpayment-$payment_status_nowpayment"],
-                ['text' => "📌 nowpayment", 'callback_data' => "nowpayment"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "iranpay1setting"],
-                ['text' => $arzireyali1status, 'callback_data' => "editpayment-arzireyali1-$arzireyali1"],
-                ['text' => $textbotlang['keyboard']['iranPay1Label'], 'callback_data' => "arzireyali1"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "iranpay2setting"],
-                ['text' => $arzireyali2status, 'callback_data' => "editpayment-arzireyali2-$arzireyali2"],
-                ['text' => $textbotlang['keyboard']['iranPay2Label'], 'callback_data' => "arzireyali2"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "iranpay4setting"],
-                ['text' => $abangateway4text, 'callback_data' => "editpayment-oniranpay4-$abangateway4"],
-                ['text' => $textbotlang['keyboard']['iranPay4Label'], 'callback_data' => "oniranpay4"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "iranpay3setting"],
-                ['text' => $arzireyali3text, 'callback_data' => "editpayment-oniranpay3-$arzireyali3"],
-                ['text' => $textbotlang['keyboard']['iranPay3Label'], 'callback_data' => "oniranpay3"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "aqayepardakhtsetting"],
-                ['text' => $aqayepardakhtstatus, 'callback_data' => "editpayment-aqayepardakht-$aqayepardakht"],
-                ['text' => $textbotlang['keyboard']['aqayePardakhtGateway'], 'callback_data' => "aqayepardakht"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "zarinpalsetting"],
-                ['text' => $zarinpalstatus, 'callback_data' => "editpayment-zarinpal-$zarinpal"],
-                ['text' => $textbotlang['keyboard']['zarinPalGateway'], 'callback_data' => "zarinpal"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "varizasetting"],
-                ['text' => $varizastatus, 'callback_data' => "editpayment-variza-$variza"],
-                ['text' => $textbotlang['keyboard']['varizaGateway'], 'callback_data' => "variza"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "affilnecurrencysetting"],
-                ['text' => $affilnecurrencystatus, 'callback_data' => "editpayment-affilnecurrency-$affilnecurrency"],
-                ['text' => $textbotlang['keyboard']['cryptoOfflinePayment'], 'callback_data' => "affilnecurrency"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['settings'], 'callback_data' => "startelegram"],
-                ['text' => $paymentstar, 'callback_data' => "editpayment-startelegram-$paymentsstartelegram"],
-                ['text' => "💫Star Telegram", 'callback_data' => "none"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['maxChargeBalance'], 'callback_data' => "maxbalanceaccount"],
-                ['text' => $textbotlang['keyboard']['minChargeBalance'], 'callback_data' => "mainbalanceaccount"],
-            ],
-            [
-                ['text' => $textbotlang['keyboard']['walletAddress'], 'callback_data' => "walletaddress"],
+                ['text' => $textbotlang['keyboard']['backToGateways'], 'callback_data' => "paygwlist"],
             ],
         ]
     ]);
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['gateway']['intro'], $Bot_Status);
+    Editmessagetext($from_id, $message_id, sprintf($textbotlang['Admin']['gateway']['detail'], $gateway['label'], $gatewayStatusText), $gatewayKeyboard);
 } elseif ($text == $textbotlang['keyboard']['cashbackCartToCart']) {
     sendmessage($from_id, $textbotlang['Admin']['price']['askPaymentCashback'], $backadmin, 'HTML');
     step("getcashcart", $from_id);

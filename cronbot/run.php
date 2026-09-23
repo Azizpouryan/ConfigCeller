@@ -20,6 +20,9 @@ if (!flock($lockFh, LOCK_EX | LOCK_NB)) {
 
 $slotFh = mirza_cron_try_host_slot(3, 2);
 $scorestatus = null;
+$cronStatusFile = dirname($cronbotDir) . '/storage/cron_status.json';
+$cronStatus = json_decode((string) @file_get_contents($cronStatusFile), true) ?: [];
+$cronStatus['dispatcher'] = time();
 
 try {
     foreach (mirza_cron_jobs() as $job) {
@@ -44,13 +47,18 @@ try {
             }
         }
 
+        $jobError = null;
         try {
             include $script;
         } catch (Throwable $e) {
-            error_log('mirza cron: ' . $job['job'] . ': ' . $e->getMessage());
+            $jobError = $e->getMessage();
+            error_log('mirza cron: ' . $job['job'] . ': ' . $jobError);
         }
+        $cronStatus['jobs'][$job['job']] = ['time' => time(), 'error' => $jobError];
     }
 } finally {
+    @mkdir(dirname($cronStatusFile), 0775, true);
+    @file_put_contents($cronStatusFile, json_encode($cronStatus));
     mirza_cron_release_host_slot($slotFh);
     flock($lockFh, LOCK_UN);
     fclose($lockFh);

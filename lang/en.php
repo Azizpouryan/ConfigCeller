@@ -1218,6 +1218,20 @@ Message text:
                 ],
         ],
         'Admin' => [
+                'cronHealth' => [
+                        'title' => "⏱ <b>Cron status</b>",
+                        'running' => "✅ Cron jobs are running.",
+                        'stopped' => "❌ Cron is not running or has stopped.",
+                        'lastRun' => "🕐 Last run: %s",
+                        'never' => "never",
+                        'justNow' => "just now",
+                        'minutesAgo' => "%s min ago",
+                        'disabled' => "off",
+                        'command' => "📌 To set it up manually, add this line to the server crontab:\n<code>%s</code>",
+                        'refresh' => "🔄 Refresh",
+                        'fix' => "🔧 Reinstall cron",
+                        'fixed' => "✅ Cron was reinstalled.",
+                ],
                 'activeBotText' => 'To use the admin panel features:
 
 Go to a page that has a keyboard at the bottom.
@@ -4137,6 +4151,7 @@ We hope you had a good experience with the ease and speed of your service. If yo
                 'volumeResetType' => 'Volume reset type',
                 'apiNowPayment' => 'API NOWPAYMENT',
                 'walletAddress' => 'Wallet address',
+                'cronStatus' => '⏱ Cron status',
                 'wheelGameType' => '🎮 Game type',
                 'wheelModeDice' => '🎲 Dice',
                 'wheelModeSlot' => '🎰 Slot',

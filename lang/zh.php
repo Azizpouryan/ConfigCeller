@@ -1218,6 +1218,20 @@ https://t.me/%s?start=%s',
                 ],
         ],
         'Admin' => [
+                'cronHealth' => [
+                        'title' => "⏱ <b>定时任务状态</b>",
+                        'running' => "✅ 定时任务正在运行。",
+                        'stopped' => "❌ 定时任务未运行或已停止。",
+                        'lastRun' => "🕐 上次运行：%s",
+                        'never' => "从未",
+                        'justNow' => "刚刚",
+                        'minutesAgo' => "%s 分钟前",
+                        'disabled' => "已关闭",
+                        'command' => "📌 如需手动设置，请将此行添加到服务器 crontab：\n<code>%s</code>",
+                        'refresh' => "🔄 刷新",
+                        'fix' => "🔧 重新安装定时任务",
+                        'fixed' => "✅ 定时任务已重新安装。",
+                ],
                 'activeBotText' => '使用管理面板功能：
 
 前往底部带有键盘的页面。
@@ -4137,6 +4151,7 @@ f,n.n2',
                 'volumeResetType' => '流量重置类型',
                 'apiNowPayment' => 'API NOWPAYMENT',
                 'walletAddress' => '钱包地址',
+                'cronStatus' => '⏱ 定时任务状态',
                 'wheelGameType' => '🎮 游戏类型',
                 'wheelModeDice' => '🎲 骰子',
                 'wheelModeSlot' => '🎰 老虎机',

@@ -1218,6 +1218,20 @@ https://t.me/%s?start=%s',
                 ],
         ],
         'Admin' => [
+                'cronHealth' => [
+                        'title' => "⏱ <b>Статус cron-задач</b>",
+                        'running' => "✅ Cron-задачи выполняются.",
+                        'stopped' => "❌ Cron не запускается или остановлен.",
+                        'lastRun' => "🕐 Последний запуск: %s",
+                        'never' => "никогда",
+                        'justNow' => "только что",
+                        'minutesAgo' => "%s мин назад",
+                        'disabled' => "выкл",
+                        'command' => "📌 Для ручной настройки добавьте эту строку в crontab сервера:\n<code>%s</code>",
+                        'refresh' => "🔄 Обновить",
+                        'fix' => "🔧 Переустановить cron",
+                        'fixed' => "✅ Cron переустановлен.",
+                ],
                 'activeBotText' => 'Чтобы использовать функции админ-панели:
 
 Перейдите на страницу, внизу которой есть клавиатура.
@@ -4137,6 +4151,7 @@ ID пользователя : %s
                 'volumeResetType' => 'Тип сброса объёма',
                 'apiNowPayment' => 'API NOWPAYMENT',
                 'walletAddress' => 'Адрес кошелька',
+                'cronStatus' => '⏱ Статус cron',
                 'wheelGameType' => '🎮 Тип игры',
                 'wheelModeDice' => '🎲 Кубик',
                 'wheelModeSlot' => '🎰 Слот',

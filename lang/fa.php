@@ -1216,6 +1216,20 @@ https://t.me/%s?start=%s',
                 ],
         ],
         'Admin' => [
+                'cronHealth' => [
+                        'title' => "⏱ <b>وضعیت کرون‌ها</b>",
+                        'running' => "✅ کرون‌ها در حال اجرا هستند.",
+                        'stopped' => "❌ کرون اجرا نمی‌شود یا متوقف شده است.",
+                        'lastRun' => "🕐 آخرین اجرا: %s",
+                        'never' => "هرگز",
+                        'justNow' => "همین الان",
+                        'minutesAgo' => "%s دقیقه پیش",
+                        'disabled' => "خاموش",
+                        'command' => "📌 برای راه‌اندازی دستی، این خط را به crontab سرور اضافه کنید:\n<code>%s</code>",
+                        'refresh' => "🔄 بروزرسانی",
+                        'fix' => "🔧 تنظیم مجدد کرون",
+                        'fixed' => "✅ کرون دوباره تنظیم شد.",
+                ],
                 'activeBotText' => 'برای استفاده از امکانات پنل ادمین:
 
 به صفحه‌ای که پایین آن کیبورد دارد بروید.
@@ -4121,6 +4135,7 @@ f,n.n2',
                 'volumeResetType' => 'نوع ریست حجم',
                 'apiNowPayment' => 'API NOWPAYMENT',
                 'walletAddress' => 'آدرس ولت',
+                'cronStatus' => '⏱ وضعیت کرون‌ها',
                 'wheelGameType' => '🎮 نوع بازی',
                 'wheelModeDice' => '🎲 تاس',
                 'wheelModeSlot' => '🎰 اسلات',

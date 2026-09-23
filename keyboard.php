@@ -154,7 +154,7 @@ if ($adminrulecheck['rule'] == "administrator") {
             [['text' => $textbotlang['Admin']['btnKeyboard']['managementPanel']], ['text' => $textbotlang['Admin']['btnKeyboard']['addPanel']]],
             [['text' => $textbotlang['keyboard']['quickSetTimePrice']], ['text' => $textbotlang['keyboard']['quickSetVolumePrice']]],
             [['text' => $textbotlang['Admin']['btnKeyboard']['manageUser']], ['text' => $textbotlang['keyboard']['shopSettings']]],
-            [['text' => $textbotlang['keyboard']['financial']]],
+            [['text' => $textbotlang['keyboard']['financial']], ['text' => $textbotlang['keyboard']['cronStatus']]],
             [['text' => $textbotlang['keyboard']['supportSection']], ['text' => $textbotlang['keyboard']['educationSection']]],
             [['text' => $textbotlang['keyboard']['botReport']], ['text' => $textbotlang['keyboard']['panelFeatures']]],
             [['text' => $textbotlang['keyboard']['generalSettings']], ['text' => $textbotlang['keyboard']['pendingReceipts']]],
@@ -545,6 +545,45 @@ function affiliateSettingsMenu()
     ];
     $text = sprintf($textbotlang['Admin']['affiliates']['settingsTitle'], $commissionText, $firstBuyText, $percentText, $startGiftText, $giftAmountText);
     return [$text, json_encode(['inline_keyboard' => $rows])];
+}
+function cronStatusMenu()
+{
+    global $textbotlang, $domainhosts;
+    require_once __DIR__ . '/cronbot/jobs.php';
+    $labels = $textbotlang['Admin']['cronHealth'];
+    $cronStatus = json_decode((string) @file_get_contents(__DIR__ . '/storage/cron_status.json'), true) ?: [];
+    $setting = select("setting", "*");
+    $timeAgo = fn($time) => time() - $time < 60 ? $labels['justNow'] : sprintf($labels['minutesAgo'], intdiv(time() - $time, 60));
+    $dispatcherRunning = isset($cronStatus['dispatcher']) && time() - $cronStatus['dispatcher'] <= 180;
+    $lines = [];
+    foreach (mirza_cron_jobs() as $job) {
+        [$minute, $hour] = explode(' ', $job['schedule']);
+        $intervalMinutes = str_starts_with($hour, '*/') ? (int) substr($hour, 2) * 60 : (str_starts_with($minute, '*/') ? (int) substr($minute, 2) : 1);
+        $lastRun = $cronStatus['jobs'][$job['job']] ?? null;
+        if ($job['job'] == 'lottery' && intval($setting['scorestatus']) != 1) {
+            $icon = "⏸";
+            $when = $labels['disabled'];
+        } elseif (!$lastRun) {
+            $icon = "❌";
+            $when = $labels['never'];
+        } else {
+            $icon = $lastRun['error'] ? "⚠️" : (time() - $lastRun['time'] <= $intervalMinutes * 120 + 120 ? "✅" : "❌");
+            $when = $timeAgo($lastRun['time']);
+        }
+        $lines[] = "$icon {$job['title']} — $when";
+    }
+    $text = $labels['title'] . "\n\n" . ($dispatcherRunning ? $labels['running'] : $labels['stopped']) . "\n";
+    $text .= sprintf($labels['lastRun'], isset($cronStatus['dispatcher']) ? $timeAgo($cronStatus['dispatcher']) : $labels['never']) . "\n\n";
+    $text .= implode("\n", $lines);
+    if (!$dispatcherRunning) {
+        $text .= "\n\n" . sprintf($labels['command'], htmlspecialchars(mirza_cron_dispatcher_command((string) $domainhosts)));
+    }
+    $keyboard = json_encode([
+        'inline_keyboard' => [
+            [['text' => $labels['refresh'], 'callback_data' => "cronstatus_refresh"], ['text' => $labels['fix'], 'callback_data' => "cronstatus_fix"]],
+        ]
+    ]);
+    return [$text, $keyboard];
 }
 function giftCodesMenu()
 {

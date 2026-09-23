@@ -387,6 +387,138 @@ $shopkeyboard = json_encode([
     ],
     'resize_keyboard' => true
 ]);
+$wheelFeatures = [
+    'wheel_luck' => ['label' => $textbotlang['keyboard']['wheelOfLuck'], 'setting' => 'wheelـluck', 'on' => '1', 'off' => '0'],
+    'wheelagentfirst' => ['label' => $textbotlang['keyboard']['firstPurchaseWheel'], 'setting' => 'statusfirstwheel', 'on' => '1', 'off' => '0'],
+    'wheelagent' => ['label' => $textbotlang['keyboard']['agentWheelOfLuck'], 'setting' => 'wheelagent', 'on' => '1', 'off' => '0'],
+    'Dice' => ['label' => $textbotlang['keyboard']['wheelGameType'], 'setting' => 'Dice', 'on' => '1', 'off' => '0', 'onText' => $textbotlang['keyboard']['wheelModeDice'], 'offText' => $textbotlang['keyboard']['wheelModeSlot']],
+];
+$lotteryFeatures = [
+    'score' => ['label' => $textbotlang['keyboard']['nightLottery'], 'setting' => 'scorestatus', 'on' => '1', 'off' => '0'],
+    'Lotteryagent' => ['label' => $textbotlang['keyboard']['agentLottery'], 'setting' => 'Lotteryagent', 'on' => '1', 'off' => '0'],
+];
+$featureCategories = [
+    'general' => [
+        'label' => $textbotlang['keyboard']['featureCategoryGeneral'],
+        'features' => [
+            'statusbot' => ['label' => $textbotlang['Admin']['Status']['statusBot'], 'setting' => 'Bot_Status', 'on' => 'botstatuson', 'off' => 'botstatusoff'],
+            'role' => ['label' => $textbotlang['Admin']['Status']['statusRole'], 'setting' => 'roll_Status', 'on' => 'rolleon', 'off' => 'rolleoff'],
+            'notifnew' => ['label' => $textbotlang['Admin']['Status']['statusNotifNewUser'], 'setting' => 'statusnewuser', 'on' => 'onnewuser', 'off' => 'offnewuser'],
+            'usernamebtn' => ['label' => $textbotlang['Admin']['Status']['statusUsernameBtn'], 'setting' => 'NotUser', 'on' => 'onnotuser', 'off' => 'offnotuser'],
+            'inlinebtnmain' => ['label' => $textbotlang['Admin']['Status']['inlinebtns'], 'setting' => 'inlinebtnmain', 'on' => 'oninline', 'off' => 'offinline'],
+            'keyconfig' => ['label' => $textbotlang['keyboard']['configKeyboard'], 'setting' => 'status_keyboard_config', 'on' => '1', 'off' => '0'],
+            'statussupportpv' => ['label' => $textbotlang['keyboard']['supportInPv'], 'setting' => 'statussupportpv', 'on' => 'onpvsupport', 'off' => 'offpvsupport'],
+            'btn_status_category' => ['label' => $textbotlang['keyboard']['educationCategory'], 'setting' => 'categoryhelp', 'on' => '1', 'off' => '0'],
+            'linkappstatus' => ['label' => $textbotlang['keyboard']['appDownloadLinkAlt'], 'setting' => 'linkappstatus', 'on' => '1', 'off' => '0', 'config' => 'linkappsetting'],
+            'Authenticationphone' => ['label' => $textbotlang['Admin']['Status']['Authenticationphone'], 'setting' => 'get_number', 'on' => 'onAuthenticationphone', 'off' => 'offAuthenticationphone'],
+            'Authenticationiran' => ['label' => $textbotlang['Admin']['Status']['Authenticationiran'], 'setting' => 'iran_number', 'on' => 'onAuthenticationiran', 'off' => 'offAuthenticationiran'],
+            'verifystart' => ['label' => $textbotlang['keyboard']['authenticate'], 'setting' => 'verifystart', 'on' => 'onverify', 'off' => 'offverify'],
+            'verifybyuser' => ['label' => $textbotlang['keyboard']['authWithLink'], 'setting' => 'verifybucodeuser', 'on' => 'onverify', 'off' => 'offverify'],
+        ],
+    ],
+    'sales' => [
+        'label' => $textbotlang['keyboard']['featureCategorySales'],
+        'features' => [
+            'bulkbuy' => ['label' => $textbotlang['keyboard']['bulkPurchaseStatus'], 'setting' => 'bulkbuy', 'on' => 'onbulk', 'off' => 'offbulk'],
+            'compycart' => ['label' => $textbotlang['keyboard']['copyCard'], 'setting' => 'statuscopycart', 'on' => '1', 'off' => '0'],
+            'Debtsettlement' => ['label' => $textbotlang['keyboard']['settleDebt'], 'setting' => 'Debtsettlement', 'on' => '1', 'off' => '0'],
+            'changeloc' => ['label' => $textbotlang['keyboard']['locationChangeLimit'], 'setting' => 'statuslimitchangeloc', 'on' => '1', 'off' => '0', 'config' => 'changeloclimit'],
+            'statusnamecustom' => ['label' => $textbotlang['keyboard']['configNote'], 'setting' => 'statusnamecustom', 'on' => 'onnamecustom', 'off' => 'offnamecustom'],
+            'statusnamecustomf' => ['label' => $textbotlang['keyboard']['userNote'], 'setting' => 'statusnoteforf', 'on' => '1', 'off' => '0'],
+            'affiliatesstatus' => ['label' => $textbotlang['keyboard']['affiliateGift'], 'setting' => 'affiliatesstatus', 'on' => 'onaffiliates', 'off' => 'offaffiliates', 'config' => 'settingaffiliatesf'],
+            'wheel_luck' => $wheelFeatures['wheel_luck'] + ['config' => 'wheelsettings'],
+            'score' => $lotteryFeatures['score'] + ['config' => 'lotterysettings'],
+        ],
+    ],
+    'cron' => [
+        'label' => $textbotlang['keyboard']['featureCategoryCron'],
+        'features' => [
+            'crontest' => ['label' => $textbotlang['keyboard']['cronTest'], 'cron' => 'test'],
+            'cronday' => ['label' => $textbotlang['keyboard']['cronTime'], 'cron' => 'day', 'config' => 'settimecornday'],
+            'cronvolume' => ['label' => $textbotlang['keyboard']['cronVolume'], 'cron' => 'volume', 'config' => 'settimecornvolume'],
+            'on_hold' => ['label' => $textbotlang['keyboard']['cronFirstConnection'], 'cron' => 'on_hold', 'config' => 'setting_on_holdcron'],
+            'notifremove' => ['label' => $textbotlang['keyboard']['cronDelete'], 'cron' => 'remove', 'config' => 'settimecornremove'],
+            'notifremove_volume' => ['label' => $textbotlang['keyboard']['cronDeleteVolume'], 'cron' => 'remove_volume', 'config' => 'settimecornremovevolume'],
+            'uptime_node' => ['label' => $textbotlang['keyboard']['nodeUptime'], 'cron' => 'uptime_node'],
+            'uptime_panel' => ['label' => $textbotlang['keyboard']['panelUptime'], 'cron' => 'uptime_panel'],
+        ],
+    ],
+];
+function featureIsOn($feature, $setting)
+{
+    if (isset($feature['cron'])) {
+        return !empty(json_decode($setting['cron_status'], true)[$feature['cron']]);
+    }
+    return $setting[$feature['setting']] == $feature['on'];
+}
+function featureCategoryKeyboard($categoryKey)
+{
+    global $featureCategories, $textbotlang;
+    $setting = select("setting", "*");
+    $rows = [];
+    foreach ($featureCategories[$categoryKey]['features'] as $featureKey => $feature) {
+        $row = [
+            ['text' => $textbotlang['Admin']['Status'][featureIsOn($feature, $setting) ? 'statuson' : 'statusoff'], 'callback_data' => "feature-$categoryKey-$featureKey"],
+            ['text' => $feature['label'], 'callback_data' => "feature-$categoryKey-$featureKey"],
+        ];
+        if (isset($feature['config'])) {
+            array_unshift($row, ['text' => "⚙️", 'callback_data' => $feature['config']]);
+        }
+        $rows[] = $row;
+    }
+    $categoryKeys = array_keys($featureCategories);
+    $page = array_search($categoryKey, $categoryKeys);
+    $pageCount = count($categoryKeys);
+    $rows[] = [
+        ['text' => "◀️", 'callback_data' => "featurecat-" . $categoryKeys[($page + $pageCount - 1) % $pageCount]],
+        ['text' => ($page + 1) . " / $pageCount", 'callback_data' => "none"],
+        ['text' => "▶️", 'callback_data' => "featurecat-" . $categoryKeys[($page + 1) % $pageCount]],
+    ];
+    return json_encode(['inline_keyboard' => $rows]);
+}
+function wheelSettingsMenu()
+{
+    global $wheelFeatures, $textbotlang;
+    $setting = select("setting", "*");
+    $rows = [];
+    foreach ($wheelFeatures as $featureKey => $feature) {
+        $isOn = featureIsOn($feature, $setting);
+        $statusText = isset($feature['onText']) ? $feature[$isOn ? 'onText' : 'offText'] : $textbotlang['Admin']['Status'][$isOn ? 'statuson' : 'statusoff'];
+        $rows[] = [
+            ['text' => $statusText, 'callback_data' => "wheel-$featureKey"],
+            ['text' => $feature['label'], 'callback_data' => "wheel-$featureKey"],
+        ];
+    }
+    $rows[] = [
+        ['text' => number_format((int) $setting['wheelـluck_price']), 'callback_data' => "wheelprize"],
+        ['text' => $textbotlang['keyboard']['lotteryWinAmount'], 'callback_data' => "wheelprize"],
+    ];
+    $rows[] = [['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "featurecat-sales"]];
+    $text = sprintf($textbotlang['Admin']['Status']['wheelSettings'], number_format((int) $setting['wheelـluck_price']));
+    return [$text, json_encode(['inline_keyboard' => $rows])];
+}
+function lotterySettingsMenu()
+{
+    global $lotteryFeatures, $textbotlang;
+    $setting = select("setting", "*");
+    $rows = [];
+    foreach ($lotteryFeatures as $featureKey => $feature) {
+        $rows[] = [
+            ['text' => $textbotlang['Admin']['Status'][featureIsOn($feature, $setting) ? 'statuson' : 'statusoff'], 'callback_data' => "lottery-$featureKey"],
+            ['text' => $feature['label'], 'callback_data' => "lottery-$featureKey"],
+        ];
+    }
+    $prizes = json_decode($setting['Lottery_prize'], true);
+    foreach (['one' => 'setFirstPrize', 'tow' => 'setSecondPrize', 'theree' => 'setThirdPrize'] as $prizeKey => $labelKey) {
+        $rows[] = [
+            ['text' => number_format((int) ($prizes[$prizeKey] ?? 0)), 'callback_data' => "lotteryprize-$prizeKey"],
+            ['text' => $textbotlang['keyboard'][$labelKey], 'callback_data' => "lotteryprize-$prizeKey"],
+        ];
+    }
+    $rows[] = [['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "featurecat-sales"]];
+    $text = sprintf($textbotlang['Admin']['Status']['lotterySettings'], number_format((int) ($prizes['one'] ?? 0)), number_format((int) ($prizes['tow'] ?? 0)), number_format((int) ($prizes['theree'] ?? 0)));
+    return [$text, json_encode(['inline_keyboard' => $rows])];
+}
 function giftCodesMenu()
 {
     global $pdo, $textbotlang;
@@ -402,9 +534,11 @@ function giftCodesMenu()
     $text = sprintf($textbotlang['Admin']['Discount']['giftManage'], count($giftCodes));
     return [$text, json_encode(['inline_keyboard' => $rows])];
 }
+$wheelFlowKeyboard = json_encode(['inline_keyboard' => [[['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "wheelsettings"]]]]);
+$lotteryFlowKeyboard = json_encode(['inline_keyboard' => [[['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "lotterysettings"]]]]);
 $giftCodeFlowKeyboard = json_encode(['inline_keyboard' => [[['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "giftcode_list"]]]]);
 $discountCodeFlowKeyboard = json_encode(['inline_keyboard' => [[['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "discountcode_list"]]]]);
-function editCodeFlowMessage($text, $keyboard)
+function editFlowMessage($text, $keyboard)
 {
     global $from_id, $message_id, $datain, $user;
     $flowMessageId = json_decode($user['Processing_value'], true)['message_id'] ?? $message_id;
@@ -1316,21 +1450,6 @@ $list_departman = json_encode($list_departman);
 $active_panell = json_encode([
     'keyboard' => [
         [['text' => $textbotlang['keyboard']['botReports']]],
-    ],
-    'resize_keyboard' => true
-]);
-$lottery = json_encode([
-    'keyboard' => [
-        [['text' => $textbotlang['keyboard']['setFirstPrize']], ['text' => $textbotlang['keyboard']['setSecondPrize']]],
-        [['text' => $textbotlang['keyboard']['setThirdPrize']]],
-        [['text' => $textbotlang['Admin']['backAdminBtn']]]
-    ],
-    'resize_keyboard' => true
-]);
-$wheelkeyboard = json_encode([
-    'keyboard' => [
-        [['text' => $textbotlang['keyboard']['lotteryWinAmount']]],
-        [['text' => $textbotlang['Admin']['backAdminBtn']]]
     ],
     'resize_keyboard' => true
 ]);

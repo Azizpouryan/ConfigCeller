@@ -381,13 +381,28 @@ $shopkeyboard = json_encode([
     'keyboard' => [
         [['text' => $textbotlang['keyboard']['shopFeatureStatus']]],
         [['text' => $textbotlang['keyboard']['manageCategory']], ['text' => $textbotlang['keyboard']['manageProducts']]],
-        [['text' => $textbotlang['keyboard']['createGiftCode']], ['text' => $textbotlang['keyboard']['deleteGiftCode']]],
+        [['text' => $textbotlang['keyboard']['manageGiftCode']]],
         [['text' => $textbotlang['keyboard']['createDiscountCode']], ['text' => $textbotlang['keyboard']['deleteDiscountCode']]],
         [['text' => $textbotlang['keyboard']['minBulkBalance']], ['text' => $textbotlang['keyboard']['renewalCashback']]],
         [['text' => $textbotlang['Admin']['backAdminBtn']], ['text' => $textbotlang['Admin']['backMenuBtn']]]
     ],
     'resize_keyboard' => true
 ]);
+function giftCodesMenu()
+{
+    global $pdo, $textbotlang;
+    $giftCodes = $pdo->query("SELECT code, price FROM Discount")->fetchAll(PDO::FETCH_ASSOC);
+    $rows = [[['text' => $textbotlang['keyboard']['createGiftCode'], 'callback_data' => "giftcode_create"]]];
+    foreach ($giftCodes as $giftCode) {
+        $rows[] = [
+            ['text' => "{$giftCode['code']} (" . number_format((int) $giftCode['price']) . ")", 'callback_data' => "giftcode_show_{$giftCode['code']}"],
+            ['text' => "❌", 'callback_data' => "giftcode_delete_{$giftCode['code']}"],
+        ];
+    }
+    $rows[] = [['text' => $textbotlang['keyboard']['backToShopMenu'], 'callback_data' => "giftcode_close"]];
+    $text = sprintf($textbotlang['Admin']['Discount']['giftManage'], count($giftCodes));
+    return [$text, json_encode(['inline_keyboard' => $rows])];
+}
 $keyboard_Category_manage = json_encode([
     'keyboard' => [
         [['text' => $textbotlang['keyboard']['addCategory']], ['text' => $textbotlang['keyboard']['deleteCategory']]],
@@ -749,26 +764,6 @@ $list_marzban_usertest = json_encode($list_marzban_panel_usertest);
         ];
     }
     $json_list_product_list_admin = json_encode($list_product);
-//--------------------------------------------------
-    $Discount = [];
-    $stmt = $pdo->prepare("SELECT * FROM Discount");
-    $stmt->execute();
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $Discount[] = [$row['code']];
-    }
-    $list_Discount = [
-        'keyboard' => [],
-        'resize_keyboard' => true,
-    ];
-    $list_Discount['keyboard'][] = [
-        ['text' => $textbotlang['Admin']['backAdminBtn']],
-    ];
-    foreach ($Discount as $button) {
-        $list_Discount['keyboard'][] = [
-            ['text' => $button[0]]
-        ];
-    }
-    $json_list_Discount_list_admin = json_encode($list_Discount);
 //--------------------------------------------------
     $DiscountSell = [];
     $stmt = $pdo->prepare("SELECT * FROM DiscountSell");

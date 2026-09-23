@@ -1317,6 +1317,8 @@ Your current numeric ID: %s',
 Received error:  %s',
                 ],
                 'Discount' => [
+                        'giftManage' => "🎁 Gift code management\n\n• 🎫 Registered codes: %s\n\n📌 Use the buttons next to each code to view details or delete it.",
+                        'giftDetail' => "🎫 %s\n\n💰 Amount: %s Toman\n🔴 Total limit: %s\n✅ Used: %s times",
                         'agentCode' => 'For which user do you want to define the code?
 
 ⚠️ If you want to define it for all users, send the text <code>allusers</code>',
@@ -3873,7 +3875,6 @@ We hope you had a good experience with the ease and speed of your service. If yo
                 'deleteDepartment' => '🔽 Delete department',
                 'deleteDiscountCode' => '❌ Delete discount code',
                 'deleteEducation' => '❌ Delete tutorial',
-                'deleteGiftCode' => '❌ Delete gift code',
                 'deleteNode' => '❌ Delete node',
                 'deletePanel' => '❌ Delete panel',
                 'deleteProduct' => '❌ Delete product',
@@ -4148,6 +4149,8 @@ We hope you had a good experience with the ease and speed of your service. If yo
                 'volumeResetType' => 'Volume reset type',
                 'apiNowPayment' => 'API NOWPAYMENT',
                 'walletAddress' => 'Wallet address',
+                'manageGiftCode' => '🎁 Manage gift codes',
+                'deleteThisCode' => '❌ Delete this code',
                 'backToGateways' => '🔙 Back to gateways',
                 'gatewaysGeneralSettings' => '➖➖ General settings ➖➖',
                 'wheelOfLuck' => '🎲 Wheel of fortune',

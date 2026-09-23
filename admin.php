@@ -3308,7 +3308,7 @@ elseif ($datain == "systemsms") {
         sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboardadmin, 'HTML');
     }
     step('home', $from_id);
-} elseif ($text == $textbotlang['keyboard']['createGiftCode'] && $adminrulecheck['rule'] == "administrator") {
+} elseif ($datain == "giftcode_create" && $adminrulecheck['rule'] == "administrator") {
     sendmessage($from_id, $textbotlang['Admin']['Discount']['getCode'], $backadmin, 'HTML');
     step('get_code', $from_id);
 } elseif ($user['step'] == "get_code") {
@@ -3335,20 +3335,37 @@ elseif ($datain == "systemsms") {
 } elseif ($user['step'] == "getlimitcodedis") {
     step("home", $from_id);
     update("Discount", "limituse", $text, "code", $user['Processing_value']);
-    sendmessage($from_id, $textbotlang['Admin']['Discount']['saveCode'], $keyboardadmin, 'HTML');
-} elseif ($text == $textbotlang['keyboard']['deleteGiftCode'] && $adminrulecheck['rule'] == "administrator") {
-    sendmessage($from_id, $textbotlang['Admin']['Discount']['removeCode'], $json_list_Discount_list_admin, 'HTML');
-    step('remove-Discount', $from_id);
-} elseif ($user['step'] == "remove-Discount") {
-    if (!rowExists("Discount", "code", $text)) {
-        sendmessage($from_id, $textbotlang['Admin']['Discount']['notCode'], null, 'HTML');
+    sendmessage($from_id, $textbotlang['Admin']['Discount']['saveCode'], $shopkeyboard, 'HTML');
+    [$giftText, $giftKeyboard] = giftCodesMenu();
+    sendmessage($from_id, $giftText, $giftKeyboard, 'HTML');
+} elseif ($text == $textbotlang['keyboard']['manageGiftCode'] && $adminrulecheck['rule'] == "administrator") {
+    [$giftText, $giftKeyboard] = giftCodesMenu();
+    sendmessage($from_id, $giftText, $giftKeyboard, 'HTML');
+} elseif (($datain == "giftcode_list" || preg_match('/^giftcode_delete_(\w+)$/', $datain, $dataget)) && $adminrulecheck['rule'] == "administrator") {
+    if ($datain != "giftcode_list") {
+        $stmt = $pdo->prepare("DELETE FROM Discount WHERE code = :code");
+        $stmt->execute([':code' => $dataget[1]]);
+    }
+    [$giftText, $giftKeyboard] = giftCodesMenu();
+    Editmessagetext($from_id, $message_id, $giftText, $giftKeyboard);
+} elseif (preg_match('/^giftcode_show_(\w+)$/', $datain, $dataget) && $adminrulecheck['rule'] == "administrator") {
+    $giftCode = select("Discount", "*", "code", $dataget[1], "select");
+    if (!$giftCode) {
+        [$giftText, $giftKeyboard] = giftCodesMenu();
+        Editmessagetext($from_id, $message_id, $giftText, $giftKeyboard);
         return;
     }
-    $stmt = $pdo->prepare("DELETE FROM Discount WHERE code = :code");
-    $stmt->bindParam(':code', $text, PDO::PARAM_STR);
-    $stmt->execute();
-    sendmessage($from_id, $textbotlang['Admin']['Discount']['removedCode'], $shopkeyboard, 'HTML');
-    step('home', $from_id);
+    $giftDetailKeyboard = json_encode([
+        'inline_keyboard' => [
+            [['text' => $textbotlang['keyboard']['deleteThisCode'], 'callback_data' => "giftcode_delete_{$giftCode['code']}"]],
+            [['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "giftcode_list"]],
+        ]
+    ]);
+    $giftDetailText = sprintf($textbotlang['Admin']['Discount']['giftDetail'], $giftCode['code'], number_format((int) $giftCode['price']), $giftCode['limituse'], $giftCode['limitused']);
+    Editmessagetext($from_id, $message_id, $giftDetailText, $giftDetailKeyboard);
+} elseif ($datain == "giftcode_close" && $adminrulecheck['rule'] == "administrator") {
+    deletemessage($from_id, $message_id);
+    sendmessage($from_id, $textbotlang['users']['selectoption'], $shopkeyboard, 'HTML');
 } elseif ($text == $textbotlang['keyboard']['usernameMethod'] && $adminrulecheck['rule'] == "administrator") {
     $text_username = $textbotlang['Admin']['algorithmUsername']['selectMethod'];
     sendmessage($from_id, $text_username, $MethodUsername, 'HTML');

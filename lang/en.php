@@ -1319,18 +1319,15 @@ Received error:  %s',
                 'Discount' => [
                         'giftManage' => "🎁 Gift code management\n\n• 🎫 Registered codes: %s\n\n📌 Use the buttons next to each code to view details or delete it.",
                         'giftDetail' => "🎫 %s\n\n💰 Amount: %s Toman\n🔴 Total limit: %s\n✅ Used: %s times",
-                        'agentCode' => 'For which user do you want to define the code?
-
-⚠️ If you want to define it for all users, send the text <code>allusers</code>',
+                        'discountManage' => "🎁 Discount code management\n\n• 🎫 Registered codes: %s\n\n📌 Use the buttons next to each code to view details or delete it.",
+                        'discountDetail' => "🎫 %s\n\n🧮 Discount: %s%%\n🎯 User group: %s\n🧩 Section: %s\n🎛 Panel: %s\n📦 Product: %s\n🔴 Total limit: %s\n👤 Per-user limit: %s\n🥇 First purchase only: %s\n⏳ Expiry: %s\n✅ Used: %s times",
+                        'agentCode' => '🎯 Which user group should the code be defined for?',
                         'errorCode' => 'The code is invalid. The code must be in English without extra characters',
                         'firstDiscount' => '📌 Should the discount code be for the first purchase or all purchases?',
                         'getCode' => 'Send a code for the gift code',
                         'invalidAgentCode' => '❌ The user type is invalid',
-                        'notCode' => '❌ Error 
-📝 The selected gift code does not exist',
                         'priceCode' => 'The code was received. Now send the code\'s amount',
                         'priceCodeSell' => 'The code was received. Now send the code\'s percentage',
-                        'removeCode' => 'Select the code you want to delete',
                         'removedCode' => '✅ The code was successfully deleted.',
                         'saveCode' => '✅ The code was successfully registered',
                         'setLimitUse' => '📌 Send the usage limit.
@@ -1339,9 +1336,8 @@ Received error:  %s',
                         'askUserLimit' => '📌 Send the usage limit per user.',
                         'askSection' => '📌 Which section should the discount code apply to?',
                         'userLimitTooHigh' => '📌 The usage count per user must be smaller than the total limit',
-                        'askProductLocation' => '📌 To set a discount code for a specific product, first select the product position.
-Note: To select all panels, send the word <code>/all</code>',
-                        'askProduct' => '📌 Which product should the discount code apply to? Note that if you want the discount code to apply to all products, send the word all',
+                        'askProductLocation' => '🎛 Which panel should the discount code apply to?',
+                        'askProduct' => '📦 Which product should the discount code apply to?',
                         'invalidPercent' => 'Invalid percentage',
                         'created' => '
 🎁 Your discount code was created successfully.
@@ -3873,7 +3869,6 @@ We hope you had a good experience with the ease and speed of your service. If yo
                 'deleteChannel' => 'Delete channel',
                 'deleteConfig' => '❌ Delete config ',
                 'deleteDepartment' => '🔽 Delete department',
-                'deleteDiscountCode' => '❌ Delete discount code',
                 'deleteEducation' => '❌ Delete tutorial',
                 'deleteNode' => '❌ Delete node',
                 'deletePanel' => '❌ Delete panel',
@@ -4149,6 +4144,10 @@ We hope you had a good experience with the ease and speed of your service. If yo
                 'volumeResetType' => 'Volume reset type',
                 'apiNowPayment' => 'API NOWPAYMENT',
                 'walletAddress' => 'Wallet address',
+                'manageDiscountCode' => '🎁 Manage discount codes',
+                'purchaseAndRenew' => 'Purchase and renewal',
+                'allPanels' => '🌍 All panels',
+                'allProducts' => '📦 All products',
                 'manageGiftCode' => '🎁 Manage gift codes',
                 'deleteThisCode' => '❌ Delete this code',
                 'backToGateways' => '🔙 Back to gateways',

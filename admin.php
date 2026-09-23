@@ -3309,39 +3309,37 @@ elseif ($datain == "systemsms") {
     }
     step('home', $from_id);
 } elseif ($datain == "giftcode_create" && $adminrulecheck['rule'] == "administrator") {
-    sendmessage($from_id, $textbotlang['Admin']['Discount']['getCode'], $backadmin, 'HTML');
+    savedata("clear", "message_id", $message_id);
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Discount']['getCode'], $giftCodeFlowKeyboard);
     step('get_code', $from_id);
 } elseif ($user['step'] == "get_code") {
     if (!preg_match('/^[A-Za-z\d]+$/', $text)) {
-        sendmessage($from_id, $textbotlang['Admin']['Discount']['errorCode'], null, 'HTML');
+        editCodeFlowMessage($textbotlang['Admin']['Discount']['errorCode'], $giftCodeFlowKeyboard);
         return;
     }
-    $stmt = $pdo->prepare("INSERT INTO Discount (code, limitused) VALUES (:code, :limitused)");
-    $value = "0";
-    $stmt->bindParam(':code', $text, PDO::PARAM_STR);
-    $stmt->bindParam(':limitused', $value, PDO::PARAM_STR);
-    $stmt->execute();
-    sendmessage($from_id, $textbotlang['Admin']['Discount']['priceCode'], null, 'HTML');
+    savedata("save", "code", $text);
+    editCodeFlowMessage($textbotlang['Admin']['Discount']['priceCode'], $giftCodeFlowKeyboard);
     step('get_price_code', $from_id);
-    update("user", "Processing_value", $text, "id", $from_id);
 } elseif ($user['step'] == "get_price_code") {
     if (!ctype_digit($text)) {
-        sendmessage($from_id, $textbotlang['Admin']['Balance']['invalidPrice'], $backadmin, 'HTML');
+        editCodeFlowMessage($textbotlang['Admin']['Balance']['invalidPrice'], $giftCodeFlowKeyboard);
         return;
     }
-    sendmessage($from_id, $textbotlang['Admin']['Discount']['setLimitUse'], $backadmin, 'HTML');
-    update("Discount", "price", $text, "code", $user['Processing_value']);
+    savedata("save", "price", $text);
+    editCodeFlowMessage($textbotlang['Admin']['Discount']['setLimitUse'], $giftCodeFlowKeyboard);
     step('getlimitcodedis', $from_id);
 } elseif ($user['step'] == "getlimitcodedis") {
+    $userdata = json_decode($user['Processing_value'], true);
+    $stmt = $pdo->prepare("INSERT INTO Discount (code, price, limituse, limitused) VALUES (:code, :price, :limituse, '0')");
+    $stmt->execute([':code' => $userdata['code'], ':price' => $userdata['price'], ':limituse' => $text]);
     step("home", $from_id);
-    update("Discount", "limituse", $text, "code", $user['Processing_value']);
-    sendmessage($from_id, $textbotlang['Admin']['Discount']['saveCode'], $shopkeyboard, 'HTML');
     [$giftText, $giftKeyboard] = giftCodesMenu();
-    sendmessage($from_id, $giftText, $giftKeyboard, 'HTML');
+    editCodeFlowMessage($textbotlang['Admin']['Discount']['saveCode'] . "\n\n" . $giftText, $giftKeyboard);
 } elseif ($text == $textbotlang['keyboard']['manageGiftCode'] && $adminrulecheck['rule'] == "administrator") {
     [$giftText, $giftKeyboard] = giftCodesMenu();
     sendmessage($from_id, $giftText, $giftKeyboard, 'HTML');
 } elseif (($datain == "giftcode_list" || preg_match('/^giftcode_delete_(\w+)$/', $datain, $dataget)) && $adminrulecheck['rule'] == "administrator") {
+    step('home', $from_id);
     if ($datain != "giftcode_list") {
         $stmt = $pdo->prepare("DELETE FROM Discount WHERE code = :code");
         $stmt->execute([':code' => $dataget[1]]);
@@ -3363,7 +3361,7 @@ elseif ($datain == "systemsms") {
     ]);
     $giftDetailText = sprintf($textbotlang['Admin']['Discount']['giftDetail'], $giftCode['code'], number_format((int) $giftCode['price']), $giftCode['limituse'], $giftCode['limitused']);
     Editmessagetext($from_id, $message_id, $giftDetailText, $giftDetailKeyboard);
-} elseif ($datain == "giftcode_close" && $adminrulecheck['rule'] == "administrator") {
+} elseif ($datain == "shopmenu_open" && $adminrulecheck['rule'] == "administrator") {
     deletemessage($from_id, $message_id);
     sendmessage($from_id, $textbotlang['users']['selectoption'], $shopkeyboard, 'HTML');
 } elseif ($text == $textbotlang['keyboard']['usernameMethod'] && $adminrulecheck['rule'] == "administrator") {
@@ -4815,64 +4813,69 @@ elseif ($datain == "systemsms") {
     sendmessage($from_id, $textbotlang['Admin']['manageUser']['removedService'], $keyboardadmin, 'HTML');
     Editmessagetext($from_id, $message_id, $text_inline, json_encode(['inline_keyboard' => []]));
     step('home', $from_id);
-} elseif ($text == $textbotlang['keyboard']['createDiscountCode'] && $adminrulecheck['rule'] == "administrator") {
-    sendmessage($from_id, $textbotlang['Admin']['Discountsell']['getCode'], $backadmin, 'HTML');
+} elseif ($datain == "discountcode_create" && $adminrulecheck['rule'] == "administrator") {
+    savedata("clear", "message_id", $message_id);
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Discountsell']['getCode'], $discountCodeFlowKeyboard);
     step('get_codesell', $from_id);
 } elseif ($user['step'] == "get_codesell") {
     if (!preg_match('/^[A-Za-z\d]+$/', $text)) {
-        sendmessage($from_id, $textbotlang['Admin']['Discount']['errorCode'], null, 'HTML');
+        editCodeFlowMessage($textbotlang['Admin']['Discount']['errorCode'], $discountCodeFlowKeyboard);
         return;
     }
-    sendmessage($from_id, $textbotlang['Admin']['Discount']['priceCodeSell'], null, 'HTML');
+    savedata("save", "code", strtolower($text));
+    editCodeFlowMessage($textbotlang['Admin']['Discount']['priceCodeSell'], $discountCodeFlowKeyboard);
     step('get_price_codesell', $from_id);
-    savedata("clear", "code", strtolower($text));
 } elseif ($user['step'] == "get_price_codesell") {
     if (!ctype_digit($text)) {
-        sendmessage($from_id, $textbotlang['Admin']['Balance']['invalidPrice'], $backadmin, 'HTML');
+        editCodeFlowMessage($textbotlang['Admin']['Balance']['invalidPrice'], $discountCodeFlowKeyboard);
         return;
     }
     savedata("save", "price", $text);
-    sendmessage($from_id, $textbotlang['Admin']['Discountsell']['getLimit'], $backadmin, 'HTML');
+    editCodeFlowMessage($textbotlang['Admin']['Discountsell']['getLimit'], $discountCodeFlowKeyboard);
     step('getlimitcode', $from_id);
 } elseif ($user['step'] == "getlimitcode") {
     savedata("save", "limitDiscount", $text);
-    sendmessage($from_id, $textbotlang['Admin']['Discount']['agentCode'], $backadmin, 'HTML');
+    $userGroupsKeyboard = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $textbotlang['keyboard']['normalUser'], 'callback_data' => "discountagent_f"],
+                ['text' => $textbotlang['keyboard']['allUsers'], 'callback_data' => "discountagent_allusers"],
+            ],
+            [
+                ['text' => $textbotlang['keyboard']['normalAgent'], 'callback_data' => "discountagent_n"],
+                ['text' => $textbotlang['keyboard']['advancedAgent'], 'callback_data' => "discountagent_n2"],
+            ],
+            [['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "discountcode_list"]],
+        ]
+    ]);
+    editCodeFlowMessage($textbotlang['Admin']['Discount']['agentCode'], $userGroupsKeyboard);
     step('gettypecodeagent', $from_id);
-} elseif ($user['step'] == "gettypecodeagent") {
-    $agentst = ["n", "n2", "f", "allusers"];
-    if (!in_array($text, $agentst)) {
-        sendmessage($from_id, $textbotlang['Admin']['Discount']['invalidAgentCode'], $backadmin, 'HTML');
-        return;
-    }
-    savedata("save", "agent", $text);
-    sendmessage($from_id, $textbotlang['Admin']['Discount']['askActiveHours'], $backadmin, 'HTML');
+} elseif ($user['step'] == "gettypecodeagent" && preg_match('/^discountagent_(f|n|n2|allusers)$/', $datain, $dataget)) {
+    savedata("save", "agent", $dataget[1]);
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Discount']['askActiveHours'], $discountCodeFlowKeyboard);
     step('gettimediscount', $from_id);
 } elseif ($user['step'] == "gettimediscount") {
     if (!ctype_digit($text)) {
-        sendmessage($from_id, $textbotlang['common']['invalidInput'], $backadmin, 'HTML');
+        editCodeFlowMessage($textbotlang['common']['invalidInput'], $discountCodeFlowKeyboard);
         return;
     }
-    if (intval($text) == 0) {
-        $text = "0";
-    } else {
-        $text = time() + (intval($text) * 3600);
-    }
-    savedata("save", "time", $text);
+    savedata("save", "time", intval($text) == 0 ? "0" : time() + (intval($text) * 3600));
     $keyboarddiscount = json_encode([
         'inline_keyboard' => [
             [
                 ['text' => $textbotlang['keyboard']['allPurchases'], 'callback_data' => "discountlimitbuy_0"],
                 ['text' => $textbotlang['keyboard']['firstPurchaseBtn'], 'callback_data' => "discountlimitbuy_1"],
             ],
+            [['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "discountcode_list"]],
         ]
     ]);
-    sendmessage($from_id, $textbotlang['Admin']['Discount']['firstDiscount'], $keyboarddiscount, 'HTML');
+    editCodeFlowMessage($textbotlang['Admin']['Discount']['firstDiscount'], $keyboarddiscount);
     step('getfirstdiscount', $from_id);
 } elseif (preg_match('/discountlimitbuy_(\w+)/', $datain, $dataget)) {
     $discountbuylimit = $dataget[1];
     savedata("save", "usefirst", $discountbuylimit);
     if (intval($discountbuylimit) == 1) {
-        sendmessage($from_id, $textbotlang['Admin']['Discount']['askUserLimit'], $backadmin, 'HTML');
+        Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Discount']['askUserLimit'], $discountCodeFlowKeyboard);
         step('getuseuser', $from_id);
         savedata("save", "typediscount", "all");
     } else {
@@ -4884,49 +4887,41 @@ elseif ($datain == "systemsms") {
                 ],
                 [
                     ['text' => $textbotlang['keyboard']['both'], 'callback_data' => "discounttype_all"]
-                ]
+                ],
+                [['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "discountcode_list"]],
             ]
         ]);
         Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Discount']['askSection'], $keyboarddiscount);
     }
 } elseif (preg_match('/discounttype_(\w+)/', $datain, $dataget)) {
-    $discountbuytype = $dataget[1];
-    Editmessagetext($from_id, $message_id, $text_inline, json_encode(['inline_keyboard' => []]));
-    savedata("save", "typediscount", $discountbuytype);
-    sendmessage($from_id, $textbotlang['Admin']['Discount']['askUserLimit'], $backadmin, 'HTML');
+    savedata("save", "typediscount", $dataget[1]);
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Discount']['askUserLimit'], $discountCodeFlowKeyboard);
     step('getuseuser', $from_id);
 } elseif ($user['step'] == "getuseuser") {
     $userdata = json_decode($user['Processing_value'], true);
-    $numberlimit = $userdata['limitDiscount'];
     if (intval($text) > intval($userdata['limitDiscount'])) {
-        sendmessage($from_id, $textbotlang['Admin']['Discount']['userLimitTooHigh'], $backadmin, 'HTML');
+        editCodeFlowMessage($textbotlang['Admin']['Discount']['userLimitTooHigh'], $discountCodeFlowKeyboard);
         return;
     }
     savedata("save", "useuser", $text);
-    sendmessage($from_id, $textbotlang['Admin']['Discount']['askProductLocation'], $json_list_marzban_panel, 'HTML');
+    editCodeFlowMessage($textbotlang['Admin']['Discount']['askProductLocation'], discountPanelsKeyboard());
     step('getlocdiscount', $from_id);
-} elseif ($user['step'] == "getlocdiscount") {
-    if ($text == "/all") {
-        $panel['code_panel'] = "/all";
-    } else {
-        $panel = select("marzban_panel", "*", "name_panel", $text, "select");
-    }
-    if ($panel == false)
+} elseif ($user['step'] == "getlocdiscount" && preg_match('/^discountpanel_(.+)$/', $datain, $dataget)) {
+    $panel = $dataget[1] == "all"
+        ? ['code_panel' => "/all", 'name_panel' => "/all"]
+        : select("marzban_panel", "*", "code_panel", $dataget[1], "select");
+    if (!$panel)
         return;
     savedata("save", "code_panel", $panel['code_panel']);
-    savedata("save", "name_panel", $text);
-    sendmessage($from_id, $textbotlang['Admin']['Discount']['askProduct'], $json_list_product_list_admin, 'HTML');
+    savedata("save", "name_panel", $panel['name_panel']);
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Discount']['askProduct'], discountProductsKeyboard($panel['name_panel']));
     step('getproductdiscount', $from_id);
-} elseif ($user['step'] == "getproductdiscount") {
-    if ($text != "all") {
-        $product = select("product", "*", "name_product", $text, "select");
-    } else {
-        $product['code_product'] = "all";
-    }
-    if ($product == false) {
-        sendmessage($from_id, $textbotlang['users']['sell']['errorProduct'], $keyboardadmin, 'HTML');
+} elseif ($user['step'] == "getproductdiscount" && preg_match('/^discountproduct_(.+)$/', $datain, $dataget)) {
+    $product = $dataget[1] == "all"
+        ? ['code_product' => "all", 'name_product' => "all"]
+        : select("product", "*", "code_product", $dataget[1], "select");
+    if (!$product)
         return;
-    }
     $userdata = json_decode($user['Processing_value'], true);
     $stmt = $pdo->prepare("INSERT INTO DiscountSell (codeDiscount, usedDiscount, price, limitDiscount, agent, usefirst, useuser, code_panel, code_product, time,type) VALUES (:codeDiscount, :usedDiscount, :price, :limitDiscount, :agent, :usefirst, :useuser, :code_panel, :code_product, :time,:type)");
     $values = "0";
@@ -4944,25 +4939,68 @@ elseif ($datain == "systemsms") {
     $stmt->bindParam(':time', $userdata['time'], PDO::PARAM_STR);
     $stmt->bindParam(':type', $userdata['typediscount'], PDO::PARAM_STR);
     $stmt->execute();
-    $textdiscount = sprintf($textbotlang['Admin']['Discount']['created'], $userdata['code'], $userdata['price'], $userdata['name_panel'], $text, $userdata['agent'], $userdata['limitDiscount']);
-    sendmessage($from_id, $textdiscount, $keyboardadmin, 'HTML');
+    $textdiscount = sprintf($textbotlang['Admin']['Discount']['created'], $userdata['code'], $userdata['price'], $userdata['name_panel'], $product['name_product'], $userdata['agent'], $userdata['limitDiscount']);
     step('home', $from_id);
-} elseif ($text == $textbotlang['keyboard']['deleteDiscountCode'] && $adminrulecheck['rule'] == "administrator") {
-    sendmessage($from_id, $textbotlang['Admin']['Discount']['removeCode'], $json_list_Discount_list_admin_sell, 'HTML');
-    step('remove-Discountsell', $from_id);
-} elseif ($user['step'] == "remove-Discountsell") {
-    if (!rowExists("DiscountSell", "codeDiscount", $text)) {
-        sendmessage($from_id, $textbotlang['Admin']['Discount']['notCode'], null, 'HTML');
+    [, $discountKeyboard] = discountCodesMenu();
+    Editmessagetext($from_id, $message_id, $textdiscount, $discountKeyboard);
+} elseif ($text == $textbotlang['keyboard']['manageDiscountCode'] && $adminrulecheck['rule'] == "administrator") {
+    [$discountText, $discountKeyboard] = discountCodesMenu();
+    sendmessage($from_id, $discountText, $discountKeyboard, 'HTML');
+} elseif (($datain == "discountcode_list" || preg_match('/^discountcode_delete_(\w+)$/', $datain, $dataget)) && $adminrulecheck['rule'] == "administrator") {
+    step('home', $from_id);
+    if ($datain != "discountcode_list") {
+        $stmt = $pdo->prepare("DELETE FROM Giftcodeconsumed WHERE code = :code");
+        $stmt->execute([':code' => $dataget[1]]);
+        $stmt = $pdo->prepare("DELETE FROM DiscountSell WHERE codeDiscount = :code");
+        $stmt->execute([':code' => $dataget[1]]);
+    }
+    [$discountText, $discountKeyboard] = discountCodesMenu();
+    Editmessagetext($from_id, $message_id, $discountText, $discountKeyboard);
+} elseif (preg_match('/^discountcode_show_(\w+)$/', $datain, $dataget) && $adminrulecheck['rule'] == "administrator") {
+    $discountCode = select("DiscountSell", "*", "codeDiscount", $dataget[1], "select");
+    if (!$discountCode) {
+        [$discountText, $discountKeyboard] = discountCodesMenu();
+        Editmessagetext($from_id, $message_id, $discountText, $discountKeyboard);
         return;
     }
-    $stmt = $pdo->prepare("DELETE FROM Giftcodeconsumed WHERE code = :code");
-    $stmt->bindParam(':code', $text, PDO::PARAM_STR);
-    $stmt->execute();
-    $stmt = $pdo->prepare("DELETE FROM DiscountSell WHERE codeDiscount = :codeDiscount");
-    $stmt->bindParam(':codeDiscount', $text, PDO::PARAM_STR);
-    $stmt->execute();
-    sendmessage($from_id, $textbotlang['Admin']['Discount']['removedCode'], $shopkeyboard, 'HTML');
-    step('home', $from_id);
+    $userGroupLabels = [
+        'f' => $textbotlang['keyboard']['normalUser'],
+        'n' => $textbotlang['keyboard']['normalAgent'],
+        'n2' => $textbotlang['keyboard']['advancedAgent'],
+        'allusers' => $textbotlang['keyboard']['allUsers'],
+    ];
+    $sectionLabels = [
+        'buy' => $textbotlang['keyboard']['purchase'],
+        'extend' => $textbotlang['keyboard']['renew'],
+        'all' => $textbotlang['keyboard']['purchaseAndRenew'],
+    ];
+    $panelLabel = $discountCode['code_panel'] == "/all"
+        ? $textbotlang['keyboard']['allPanels']
+        : (select("marzban_panel", "name_panel", "code_panel", $discountCode['code_panel'], "select")['name_panel'] ?? $discountCode['code_panel']);
+    $productLabel = $discountCode['code_product'] == "all"
+        ? $textbotlang['keyboard']['allProducts']
+        : (select("product", "name_product", "code_product", $discountCode['code_product'], "select")['name_product'] ?? $discountCode['code_product']);
+    $discountDetailText = sprintf(
+        $textbotlang['Admin']['Discount']['discountDetail'],
+        $discountCode['codeDiscount'],
+        $discountCode['price'],
+        $userGroupLabels[$discountCode['agent']] ?? $discountCode['agent'],
+        $sectionLabels[$discountCode['type']] ?? $discountCode['type'],
+        $panelLabel,
+        $productLabel,
+        $discountCode['limitDiscount'],
+        $discountCode['useuser'],
+        $discountCode['usefirst'] == "1" ? "✅ " . $textbotlang['keyboard']['yes'] : "❌ " . $textbotlang['keyboard']['no'],
+        $discountCode['time'] == "0" ? "♾ " . $textbotlang['users']['status']['unlimited'] : jdate('Y/m/d H:i', $discountCode['time']),
+        $discountCode['usedDiscount']
+    );
+    $discountDetailKeyboard = json_encode([
+        'inline_keyboard' => [
+            [['text' => $textbotlang['keyboard']['deleteThisCode'], 'callback_data' => "discountcode_delete_{$discountCode['codeDiscount']}"]],
+            [['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "discountcode_list"]],
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, $discountDetailText, $discountDetailKeyboard);
 } elseif ($text == "/end") {
     $userdata = json_decode($user['Processing_value'], true);
     $panel = select("marzban_panel", "*", "name_panel", $userdata['name_panel'], "select");

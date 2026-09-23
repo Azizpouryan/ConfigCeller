@@ -381,8 +381,7 @@ $shopkeyboard = json_encode([
     'keyboard' => [
         [['text' => $textbotlang['keyboard']['shopFeatureStatus']]],
         [['text' => $textbotlang['keyboard']['manageCategory']], ['text' => $textbotlang['keyboard']['manageProducts']]],
-        [['text' => $textbotlang['keyboard']['manageGiftCode']]],
-        [['text' => $textbotlang['keyboard']['createDiscountCode']], ['text' => $textbotlang['keyboard']['deleteDiscountCode']]],
+        [['text' => $textbotlang['keyboard']['manageGiftCode']], ['text' => $textbotlang['keyboard']['manageDiscountCode']]],
         [['text' => $textbotlang['keyboard']['minBulkBalance']], ['text' => $textbotlang['keyboard']['renewalCashback']]],
         [['text' => $textbotlang['Admin']['backAdminBtn']], ['text' => $textbotlang['Admin']['backMenuBtn']]]
     ],
@@ -399,8 +398,56 @@ function giftCodesMenu()
             ['text' => "{$giftCode['code']} (" . number_format((int) $giftCode['price']) . ")", 'callback_data' => "giftcode_show_{$giftCode['code']}"],
         ];
     }
-    $rows[] = [['text' => $textbotlang['keyboard']['backToShopMenu'], 'callback_data' => "giftcode_close"]];
+    $rows[] = [['text' => $textbotlang['keyboard']['backToShopMenu'], 'callback_data' => "shopmenu_open"]];
     $text = sprintf($textbotlang['Admin']['Discount']['giftManage'], count($giftCodes));
+    return [$text, json_encode(['inline_keyboard' => $rows])];
+}
+$giftCodeFlowKeyboard = json_encode(['inline_keyboard' => [[['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "giftcode_list"]]]]);
+$discountCodeFlowKeyboard = json_encode(['inline_keyboard' => [[['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "discountcode_list"]]]]);
+function editCodeFlowMessage($text, $keyboard)
+{
+    global $from_id, $message_id, $datain, $user;
+    $flowMessageId = json_decode($user['Processing_value'], true)['message_id'] ?? $message_id;
+    if ($datain == "") {
+        deletemessage($from_id, $message_id);
+    }
+    Editmessagetext($from_id, $flowMessageId, $text, $keyboard);
+}
+function discountPanelsKeyboard()
+{
+    global $pdo, $textbotlang;
+    $rows = [[['text' => $textbotlang['keyboard']['allPanels'], 'callback_data' => "discountpanel_all"]]];
+    foreach ($pdo->query("SELECT name_panel, code_panel FROM marzban_panel")->fetchAll(PDO::FETCH_ASSOC) as $panel) {
+        $rows[] = [['text' => $panel['name_panel'], 'callback_data' => "discountpanel_{$panel['code_panel']}"]];
+    }
+    $rows[] = [['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "discountcode_list"]];
+    return json_encode(['inline_keyboard' => $rows]);
+}
+function discountProductsKeyboard($location)
+{
+    global $pdo, $textbotlang;
+    $stmt = $pdo->prepare("SELECT name_product, code_product FROM product WHERE Location = :location OR Location = '/all'");
+    $stmt->execute([':location' => $location]);
+    $rows = [[['text' => $textbotlang['keyboard']['allProducts'], 'callback_data' => "discountproduct_all"]]];
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $product) {
+        $rows[] = [['text' => $product['name_product'], 'callback_data' => "discountproduct_{$product['code_product']}"]];
+    }
+    $rows[] = [['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "discountcode_list"]];
+    return json_encode(['inline_keyboard' => $rows]);
+}
+function discountCodesMenu()
+{
+    global $pdo, $textbotlang;
+    $discountCodes = $pdo->query("SELECT codeDiscount, price FROM DiscountSell")->fetchAll(PDO::FETCH_ASSOC);
+    $rows = [[['text' => $textbotlang['keyboard']['createDiscountCode'], 'callback_data' => "discountcode_create"]]];
+    foreach ($discountCodes as $discountCode) {
+        $rows[] = [
+            ['text' => "❌", 'callback_data' => "discountcode_delete_{$discountCode['codeDiscount']}"],
+            ['text' => "{$discountCode['codeDiscount']} ({$discountCode['price']}%)", 'callback_data' => "discountcode_show_{$discountCode['codeDiscount']}"],
+        ];
+    }
+    $rows[] = [['text' => $textbotlang['keyboard']['backToShopMenu'], 'callback_data' => "shopmenu_open"]];
+    $text = sprintf($textbotlang['Admin']['Discount']['discountManage'], count($discountCodes));
     return [$text, json_encode(['inline_keyboard' => $rows])];
 }
 $keyboard_Category_manage = json_encode([
@@ -764,26 +811,6 @@ $list_marzban_usertest = json_encode($list_marzban_panel_usertest);
         ];
     }
     $json_list_product_list_admin = json_encode($list_product);
-//--------------------------------------------------
-    $DiscountSell = [];
-    $stmt = $pdo->prepare("SELECT * FROM DiscountSell");
-    $stmt->execute();
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $DiscountSell[] = [$row['codeDiscount']];
-    }
-    $list_Discountsell = [
-        'keyboard' => [],
-        'resize_keyboard' => true,
-    ];
-    $list_Discountsell['keyboard'][] = [
-        ['text' => $textbotlang['Admin']['backAdminBtn']],
-    ];
-    foreach ($DiscountSell as $button) {
-        $list_Discountsell['keyboard'][] = [
-            ['text' => $button[0]]
-        ];
-    }
-    $json_list_Discount_list_admin_sell = json_encode($list_Discountsell);
 $payment = json_encode([
     'inline_keyboard' => [
         [['text' => $textbotlang['keyboard']['payAndGetService'], 'callback_data' => "confirmandgetservice"]],

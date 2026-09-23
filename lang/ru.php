@@ -4011,7 +4011,6 @@ ID пользователя : %s
                 'optimizeBot' => '🗑 Оптимизация бота',
                 'paidSendReceipt' => '✅ Я оплатил | Отправить квитанцию.',
                 'panelFeatureStatus' => '⚙️ Статус функций панели',
-                'panelFeatures' => '🛠 Функции панели',
                 'panelName' => '✍️ Название панели',
                 'panelUptime' => '🎛 Время работы панели',
                 'passargadPanel' => 'Pasargard',

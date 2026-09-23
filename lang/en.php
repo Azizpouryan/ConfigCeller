@@ -4011,7 +4011,6 @@ We hope you had a good experience with the ease and speed of your service. If yo
                 'optimizeBot' => '🗑 Optimize bot',
                 'paidSendReceipt' => '✅ I have paid | Send receipt.',
                 'panelFeatureStatus' => '⚙️ Panel feature status',
-                'panelFeatures' => '🛠 Panel features',
                 'panelName' => '✍️ Panel name',
                 'panelUptime' => '🎛 Panel uptime',
                 'passargadPanel' => 'Pasargard',

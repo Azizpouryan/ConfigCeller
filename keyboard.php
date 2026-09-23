@@ -156,7 +156,7 @@ if ($adminrulecheck['rule'] == "administrator") {
             [['text' => $textbotlang['Admin']['btnKeyboard']['manageUser']], ['text' => $textbotlang['keyboard']['shopSettings']]],
             [['text' => $textbotlang['keyboard']['financial']], ['text' => $textbotlang['keyboard']['cronStatus']]],
             [['text' => $textbotlang['keyboard']['supportSection']], ['text' => $textbotlang['keyboard']['educationSection']]],
-            [['text' => $textbotlang['keyboard']['botReport']], ['text' => $textbotlang['keyboard']['panelFeatures']]],
+            [['text' => $textbotlang['keyboard']['botReport']]],
             [['text' => $textbotlang['keyboard']['generalSettings']], ['text' => $textbotlang['keyboard']['pendingReceipts']]],
             [['text' => $textbotlang['bottext']['open_button']]],
             [['text' => $textbotlang['users']['backbtn']]]
@@ -1063,6 +1063,7 @@ $MethodUsername = json_encode([
 $optionMarzban = json_encode([
     'keyboard' => [
         [['text' => $textbotlang['keyboard']['panelFeatureStatus']]],
+        [['text' => $textbotlang['keyboard']['manualCreateConfig']], ['text' => $textbotlang['keyboard']['manageNodes']]],
         [['text' => $textbotlang['keyboard']['panelName']], ['text' => $textbotlang['keyboard']['deletePanel']]],
         [['text' => $textbotlang['keyboard']['editPassword']], ['text' => $textbotlang['keyboard']['editUsername']]],
         [['text' => $textbotlang['keyboard']['editPanelUrl']], ['text' => $textbotlang['keyboard']['setProtocolInbound']]],
@@ -1162,6 +1163,7 @@ $options_ui = json_encode([
 $optionwg = json_encode([
     'keyboard' => [
         [['text' => $textbotlang['keyboard']['panelFeatureStatus']]],
+        [['text' => $textbotlang['keyboard']['manualCreateConfig']]],
         [['text' => $textbotlang['keyboard']['panelName']], ['text' => $textbotlang['keyboard']['deletePanel']]],
         [['text' => $textbotlang['keyboard']['editPassword']]],
         [['text' => $textbotlang['keyboard']['editPanelUrl']], ['text' => $textbotlang['keyboard']['setInboundId']]],
@@ -1183,6 +1185,7 @@ $optionwg = json_encode([
 $optionmarzneshin = json_encode([
     'keyboard' => [
         [['text' => $textbotlang['keyboard']['panelFeatureStatus']]],
+        [['text' => $textbotlang['keyboard']['manualCreateConfig']]],
         [['text' => $textbotlang['keyboard']['panelName']], ['text' => $textbotlang['keyboard']['deletePanel']]],
         [['text' => $textbotlang['keyboard']['editPassword']], ['text' => $textbotlang['keyboard']['editUsername']]],
         [['text' => $textbotlang['keyboard']['editPanelUrl']], ['text' => $textbotlang['keyboard']['renewalMethod']]],
@@ -1218,6 +1221,7 @@ $optionManualsale = json_encode([
 $optionX_ui_single = json_encode([
     'keyboard' => [
         [['text' => $textbotlang['keyboard']['panelFeatureStatus']]],
+        [['text' => $textbotlang['keyboard']['manualCreateConfig']]],
         [['text' => $textbotlang['keyboard']['panelName']], ['text' => $textbotlang['keyboard']['deletePanel']]],
         [['text' => $textbotlang['keyboard']['editPassword']]],
         [['text' => $textbotlang['keyboard']['editPanelUrl']], ['text' => $textbotlang['keyboard']['renewalMethod']]],
@@ -1239,6 +1243,7 @@ $optionX_ui_single = json_encode([
 $optionalireza_single = json_encode([
     'keyboard' => [
         [['text' => $textbotlang['keyboard']['panelFeatureStatus']]],
+        [['text' => $textbotlang['keyboard']['manualCreateConfig']]],
         [['text' => $textbotlang['keyboard']['panelName']], ['text' => $textbotlang['keyboard']['deletePanel']]],
         [['text' => $textbotlang['keyboard']['editPassword']], ['text' => $textbotlang['keyboard']['editUsername']]],
         [['text' => $textbotlang['keyboard']['editPanelUrl']], ['text' => $textbotlang['keyboard']['renewalMethod']]],
@@ -1261,6 +1266,7 @@ $optionalireza_single = json_encode([
 $optionhiddfy = json_encode([
     'keyboard' => [
         [['text' => $textbotlang['keyboard']['panelFeatureStatus']]],
+        [['text' => $textbotlang['keyboard']['manualCreateConfig']]],
         [['text' => $textbotlang['keyboard']['panelName']], ['text' => $textbotlang['keyboard']['deletePanel']]],
         [['text' => $textbotlang['keyboard']['editPanelUrl']], ['text' => $textbotlang['keyboard']['renewalMethod']]],
         [['text' => $textbotlang['keyboard']['changeUserGroup']]],
@@ -1420,20 +1426,6 @@ $tronnowpayments = json_encode([
         [['text' => $textbotlang['keyboard']['setEducationCryptoOffline'], 'callback_data' => "paygwopt-setEducationCryptoOffline"]],
         [['text' => $textbotlang['keyboard']['backToGateways'], 'callback_data' => "paygwlist"]],
     ]
-]);
-$optionathmarzban = json_encode([
-    'keyboard' => [
-        [['text' => $textbotlang['keyboard']['manualCreateConfig']], ['text' => $textbotlang['keyboard']['manageNodes']]],
-        [['text' => $textbotlang['Admin']['backAdminBtn']], ['text' => $textbotlang['Admin']['backMenuBtn']]]
-    ],
-    'resize_keyboard' => true
-]);
-$optionathx_ui = json_encode([
-    'keyboard' => [
-        [['text' => $textbotlang['keyboard']['manualCreateConfig']]],
-        [['text' => $textbotlang['Admin']['backAdminBtn']], ['text' => $textbotlang['Admin']['backMenuBtn']]]
-    ],
-    'resize_keyboard' => true
 ]);
 $configedit = json_encode([
     'keyboard' => [

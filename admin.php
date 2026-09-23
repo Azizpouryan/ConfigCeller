@@ -19,9 +19,7 @@ $backmenu_panel_steps = [
     "GetmaineExtra", "gettypeextramain", "GetmaxeExtra", "gettypeextramax",
     "Getmaintime", "gettypeextramaintime", "Getmaxtime", "gettypeextramaxtime",
     "getuserhide", "getuserhideforremove", "getprotocoldisable", "getInbounddisable",
-    "getservceid", "setinboundandprotocol"
-];
-$backmenu_panelfeature_steps = [
+    "getservceid", "setinboundandprotocol",
     "getusernameconfigcr", "getcountcreate", "getvolumesconfig", "gettimeaccount",
     "getusage_coefficient", "getnamenode", "getipnodeset"
 ];
@@ -140,13 +138,11 @@ if ($datain == "paygwback") {
     }
     $backmenu_step = (string) $user['step'];
     step('home', $from_id);
-    if (in_array($backmenu_step, $backmenu_panel_steps, true) || in_array($backmenu_step, $backmenu_panelfeature_steps, true)) {
+    if (in_array($backmenu_step, $backmenu_panel_steps, true)) {
         $backmenu_panel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
         $backmenu_paneltype = is_array($backmenu_panel) ? (string) $backmenu_panel['type'] : '';
         if ($backmenu_paneltype === '') {
             sendmessage($from_id, $textbotlang['Admin']['backAdmin'], $keyboardadmin, 'HTML');
-        } elseif (in_array($backmenu_step, $backmenu_panelfeature_steps, true)) {
-            sendmessage($from_id, $textbotlang['Admin']['backMenu'], $backmenu_paneltype == "marzban" ? $optionathmarzban : $optionathx_ui, 'HTML');
         } elseif ($backmenu_paneltype == "Manualsale") {
             sendmessage($from_id, $textbotlang['Admin']['backMenu'], $optionManualsale, 'HTML');
         } else {
@@ -5672,7 +5668,8 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
         }
         sendMessageService($panel, $dataoutput['configs'], $output_config_link, $dataoutput['username'], null, $textcreatuser, $randomString);
     }
-    sendmessage($from_id, $textbotlang['users']['selectoption'], $optionathmarzban, 'HTML');
+    update("user", "Processing_value", $panel['name_panel'], "id", $from_id);
+    outtypepanel($panel['type'], $textbotlang['users']['selectoption']);
     $text_report = "";
     if (strlen($setting['Channel_Report']) > 0) {
         $text_report = sprintf($textbotlang['Admin']['reportgroup']['configCreatedByAdmin'], $user['Processing_value_one'], $user['Processing_value_tow'], $text, $from_id, $username, $userdata['count']);
@@ -5689,28 +5686,6 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     $textupdate = $textbotlang['Admin']['report']['botReportIntro'];
     sendmessage($from_id, $textupdate, null, 'HTML');
     step('home', $from_id);
-} elseif ($text == $textbotlang['keyboard']['panelFeatures']) {
-    sendmessage($from_id, $textbotlang['Admin']['managepanel']['selectPanel'], $json_list_marzban_panel, 'HTML');
-    step('getlocoption', $from_id);
-} elseif ($user['step'] == "getlocoption") {
-    update("user", "Processing_value", $text, "id", $from_id);
-    $typepanel = select("marzban_panel", "*", "name_panel", $text, "select")['type'];
-    if ($typepanel == "marzban") {
-        sendmessage($from_id, $textbotlang['users']['selectoption'], $optionathmarzban, 'HTML');
-    } elseif ($typepanel == "x-ui_single") {
-        sendmessage($from_id, $textbotlang['users']['selectoption'], $optionathx_ui, 'HTML');
-    } elseif ($typepanel == "hiddify") {
-        sendmessage($from_id, $textbotlang['users']['selectoption'], $optionathx_ui, 'HTML');
-    } elseif ($typepanel == "alireza") {
-        sendmessage($from_id, $textbotlang['users']['selectoption'], $optionathx_ui, 'HTML');
-    } elseif ($typepanel == "alireza_single") {
-        sendmessage($from_id, $textbotlang['users']['selectoption'], $optionathx_ui, 'HTML');
-    } elseif ($typepanel == "marzneshin") {
-        sendmessage($from_id, $textbotlang['users']['selectoption'], $optionathx_ui, 'HTML');
-    } elseif ($typepanel == "WGDashboard") {
-        sendmessage($from_id, $textbotlang['users']['selectoption'], $optionathx_ui, 'HTML');
-    }
-    step("home", $from_id);
 } elseif ($text == $textbotlang['keyboard']['manageNodes'] || $datain == "bakcnode") {
     if ($adminnumber != $from_id) {
         sendmessage($from_id, $textbotlang['Admin']['mainAdminOnly'], null, 'HTML');
@@ -5726,6 +5701,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
         return;
     }
     $nodes = json_decode($nodes['body'], true);
+    $nodes = $nodes['nodes'] ?? $nodes;
     if (count($nodes) == 0) {
         sendmessage($from_id, $textbotlang['Admin']['node']['settingsUnavailable'], null, 'HTML');
         return;
@@ -5760,25 +5736,29 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
         sendmessage($from_id, sprintf($textbotlang['Admin']['errorCode2'], $node['status']), null, 'HTML');
         return;
     }
-    $nodeusage = Get_usage_Nodes($user['Processing_value']);
-    if (!empty($nodeusage['error'])) {
-        sendmessage($from_id, panelErrorText($nodeusage['error']), null, 'HTML');
-        return;
-    }
-    if (!empty($nodeusage['status']) && $nodeusage['status'] != 200) {
-        sendmessage($from_id, sprintf($textbotlang['Admin']['errorCode3'], $nodeusage['status']), null, 'HTML');
-        return;
-    }
     $node = json_decode($node['body'], true);
-    $nodeusage = json_decode($nodeusage['body'], true);
-    foreach ($nodeusage['usages'] as $nodeusages) {
-        if ($nodeusages['node_id'] == $nodeid) {
-            $nodeusage = $nodeusages;
-            break;
+    if (isset($node['uplink'])) {
+        $nodeusage = ['uplink' => $node['lifetime_uplink'] ?? $node['uplink'], 'downlink' => $node['lifetime_downlink'] ?? $node['downlink']];
+    } else {
+        $nodeusage = Get_usage_Nodes($user['Processing_value']);
+        if (!empty($nodeusage['error'])) {
+            sendmessage($from_id, panelErrorText($nodeusage['error']), null, 'HTML');
+            return;
+        }
+        if (!empty($nodeusage['status']) && $nodeusage['status'] != 200) {
+            sendmessage($from_id, sprintf($textbotlang['Admin']['errorCode3'], $nodeusage['status']), null, 'HTML');
+            return;
+        }
+        $nodeusage = json_decode($nodeusage['body'], true);
+        foreach ($nodeusage['usages'] as $nodeusages) {
+            if ($nodeusages['node_id'] == $nodeid) {
+                $nodeusage = $nodeusages;
+                break;
+            }
         }
     }
     $sumvolume = formatBytes($nodeusage['downlink'] + $nodeusage['uplink']);
-    $textnode = sprintf($textbotlang['Admin']['node']['info'], $node['name'], $node['address'], $node['port'], $node['api_port'], $sumvolume, $node['usage_coefficient'], $node['xray_version'], $node['status']);
+    $textnode = sprintf($textbotlang['Admin']['node']['info'], $node['name'], $node['address'], $node['port'], $node['api_port'], $sumvolume, $node['usage_coefficient'], $node['xray_version'] ?? $node['core_version'], $node['status']);
     $backinfoss = json_encode([
         'inline_keyboard' => [
             [
@@ -5810,8 +5790,12 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     Editmessagetext($from_id, $message_id, $textnode, $backinfoss);
     step("getusage_coefficient", $from_id);
 } elseif ($user['step'] == "getusage_coefficient") {
+    if (!is_numeric($text) || $text < 0) {
+        sendmessage($from_id, $textbotlang['common']['invalidInput'], null, 'HTML');
+        return;
+    }
     $config = array(
-        'usage_coefficient' => $text
+        'usage_coefficient' => (float) $text
     );
     Modifyuser_node($user['Processing_value'], $user['Processing_value_one'], $config);
     $backinfoss = json_encode([

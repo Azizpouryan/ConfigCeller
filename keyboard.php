@@ -395,8 +395,8 @@ function giftCodesMenu()
     $rows = [[['text' => $textbotlang['keyboard']['createGiftCode'], 'callback_data' => "giftcode_create"]]];
     foreach ($giftCodes as $giftCode) {
         $rows[] = [
-            ['text' => "{$giftCode['code']} (" . number_format((int) $giftCode['price']) . ")", 'callback_data' => "giftcode_show_{$giftCode['code']}"],
             ['text' => "❌", 'callback_data' => "giftcode_delete_{$giftCode['code']}"],
+            ['text' => "{$giftCode['code']} (" . number_format((int) $giftCode['price']) . ")", 'callback_data' => "giftcode_show_{$giftCode['code']}"],
         ];
     }
     $rows[] = [['text' => $textbotlang['keyboard']['backToShopMenu'], 'callback_data' => "giftcode_close"]];

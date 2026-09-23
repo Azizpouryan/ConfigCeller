@@ -17,3 +17,4 @@ cronbot/.run.lock
 graphify-out
 docs
 /lang/override/
+/deploy.sh

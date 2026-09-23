@@ -949,7 +949,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
     if (isset($userdate['code_product'])) {
         $product = $userdate['code_product'];
         $product = select("product", "*", "code_product", $product);
-        if ($product == false) {
+        if ($product == false || ($product['Location'] != $marzban_list_get['name_panel'] && $product['Location'] != "/all")) {
             sendmessage($from_id, "❌ خطایی رخ داده است مراحل خرید را از اول انجام دهید", $keyboard, 'html');
             step("home", $from_id);
             return;

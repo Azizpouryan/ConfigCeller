@@ -15,6 +15,7 @@ use RuntimeException;
 final class TenantScopedRepository
 {
     private const TABLES = [
+        // New control-plane tables.
         'saas_membership',
         'saas_bot',
         'saas_domain',
@@ -22,6 +23,36 @@ final class TenantScopedRepository
         'saas_audit_log',
         'saas_job',
         'saas_backup',
+        // Legacy business tables after migration 013 adds tenant_id.
+        'admin',
+        'user',
+        'help',
+        'setting',
+        'channels',
+        'marzban_panel',
+        'product',
+        'invoice',
+        'Payment_report',
+        'Discount',
+        'Giftcodeconsumed',
+        'PaySetting',
+        'DiscountSell',
+        'affiliates',
+        'shopSetting',
+        'cancel_service',
+        'service_other',
+        'card_number',
+        'Requestagent',
+        'topicid',
+        'manualsell',
+        'departman',
+        'support_message',
+        'wheel_list',
+        'botsaz',
+        'app',
+        'logs_api',
+        'category',
+        'reagent_report',
     ];
 
     public function __construct(

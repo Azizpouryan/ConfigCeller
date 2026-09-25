@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../src/SaaS/bootstrap.php';
 
+use MirzaBot\SaaS\AuthContext;
+use MirzaBot\SaaS\Role;
 use MirzaBot\SaaS\SecretBox;
 use MirzaBot\SaaS\TenantContext;
 
@@ -40,5 +42,11 @@ $pass($context->requireTenantId() === $tenantId, 'Previous tenant context was no
 
 $context->clear();
 $pass(!$context->hasTenant(), 'Tenant context was not cleared.');
+
+$authContext = new AuthContext(1, $tenantId, Role::TENANT_OWNER, false, time() - 10, time());
+$pass($authContext->can('bots.manage'), 'Tenant owner permission was not granted.');
+$pass(!$authContext->can('system.shutdown'), 'Unknown permission was granted.');
+$masterContext = new AuthContext(2, $tenantId, Role::MASTER_ADMIN, true, time() - 10, time());
+$pass($masterContext->can('system.shutdown'), 'Master admin wildcard permission was not granted.');
 
 fwrite(STDOUT, "SaaS foundation tests passed.\n");

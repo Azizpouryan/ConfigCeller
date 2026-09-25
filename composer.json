@@ -9,6 +9,14 @@
         "endroid/qr-code": "^6.0",
         "phpoffice/phpspreadsheet": "^5.8"
     },
+    "autoload": {
+        "psr-4": {
+            "MirzaBot\\": "src/"
+        }
+    },
+    "scripts": {
+        "test:foundation": "php tests/SaaSFoundationTest.php"
+    },
     "config": {
         "optimize-autoloader": true,
         "sort-packages": true,

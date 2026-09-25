@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'schema_migrations',
     'user',
     'help',
     'setting',
@@ -30,4 +31,14 @@ return [
     'logs_api',
     'category',
     'reagent_report',
+    'saas_tenant',
+    'saas_user',
+    'saas_plan',
+    'saas_membership',
+    'saas_bot',
+    'saas_domain',
+    'saas_subscription',
+    'saas_audit_log',
+    'saas_job',
+    'saas_backup',
 ];

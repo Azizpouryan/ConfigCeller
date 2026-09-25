@@ -133,19 +133,68 @@ final class Schema
 
     public function runMigrations(string $directory): void
     {
+        $this->ensureMigrationTable();
         $files = glob($directory . '/*.php') ?: [];
         sort($files);
+
+        $applied = $this->pdo
+            ->query('SELECT migration, checksum FROM `schema_migrations`')
+            ->fetchAll(PDO::FETCH_KEY_PAIR);
+
         foreach ($files as $file) {
             $name = basename($file, '.php');
-            try {
-                $migration = $this->loadDefinition($file);
-                if (is_callable($migration)) {
-                    $migration($this->pdo, $this);
+            $checksum = hash_file('sha256', $file);
+            if ($checksum === false) {
+                throw new RuntimeException("Unable to checksum migration: {$name}");
+            }
+            if (isset($applied[$name])) {
+                if (!hash_equals((string) $applied[$name], $checksum)) {
+                    throw new RuntimeException("Migration {$name} was modified after it was applied.");
                 }
+                continue;
+            }
+
+            $startedTransaction = false;
+            try {
+                if (!$this->pdo->inTransaction()) {
+                    $this->pdo->beginTransaction();
+                    $startedTransaction = true;
+                }
+
+                $migration = $this->loadDefinition($file);
+                if (!is_callable($migration)) {
+                    throw new RuntimeException("Migration {$name} must return a callable.");
+                }
+                $migration($this->pdo, $this);
+
+                $statement = $this->pdo->prepare(
+                    'INSERT INTO `schema_migrations` (migration, checksum, applied_at) VALUES (?, ?, ?)'
+                );
+                $statement->execute([$name, $checksum, date('Y-m-d H:i:s')]);
+
+                // MySQL implicitly commits many ALTER TABLE statements. Only
+                // commit when the transaction is still active.
+                if ($startedTransaction && $this->pdo->inTransaction()) {
+                    $this->pdo->commit();
+                }
+                $applied[$name] = $checksum;
             } catch (Throwable $e) {
+                if ($startedTransaction && $this->pdo->inTransaction()) {
+                    $this->pdo->rollBack();
+                }
                 $this->logFailure("migration:$name", $e);
+                throw $e;
             }
         }
+    }
+
+    private function ensureMigrationTable(): void
+    {
+        if ($this->tableExists('schema_migrations')) {
+            return;
+        }
+
+        $this->create('schema_migrations', 'migration varchar(255) PRIMARY KEY NOT NULL, checksum char(64) NOT NULL, applied_at DATETIME NOT NULL');
     }
 
     public function applyIndexes(array $indexes): void

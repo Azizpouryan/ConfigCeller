@@ -10,7 +10,11 @@ return static function (PDO $pdo, Schema $schema): void {
         $password = (string) $admin['password'];
         $isHashed = str_starts_with($password, '$2') || str_starts_with($password, '$argon2');
         if ($admin['username'] === 'root') {
-            $statement->execute([$admin['id_admin'], password_hash(bin2hex(random_bytes(16)), PASSWORD_BCRYPT), $admin['id_admin']]);
+            // Never rotate a live administrator password on every bootstrap.
+            // Keep the historical username migration, but hash an old plaintext
+            // value only once and preserve an existing password hash.
+            $safePassword = $isHashed ? $password : password_hash($password, PASSWORD_BCRYPT);
+            $statement->execute([$admin['id_admin'], $safePassword, $admin['id_admin']]);
         } elseif (!$isHashed) {
             $statement->execute([$admin['username'], password_hash($password, PASSWORD_BCRYPT), $admin['id_admin']]);
         }

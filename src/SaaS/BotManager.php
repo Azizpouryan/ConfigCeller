@@ -74,6 +74,47 @@ final class BotManager
         return $this->find((string) $this->pdo->lastInsertId(), true) ?? throw new RuntimeException('Bot was created but could not be loaded.');
     }
 
+    public function provision(string $publicId): array
+    {
+        $this->assertPublicId($publicId);
+        $credentials = $this->rawFind($publicId);
+        if (!is_array($credentials) || empty($credentials['token_ciphertext']) || empty($credentials['webhook_secret_ciphertext'])) {
+            throw new RuntimeException('Bot credentials are unavailable.');
+        }
+
+        $tenant = $this->pdo->prepare('SELECT t.legacy_key FROM saas_bot b INNER JOIN saas_tenant t ON t.id = b.tenant_id WHERE b.public_id = ? AND b.tenant_id = ? AND b.deleted_at IS NULL LIMIT 1');
+        $tenant->execute([$publicId, $this->context->requireTenantId()]);
+        $tenantRow = $tenant->fetch(PDO::FETCH_ASSOC);
+        if (!is_array($tenantRow) || ($tenantRow['legacy_key'] ?? null) !== 'legacy') {
+            throw new RuntimeException('Central dispatch is not enabled for this Bot yet.');
+        }
+
+        $token = $this->requireSecretBox()->decrypt((string) $credentials['token_ciphertext']);
+        $secret = $this->requireSecretBox()->decrypt((string) $credentials['webhook_secret_ciphertext']);
+        try {
+            $me = $this->telegramCall($token, 'getMe');
+            $baseUrl = $this->webhookBaseUrl();
+            $webhookUrl = rtrim($baseUrl, '/') . '/telegram_webhook.php?bot=' . rawurlencode($publicId);
+            $this->telegramCall($token, 'setWebhook', [
+                'url' => $webhookUrl,
+                'secret_token' => $secret,
+                'drop_pending_updates' => false,
+            ]);
+            $username = (string) ($me['result']['username'] ?? '');
+            if ($username !== '') {
+                $update = $this->pdo->prepare('UPDATE saas_bot SET username = ?, status = \'active\', last_error = NULL, updated_at = ? WHERE public_id = ? AND tenant_id = ? AND deleted_at IS NULL');
+                $update->execute([$username, date('Y-m-d H:i:s'), $publicId, $this->context->requireTenantId()]);
+            } else {
+                $this->markHealth($publicId, 'active');
+            }
+            return ['public_id' => $publicId, 'username' => $username, 'status' => 'active'];
+        } catch (\Throwable $e) {
+            $update = $this->pdo->prepare('UPDATE saas_bot SET status = \'error\', last_error = ?, updated_at = ? WHERE public_id = ? AND tenant_id = ? AND deleted_at IS NULL');
+            $update->execute(['provisioning failed', date('Y-m-d H:i:s'), $publicId, $this->context->requireTenantId()]);
+            throw new RuntimeException('Telegram Bot provisioning failed.');
+        }
+    }
+
     public function softDelete(string $publicId): void
     {
         $this->assertPublicId($publicId);
@@ -192,11 +233,53 @@ final class BotManager
     private function rawFind(string $publicId): ?array
     {
         $statement = $this->pdo->prepare(
-            'SELECT public_id, token_ciphertext FROM saas_bot WHERE public_id = ? AND tenant_id = ? AND deleted_at IS NULL LIMIT 1'
+            'SELECT public_id, token_ciphertext, webhook_secret_ciphertext FROM saas_bot WHERE public_id = ? AND tenant_id = ? AND deleted_at IS NULL LIMIT 1'
         );
         $statement->execute([$publicId, $this->context->requireTenantId()]);
         $row = $statement->fetch(PDO::FETCH_ASSOC);
         return is_array($row) ? $row : null;
+    }
+
+    private function telegramCall(string $token, string $method, array $payload = []): array
+    {
+        // Telegram's Bot API requires the token in this endpoint path. It is
+        // never returned, logged, or accepted from a browser URL in our app.
+        $handle = curl_init('https://api.telegram.org/bot' . $token . '/' . $method);
+        if ($handle === false) {
+            throw new RuntimeException('Telegram connection failed.');
+        }
+        curl_setopt_array($handle, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => http_build_query($payload),
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 20,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_FOLLOWLOCATION => false,
+        ]);
+        $response = curl_exec($handle);
+        $error = curl_error($handle);
+        curl_close($handle);
+        if ($response === false || $error !== '') {
+            throw new RuntimeException('Telegram connection failed.');
+        }
+        $decoded = json_decode($response, true);
+        if (!is_array($decoded) || empty($decoded['ok'])) {
+            throw new RuntimeException('Telegram API rejected the request.');
+        }
+        return $decoded;
+    }
+
+    private function webhookBaseUrl(): string
+    {
+        $baseUrl = trim((string) getenv('MIRZABOT_WEBHOOK_BASE_URL'));
+        $parts = parse_url($baseUrl);
+        $host = is_array($parts) ? strtolower((string) ($parts['host'] ?? '')) : '';
+        if (($parts['scheme'] ?? '') !== 'https' || $host === '' || $host === 'localhost' || filter_var($host, FILTER_VALIDATE_IP) !== false) {
+            throw new RuntimeException('A public HTTPS webhook base URL is required.');
+        }
+        return rtrim($baseUrl, '/');
     }
 
     private function requireSecretBox(): SecretBox

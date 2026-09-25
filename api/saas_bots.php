@@ -71,6 +71,11 @@ try {
             $manager->rotateToken($publicId, (string) ($data['token'] ?? ''));
             $audit->record($auth->tenantId(), $auth->userId(), 'bot.credential_rotated', 'saas_bot', $publicId);
             sendJsonResponse(true, 'bot credential rotated', []);
+        case 'provision':
+            $publicId = (string) ($data['public_id'] ?? '');
+            $item = $manager->provision($publicId);
+            $audit->record($auth->tenantId(), $auth->userId(), 'bot.provisioned', 'saas_bot', $publicId, ['username' => $item['username']]);
+            sendJsonResponse(true, 'bot provisioned', ['item' => $item]);
         default:
             sendJsonResponse(false, 'action invalid', [], 422);
     }

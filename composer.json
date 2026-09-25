@@ -14,10 +14,6 @@
             "MirzaBot\\": "src/"
         }
     },
-    "scripts": {
-        "test:foundation": "php tests/SaaSFoundationTest.php",
-        "test:isolation": "php tests/TenantIsolationTest.php"
-    },
     "config": {
         "optimize-autoloader": true,
         "sort-packages": true,

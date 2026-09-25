@@ -15,7 +15,8 @@
         }
     },
     "scripts": {
-        "test:foundation": "php tests/SaaSFoundationTest.php"
+        "test:foundation": "php tests/SaaSFoundationTest.php",
+        "test:isolation": "php tests/TenantIsolationTest.php"
     },
     "config": {
         "optimize-autoloader": true,

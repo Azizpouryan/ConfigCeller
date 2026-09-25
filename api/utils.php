@@ -100,8 +100,21 @@ function validateToken($headers)
     return false;
 }
 
+function saasTenantEnforcementEnabled(): bool
+{
+    return getenv('MIRZABOT_SAAS_ENFORCE_TENANT') === '1';
+}
+
+function rejectLegacyApiWhenSaaS(): void
+{
+    if (saasTenantEnforcementEnabled()) {
+        sendJsonResponse(false, 'legacy API disabled while tenant isolation is enforced', [], 410);
+    }
+}
+
 function requireApiToken($headers)
 {
+    rejectLegacyApiWhenSaaS();
     if (!validateToken($headers)) {
         sendJsonResponse(false, "token invalid", [], 403);
     }
@@ -129,6 +142,7 @@ function hasAdminSession()
 
 function requireApiTokenOrAdminSession($headers)
 {
+    rejectLegacyApiWhenSaaS();
     if (validateToken($headers) || hasAdminSession()) {
         return;
     }

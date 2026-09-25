@@ -5,6 +5,7 @@ require_once __DIR__ . '/../function.php';
 require_once __DIR__ . '/utils.php';
 
 header('Content-Type: application/json; charset=utf-8');
+rejectLegacyApiWhenSaaS();
 date_default_timezone_set('Asia/Tehran');
 ini_set('default_charset', 'UTF-8');
 ini_set('error_log', 'error_log');

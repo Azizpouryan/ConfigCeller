@@ -41,6 +41,12 @@ function db_count(PDO $pdo, string $sql, array $params = []): int
 }
 function require_auth(): void
 {
+    // The old panel executes global queries. Once SaaS isolation is enabled,
+    // fail closed instead of allowing a global admin session to cross tenants.
+    if (getenv('MIRZABOT_SAAS_ENFORCE_TENANT') === '1') {
+        header('Location: saas_login.php');
+        exit;
+    }
     if (session_status() === PHP_SESSION_NONE)
         session_start();
     global $pdo;

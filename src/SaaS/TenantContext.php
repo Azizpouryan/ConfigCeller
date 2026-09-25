@@ -35,6 +35,14 @@ final class TenantContext
         $this->attributes = $attributes;
     }
 
+    public function applyToPdo(\PDO $pdo): void
+    {
+        $tenant = $pdo->quote($this->requireTenantId());
+        $bot = $this->botId === null ? 'NULL' : (string) $this->botId;
+        $pdo->exec("SET @mirza_tenant_id = {$tenant}");
+        $pdo->exec("SET @mirza_saas_bot_id = {$bot}");
+    }
+
     public function clear(): void
     {
         $this->tenantId = null;

@@ -358,6 +358,29 @@ function ensureColumnExistsForUpdate($tableName, $fieldName, $valueSample = null
         error_log('Failed to ensure column exists: ' . $e->getMessage());
     }
 }
+function saasRuntimeTenantId(): ?string
+{
+    $context = $GLOBALS['mirzaSaasTenantContext'] ?? null;
+    if (!is_object($context) || !method_exists($context, 'tenantId')) {
+        return null;
+    }
+    $tenantId = $context->tenantId();
+    return is_string($tenantId) && $tenantId !== '' ? $tenantId : null;
+}
+
+function saasTenantScopedLegacyTable(string $table): bool
+{
+    static $tables = [
+        'admin', 'user', 'help', 'setting', 'channels', 'marzban_panel', 'product',
+        'invoice', 'payment_report', 'discount', 'giftcodeconsumed', 'paysetting',
+        'discountsell', 'affiliates', 'shopsetting', 'cancel_service', 'service_other',
+        'card_number', 'requestagent', 'topicid', 'manualsell', 'departman',
+        'support_message', 'wheel_list', 'botsaz', 'app', 'logs_api', 'category',
+        'reagent_report',
+    ];
+    return in_array(strtolower($table), $tables, true);
+}
+
 function update($table, $field, $newValue, $whereField = null, $whereValue = null)
 {
     global $pdo, $user;
@@ -370,13 +393,27 @@ function update($table, $field, $newValue, $whereField = null, $whereValue = nul
 
     ensureColumnExistsForUpdate($table, $field, $valueToStore);
 
-    $executeUpdate = function ($value) use ($pdo, $table, $field, $whereField, $whereValue) {
+    $tenantId = saasRuntimeTenantId();
+    $tenantScoped = $tenantId !== null && saasTenantScopedLegacyTable($table);
+    $executeUpdate = function ($value) use ($pdo, $table, $field, $whereField, $whereValue, $tenantId, $tenantScoped) {
         if ($whereField !== null) {
-            $stmt = $pdo->prepare("UPDATE $table SET $field = ? WHERE $whereField = ?");
-            $stmt->execute([$value, $whereValue]);
+            $sql = "UPDATE $table SET $field = ? WHERE $whereField = ?";
+            $params = [$value, $whereValue];
+            if ($tenantScoped) {
+                $sql .= ' AND tenant_id = ?';
+                $params[] = $tenantId;
+            }
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
         } else {
-            $stmt = $pdo->prepare("UPDATE $table SET $field = ?");
-            $stmt->execute([$value]);
+            $sql = "UPDATE $table SET $field = ?";
+            $params = [$value];
+            if ($tenantScoped) {
+                $sql .= ' WHERE tenant_id = ?';
+                $params[] = $tenantId;
+            }
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
         }
     };
 
@@ -466,6 +503,8 @@ function select($table, $field, $whereField = null, $whereValue = null, $type = 
         $useCache = (bool) $options['cache'];
     }
 
+    $tenantId = saasRuntimeTenantId();
+    $tenantScoped = $tenantId !== null && saasTenantScopedLegacyTable($table);
     $cacheKey = null;
     if ($useCache) {
         $cacheKey = hash('sha256', json_encode([
@@ -474,6 +513,7 @@ function select($table, $field, $whereField = null, $whereValue = null, $type = 
             $whereField,
             $whereValue,
             $type,
+            $tenantId,
         ], JSON_UNESCAPED_UNICODE));
 
         $store = &getSelectCacheStore();
@@ -490,6 +530,11 @@ function select($table, $field, $whereField = null, $whereValue = null, $type = 
 
     if ($whereField !== null) {
         $query .= " WHERE $whereField = :whereValue";
+        if ($tenantScoped) {
+            $query .= " AND tenant_id = :tenantId";
+        }
+    } elseif ($tenantScoped) {
+        $query .= " WHERE tenant_id = :tenantId";
     }
 
     if ($type != "count" && $type != "fetchAll" && $type != "FETCH_COLUMN") {
@@ -501,7 +546,10 @@ function select($table, $field, $whereField = null, $whereValue = null, $type = 
     try {
         $stmt = $pdo->prepare($query);
         if ($whereField !== null) {
-            $stmt->bindParam(':whereValue', $whereValue, PDO::PARAM_STR);
+            $stmt->bindValue(':whereValue', $whereValue, PDO::PARAM_STR);
+        }
+        if ($tenantScoped) {
+            $stmt->bindValue(':tenantId', $tenantId, PDO::PARAM_STR);
         }
 
         $stmt->execute();
@@ -519,7 +567,7 @@ function select($table, $field, $whereField = null, $whereValue = null, $type = 
                     return $value !== null && $value !== '';
                 })));
 
-                if (empty($results) && isset($adminnumber) && $adminnumber !== '') {
+                if (!$tenantScoped && empty($results) && isset($adminnumber) && $adminnumber !== '') {
                     $results[] = (string) $adminnumber;
                 }
             }
@@ -555,8 +603,17 @@ function rowExists($table, $field, $value)
     assertSqlIdentifier($field);
 
     try {
-        $stmt = $pdo->prepare("SELECT 1 FROM $table WHERE $field = ? LIMIT 1");
-        $stmt->execute([$value]);
+        $tenantId = saasRuntimeTenantId();
+        $tenantScoped = $tenantId !== null && saasTenantScopedLegacyTable($table);
+        $sql = "SELECT 1 FROM $table WHERE $field = ?";
+        $params = [$value];
+        if ($tenantScoped) {
+            $sql .= ' AND tenant_id = ?';
+            $params[] = $tenantId;
+        }
+        $sql .= ' LIMIT 1';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
         return $stmt->fetchColumn() !== false;
     } catch (PDOException $e) {
         error_log("Query failed: " . $e->getMessage());

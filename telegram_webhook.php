@@ -48,6 +48,7 @@ try {
 
     $context = new \MirzaBot\SaaS\TenantContext();
     $context->set((string) $bot['tenant_id'], (int) $bot['id']);
+    $context->applyToPdo($pdo);
     $GLOBALS['mirzaSaasTenantContext'] = $context;
 
     // The existing core is only safe to dispatch for the single legacy tenant

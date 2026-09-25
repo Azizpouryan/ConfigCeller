@@ -20,6 +20,7 @@ function mirza_cron_jobs(): array
         ['job' => 'expireagent', 'schedule' => '*/30 * * * *', 'title' => 'انقضای اشتراک نمایندگان'],
         ['job' => 'backupbot', 'schedule' => '0 */5 * * *', 'title' => 'پشتیبان‌گیری ربات‌ساز'],
         ['job' => 'lottery', 'schedule' => '*/1 * * * *', 'title' => 'قرعه‌کشی و امتیازات'],
+        ['job' => 'saas_worker', 'schedule' => '*/1 * * * *', 'title' => 'پردازش صف SaaS'],
     ];
 }
 

@@ -39,6 +39,7 @@ try {
         $context,
         \MirzaBot\SaaS\SecretBox::fromEnvironment(),
     );
+    $audit = new \MirzaBot\SaaS\AuditLogger($pdo);
 
     if ($method === 'GET') {
         sendJsonResponse(true, 'ok', [
@@ -57,12 +58,17 @@ try {
     switch ($action) {
         case 'create':
             $item = $manager->create((string) ($data['token'] ?? ''), (string) ($data['username'] ?? ''));
+            $audit->record($auth->tenantId(), $auth->userId(), 'bot.created', 'saas_bot', $item['public_id'], ['username' => $item['username']]);
             sendJsonResponse(true, 'bot created', ['item' => $item], 201);
         case 'delete':
-            $manager->softDelete((string) ($data['public_id'] ?? ''));
+            $publicId = (string) ($data['public_id'] ?? '');
+            $manager->softDelete($publicId);
+            $audit->record($auth->tenantId(), $auth->userId(), 'bot.soft_deleted', 'saas_bot', $publicId);
             sendJsonResponse(true, 'bot scheduled for deletion', []);
         case 'rotate':
-            $manager->rotateToken((string) ($data['public_id'] ?? ''), (string) ($data['token'] ?? ''));
+            $publicId = (string) ($data['public_id'] ?? '');
+            $manager->rotateToken($publicId, (string) ($data['token'] ?? ''));
+            $audit->record($auth->tenantId(), $auth->userId(), 'bot.credential_rotated', 'saas_bot', $publicId);
             sendJsonResponse(true, 'bot credential rotated', []);
         default:
             sendJsonResponse(false, 'action invalid', [], 422);

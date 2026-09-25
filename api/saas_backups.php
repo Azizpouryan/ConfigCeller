@@ -28,6 +28,7 @@ try {
         $pdo,
         \MirzaBot\SaaS\SecretBox::fromEnvironment(),
     );
+    $audit = new \MirzaBot\SaaS\AuditLogger($pdo);
 
     if ($method === 'GET') {
         $action = (string) ($_GET['action'] ?? 'preview');
@@ -53,14 +54,15 @@ try {
 
     switch ((string) ($data['action'] ?? '')) {
         case 'create':
-            sendJsonResponse(true, 'backup created', [
-                'backup' => $service->create(
-                    $auth->tenantId(),
-                    (string) ($data['mode'] ?? 'full'),
-                    $auth->userId(),
-                ),
-            ], 201);
+            $backup = $service->create(
+                $auth->tenantId(),
+                (string) ($data['mode'] ?? 'full'),
+                $auth->userId(),
+            );
+            $audit->record($auth->tenantId(), $auth->userId(), 'backup.created', 'saas_backup', $backup['public_id'], ['mode' => $backup['mode']]);
+            sendJsonResponse(true, 'backup created', ['backup' => $backup], 201);
         case 'restore':
+            $audit->record($auth->tenantId(), $auth->userId(), 'backup.restore_requested', 'saas_backup', (string) ($data['backup_id'] ?? ''), ['mode' => (string) ($data['mode'] ?? '')]);
             $service->restore(
                 $auth->tenantId(),
                 (string) ($data['backup_id'] ?? ''),

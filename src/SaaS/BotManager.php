@@ -17,7 +17,8 @@ final class BotManager
     public function __construct(
         private readonly PDO $pdo,
         private readonly TenantContext $context,
-        private readonly SecretBox $secretBox,
+        private readonly ?SecretBox $secretBox,
+        private readonly ?JobQueue $queue = null,
     ) {
     }
 
@@ -63,8 +64,8 @@ final class BotManager
             $this->context->requireTenantId(),
             ltrim($username, '@'),
             $tokenHash,
-            $this->secretBox->encrypt($token),
-            $this->secretBox->encrypt(bin2hex(random_bytes(32))),
+            $this->requireSecretBox()->encrypt($token),
+            $this->requireSecretBox()->encrypt(bin2hex(random_bytes(32))),
             'provisioning',
             $now,
             $now,
@@ -81,10 +82,41 @@ final class BotManager
              SET status = 'deleted', deleted_at = ?, updated_at = ?
              WHERE public_id = ? AND tenant_id = ? AND deleted_at IS NULL"
         );
-        $statement->execute([date('Y-m-d H:i:s'), date('Y-m-d H:i:s'), $publicId, $this->context->requireTenantId()]);
-        if ($statement->rowCount() !== 1) {
-            throw new RuntimeException('Bot was not found in the current tenant.');
+        $tenantId = $this->context->requireTenantId();
+        $startedTransaction = false;
+        try {
+            if (!$this->pdo->inTransaction()) {
+                $this->pdo->beginTransaction();
+                $startedTransaction = true;
+            }
+            $statement->execute([date('Y-m-d H:i:s'), date('Y-m-d H:i:s'), $publicId, $tenantId]);
+            if ($statement->rowCount() !== 1) {
+                throw new RuntimeException('Bot was not found in the current tenant.');
+            }
+            if ($this->queue !== null) {
+                $this->queue->enqueue('bot.cleanup', ['public_id' => $publicId], $tenantId, null, 'bot.cleanup:' . $tenantId . ':' . $publicId, 86400, 10);
+            }
+            if ($startedTransaction && $this->pdo->inTransaction()) {
+                $this->pdo->commit();
+            }
+        } catch (\Throwable $e) {
+            if ($startedTransaction && $this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
         }
+    }
+
+    public function cleanupDeleted(string $publicId, int $retentionSeconds = 86400): void
+    {
+        $this->assertPublicId($publicId);
+        $cutoff = date('Y-m-d H:i:s', time() - max(86400, $retentionSeconds));
+        $statement = $this->pdo->prepare(
+            "UPDATE saas_bot
+             SET token_hash = NULL, token_ciphertext = NULL, webhook_secret_ciphertext = NULL, updated_at = ?
+             WHERE public_id = ? AND tenant_id = ? AND status = 'deleted' AND deleted_at IS NOT NULL AND deleted_at <= ?"
+        );
+        $statement->execute([date('Y-m-d H:i:s'), $publicId, $this->context->requireTenantId(), $cutoff]);
     }
 
     public function rotateToken(string $publicId, string $token): void
@@ -109,7 +141,7 @@ final class BotManager
         );
         $statement->execute([
             $tokenHash,
-            $this->secretBox->encrypt($token),
+            $this->requireSecretBox()->encrypt($token),
             date('Y-m-d H:i:s'),
             $publicId,
             $this->context->requireTenantId(),
@@ -127,7 +159,7 @@ final class BotManager
         if (!is_array($bot) || empty($bot['token_ciphertext'])) {
             throw new RuntimeException('Bot credential is unavailable.');
         }
-        return $this->secretBox->decrypt((string) $bot['token_ciphertext']);
+        return $this->requireSecretBox()->decrypt((string) $bot['token_ciphertext']);
     }
 
     public function markHealth(string $publicId, string $status, ?string $error = null): void
@@ -165,6 +197,14 @@ final class BotManager
         $statement->execute([$publicId, $this->context->requireTenantId()]);
         $row = $statement->fetch(PDO::FETCH_ASSOC);
         return is_array($row) ? $row : null;
+    }
+
+    private function requireSecretBox(): SecretBox
+    {
+        if ($this->secretBox === null) {
+            throw new RuntimeException('Bot secret storage is not configured.');
+        }
+        return $this->secretBox;
     }
 
     private function uuid(): string

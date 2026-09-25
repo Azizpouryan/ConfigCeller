@@ -38,6 +38,7 @@ try {
         $pdo,
         $context,
         \MirzaBot\SaaS\SecretBox::fromEnvironment(),
+        new \MirzaBot\SaaS\JobQueue($pdo),
     );
     $audit = new \MirzaBot\SaaS\AuditLogger($pdo);
 

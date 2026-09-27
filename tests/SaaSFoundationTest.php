@@ -6,6 +6,7 @@ require_once __DIR__ . '/../src/SaaS/bootstrap.php';
 
 use MirzaBot\SaaS\AuthContext;
 use MirzaBot\SaaS\DomainResolver;
+use MirzaBot\SaaS\LegacySqlScope;
 use MirzaBot\SaaS\Role;
 use MirzaBot\SaaS\SecretBox;
 use MirzaBot\SaaS\TenantContext;
@@ -50,5 +51,14 @@ $pass(!$authContext->can('system.shutdown'), 'Unknown permission was granted.');
 $masterContext = new AuthContext(2, $tenantId, Role::MASTER_ADMIN, true, time() - 10, time());
 $pass($masterContext->can('system.shutdown'), 'Master admin wildcard permission was not granted.');
 $pass(DomainResolver::normalize('Panel.Example.com:443') === 'panel.example.com', 'Domain normalization failed.');
+
+$scopeContext = new TenantContext();
+$scopeContext->set($tenantId);
+$GLOBALS['mirzaSaasTenantContext'] = $scopeContext;
+$scopedSql = LegacySqlScope::scope('SELECT * FROM invoice WHERE id_user = :id ORDER BY id_invoice DESC');
+$pass(str_contains($scopedSql, 'tenant_id = :__mirza_tenant_id'), 'Legacy SELECT was not tenant-scoped.');
+$insertSql = LegacySqlScope::scope('INSERT INTO invoice (id_invoice) VALUES (?)');
+$pass($insertSql === 'INSERT INTO invoice (id_invoice) VALUES (?)', 'Legacy INSERT was unexpectedly rewritten.');
+unset($GLOBALS['mirzaSaasTenantContext']);
 
 fwrite(STDOUT, "SaaS foundation tests passed.\n");

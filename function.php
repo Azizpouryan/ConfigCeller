@@ -1,5 +1,6 @@
 <?php
 require_once 'vendor/autoload.php';
+require_once __DIR__ . '/src/SaaS/bootstrap.php';
 require 'config.php';
 ini_set('error_log', 'error_log');
 
@@ -379,6 +380,16 @@ function saasTenantScopedLegacyTable(string $table): bool
         'reagent_report',
     ];
     return in_array(strtolower($table), $tables, true);
+}
+
+function saasPrepare(PDO $pdo, string $sql, array $options = []): PDOStatement
+{
+    return \MirzaBot\SaaS\LegacySqlScope::prepare($pdo, $sql, $options);
+}
+
+function saasQuery(PDO $pdo, string $sql): PDOStatement
+{
+    return \MirzaBot\SaaS\LegacySqlScope::query($pdo, $sql);
 }
 
 function update($table, $field, $newValue, $whereField = null, $whereValue = null)

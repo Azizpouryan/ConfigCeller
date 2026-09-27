@@ -44,7 +44,7 @@ class ManagePanel
         }
         if (!in_array($code_product, ["usertest", $textbotlang['users']['customSellVolume']['btnVolume'], "customvolume"])) {
 
-            $stmt = $pdo->prepare("SELECT * FROM product WHERE (Location = :name_panel OR Location = '/all')  AND code_product = :code_product");
+            $stmt = saasPrepare($pdo, "SELECT * FROM product WHERE (Location = :name_panel OR Location = '/all')  AND code_product = :code_product");
             $stmt->bindParam(':name_panel', $name_panel);
             $stmt->bindParam(':code_product', $code_product);
             $stmt->execute();
@@ -262,7 +262,7 @@ class ManagePanel
                 }
             }
         } elseif ($Get_Data_Panel['type'] == "Manualsale") {
-            $statement = $pdo->prepare("SELECT * FROM manualsell WHERE codepanel = :code_panel AND status = 'active' AND codeproduct = :code_product ORDER BY RAND() LIMIT 1");
+            $statement = saasPrepare($pdo, "SELECT * FROM manualsell WHERE codepanel = :code_panel AND status = 'active' AND codeproduct = :code_product ORDER BY RAND() LIMIT 1");
             $statement->bindParam(":code_panel", $Get_Data_Panel['code_panel']);
             $statement->bindParam(":code_product", $code_product);
             $statement->execute();
@@ -746,7 +746,7 @@ class ManagePanel
                 );
             }
         } elseif ($Get_Data_Panel['type'] == "Manualsale") {
-            $stmt = $pdo->prepare("SELECT * FROM manualsell WHERE username = :username");
+            $stmt = saasPrepare($pdo, "SELECT * FROM manualsell WHERE username = :username");
             $stmt->bindParam(':username', $username);
             $stmt->execute();
             $configman = $stmt->fetch(PDO::FETCH_ASSOC);

@@ -263,7 +263,7 @@ $usernamecart = getPaySettingValue("CartDirect");
 $Swapino = getPaySettingValue("statusSwapWallet");
 $trnadoo = getPaySettingValue("statustarnado");
 $paymentverify = getPaySettingValue("checkpaycartfirst");
-$stmt = $pdo->prepare("SELECT COUNT(*) FROM Payment_report WHERE id_user = :user_id AND payment_Status = 'paid'");
+$stmt = saasPrepare($pdo, "SELECT COUNT(*) FROM Payment_report WHERE id_user = :user_id AND payment_Status = 'paid'");
 $stmt->bindValue(':user_id', $from_id);
 $stmt->execute();
 $paymentexits = (int) $stmt->fetchColumn();
@@ -588,7 +588,7 @@ function cronStatusMenu()
 function giftCodesMenu()
 {
     global $pdo, $textbotlang;
-    $giftCodes = $pdo->query("SELECT code, price FROM Discount")->fetchAll(PDO::FETCH_ASSOC);
+    $giftCodes = saasQuery($pdo, "SELECT code, price FROM Discount")->fetchAll(PDO::FETCH_ASSOC);
     $rows = [[['text' => $textbotlang['keyboard']['createGiftCode'], 'callback_data' => "giftcode_create"]]];
     foreach ($giftCodes as $giftCode) {
         $rows[] = [
@@ -618,7 +618,7 @@ function discountPanelsKeyboard()
 {
     global $pdo, $textbotlang;
     $rows = [[['text' => $textbotlang['keyboard']['allPanels'], 'callback_data' => "discountpanel_all"]]];
-    foreach ($pdo->query("SELECT name_panel, code_panel FROM marzban_panel")->fetchAll(PDO::FETCH_ASSOC) as $panel) {
+    foreach (saasQuery($pdo, "SELECT name_panel, code_panel FROM marzban_panel")->fetchAll(PDO::FETCH_ASSOC) as $panel) {
         $rows[] = [['text' => $panel['name_panel'], 'callback_data' => "discountpanel_{$panel['code_panel']}"]];
     }
     $rows[] = [['text' => $textbotlang['keyboard']['backToPreviousMenu'], 'callback_data' => "discountcode_list"]];
@@ -627,7 +627,7 @@ function discountPanelsKeyboard()
 function discountProductsKeyboard($location)
 {
     global $pdo, $textbotlang;
-    $stmt = $pdo->prepare("SELECT name_product, code_product FROM product WHERE Location = :location OR Location = '/all'");
+    $stmt = saasPrepare($pdo, "SELECT name_product, code_product FROM product WHERE Location = :location OR Location = '/all'");
     $stmt->execute([':location' => $location]);
     $rows = [[['text' => $textbotlang['keyboard']['allProducts'], 'callback_data' => "discountproduct_all"]]];
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $product) {
@@ -639,7 +639,7 @@ function discountProductsKeyboard($location)
 function discountCodesMenu()
 {
     global $pdo, $textbotlang;
-    $discountCodes = $pdo->query("SELECT codeDiscount, price FROM DiscountSell")->fetchAll(PDO::FETCH_ASSOC);
+    $discountCodes = saasQuery($pdo, "SELECT codeDiscount, price FROM DiscountSell")->fetchAll(PDO::FETCH_ASSOC);
     $rows = [[['text' => $textbotlang['keyboard']['createDiscountCode'], 'callback_data' => "discountcode_create"]]];
     foreach ($discountCodes as $discountCode) {
         $rows[] = [
@@ -720,7 +720,7 @@ $backadmin = json_encode([
 ]);
 //------------------  [ list panel ]----------------//
 $namepanel = [];
-    $allPanelRows = $pdo->query("SELECT * FROM marzban_panel")->fetchAll(PDO::FETCH_ASSOC);
+    $allPanelRows = saasQuery($pdo, "SELECT * FROM marzban_panel")->fetchAll(PDO::FETCH_ASSOC);
     foreach ($allPanelRows as $row) {
         $namepanel[] = [$row['name_panel']];
     }
@@ -748,7 +748,7 @@ $namepanel = [];
     $list_marzban_panel_edit_product = json_encode($list_marzban_panel_edit_product);
 //------------------  [ list channel ]----------------//
 $list_channels = [];
-    $stmt = $pdo->prepare("SELECT * FROM channels");
+    $stmt = saasPrepare($pdo, "SELECT * FROM channels");
     $stmt->execute();
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $list_channels[] = [$row['link']];
@@ -769,7 +769,7 @@ $list_channels = [];
     $list_channels_joins = json_encode($list_channels_join);
 //------------------  [ list card ]----------------//
 $list_card = [];
-    $stmt = $pdo->prepare("SELECT * FROM card_number");
+    $stmt = saasPrepare($pdo, "SELECT * FROM card_number");
     $stmt->execute();
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $list_card[] = [$row['cardnumber']];
@@ -789,7 +789,7 @@ $list_card = [];
     ];
     $list_card_remove = json_encode($list_card_remove);
 //------------------  [ help list ]----------------//
-    $helpRows = $pdo->query("SELECT * FROM help")->fetchAll(PDO::FETCH_ASSOC);
+    $helpRows = saasQuery($pdo, "SELECT * FROM help")->fetchAll(PDO::FETCH_ASSOC);
     $helpkey = [];
     foreach ($helpRows as $row) {
         $helpkey[] = [$row['name_os']];
@@ -835,7 +835,7 @@ $json_list_helpـcategory = json_encode($helpcwtgory);
 
 
 //------------------  [ help app ]----------------//
-$appRows = $pdo->query("SELECT * FROM app")->fetchAll(PDO::FETCH_ASSOC);
+$appRows = saasQuery($pdo, "SELECT * FROM app")->fetchAll(PDO::FETCH_ASSOC);
 $helpapp = ['inline_keyboard' => []];
 foreach ($appRows as $result) {
     $helpapp['inline_keyboard'][] = [
@@ -858,13 +858,13 @@ $helpappremove['keyboard'][] = [
 ];
 $json_list_remove_helpـlink = json_encode($helpappremove);
 //------------------  [ listpanelusers ]----------------//
-$stmt = $pdo->prepare("SELECT * FROM marzban_panel WHERE status = 'active' AND (agent = :agent OR agent = 'all')");
+$stmt = saasPrepare($pdo, "SELECT * FROM marzban_panel WHERE status = 'active' AND (agent = :agent OR agent = 'all')");
 $stmt->bindParam(':agent', $users['agent']);
 $stmt->execute();
 $activePanelRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $manualsellCounts = [];
 if (in_array('Manualsale', array_column($activePanelRows, 'type'))) {
-    foreach ($pdo->query("SELECT codepanel, COUNT(*) AS c FROM manualsell WHERE status = 'active' GROUP BY codepanel")->fetchAll(PDO::FETCH_ASSOC) as $msRow) {
+    foreach (saasQuery($pdo, "SELECT codepanel, COUNT(*) AS c FROM manualsell WHERE status = 'active' GROUP BY codepanel")->fetchAll(PDO::FETCH_ASSOC) as $msRow) {
         $manualsellCounts[$msRow['codepanel']] = (int) $msRow['c'];
     }
 }
@@ -975,7 +975,7 @@ $list_marzban_panel_userschange = json_encode($list_marzban_panel_users_change);
 
 
 //------------------  [ listpanelusers test ]----------------//
-$stmt = $pdo->prepare("SELECT * FROM marzban_panel WHERE TestAccount = 'ONTestAccount' AND (agent = :agent OR agent = 'all')");
+$stmt = saasPrepare($pdo, "SELECT * FROM marzban_panel WHERE TestAccount = 'ONTestAccount' AND (agent = :agent OR agent = 'all')");
 $stmt->bindValue(':agent', $users['agent'], PDO::PARAM_STR);
 $stmt->execute();
 $list_marzban_panel_usertest = ['inline_keyboard' => []];
@@ -993,7 +993,7 @@ $list_marzban_usertest = json_encode($list_marzban_panel_usertest);
 
 //--------------------------------------------------
     $product = [];
-    $stmt = $pdo->prepare("SELECT * FROM product WHERE Location = :text or Location = '/all' ");
+    $stmt = saasPrepare($pdo, "SELECT * FROM product WHERE Location = :text or Location = '/all' ");
     $stmt->bindParam(':text', $text, PDO::PARAM_STR);
     $stmt->execute();
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -1463,7 +1463,7 @@ $supportcenter = json_encode([
 ]);
 //------------------  [ list departeman ]----------------//
 $departeman = [];
-    $stmt = $pdo->prepare("SELECT * FROM departman");
+    $stmt = saasPrepare($pdo, "SELECT * FROM departman");
     $stmt->execute();
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $departeman[] = [$row['name_departman']];
@@ -1484,7 +1484,7 @@ $departeman = [];
     $departemanslist = json_encode($departemans);
 // list departeman
 $list_departman = ['inline_keyboard' => []];
-    $stmt = $pdo->prepare("SELECT * FROM departman");
+    $stmt = saasPrepare($pdo, "SELECT * FROM departman");
     $stmt->execute();
     while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $list_departman['inline_keyboard'][] = [
@@ -1514,7 +1514,7 @@ function KeyboardProduct($location, $query, $pricediscount, $datakeyboard, $stat
     global $pdo, $textbotlang, $from_id;
     $product = ['inline_keyboard' => []];
     $statusshowprice = select("shopSetting", "*", "Namevalue", "statusshowprice", "select")['value'];
-    $stmt = $pdo->prepare($query);
+    $stmt = saasPrepare($pdo, $query);
     $stmt->execute($queryParams);
     if ($valuetow != null) {
         $valuetow = "-$valuetow";
@@ -1528,7 +1528,7 @@ function KeyboardProduct($location, $query, $pricediscount, $datakeyboard, $stat
             continue;
         if ($result['one_buy_status'] == "1") {
             if ($countorder === null) {
-                $stmts2 = $pdo->prepare("SELECT COUNT(*) FROM invoice WHERE Status != 'Unpaid' AND id_user = :id_user");
+                $stmts2 = saasPrepare($pdo, "SELECT COUNT(*) FROM invoice WHERE Status != 'Unpaid' AND id_user = :id_user");
                 $stmts2->bindValue(':id_user', $from_id);
                 $stmts2->execute();
                 $countorder = (int) $stmts2->fetchColumn();
@@ -1558,7 +1558,7 @@ function KeyboardProduct($location, $query, $pricediscount, $datakeyboard, $stat
 function KeyboardCategory($location, $agent, $backuser = "backuser")
 {
     global $pdo, $textbotlang;
-    $stmts = $pdo->prepare("SELECT category, COUNT(*) AS c FROM product WHERE (Location = :location OR Location = '/all') AND agent = :agent GROUP BY category");
+    $stmts = saasPrepare($pdo, "SELECT category, COUNT(*) AS c FROM product WHERE (Location = :location OR Location = '/all') AND agent = :agent GROUP BY category");
     $stmts->bindParam(':location', $location, PDO::PARAM_STR);
     $stmts->bindParam(':agent', $agent);
     $stmts->execute();
@@ -1567,7 +1567,7 @@ function KeyboardCategory($location, $agent, $backuser = "backuser")
         $categoryKey = mb_strtolower(trim((string) $catRow['category']), 'UTF-8');
         $categoryCounts[$categoryKey] = ($categoryCounts[$categoryKey] ?? 0) + (int) $catRow['c'];
     }
-    $stmt = $pdo->prepare("SELECT * FROM category");
+    $stmt = saasPrepare($pdo, "SELECT * FROM category");
     $stmt->execute();
     $list_category = ['inline_keyboard' => [],];
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -1584,7 +1584,7 @@ function KeyboardCategory($location, $agent, $backuser = "backuser")
 function keyboardTimeCategory($name_panel, $agent, $callback_data = "producttime_", $callback_data_back = "backuser", $statuscustomvolume = false, $statusbtnextend = false)
 {
     global $pdo, $textbotlang;
-    $stmt = $pdo->prepare("SELECT (Service_time) FROM product WHERE (Location = :name_panel OR Location = '/all') AND  agent = :agent");
+    $stmt = saasPrepare($pdo, "SELECT (Service_time) FROM product WHERE (Location = :name_panel OR Location = '/all') AND  agent = :agent");
     $stmt->bindValue(':name_panel', $name_panel, PDO::PARAM_STR);
     $stmt->bindValue(':agent', $agent, PDO::PARAM_STR);
     $stmt->execute();
@@ -1687,7 +1687,7 @@ $keyboardchangelimit = json_encode([
 function KeyboardCategoryadmin()
 {
     global $pdo, $textbotlang;
-    $stmt = $pdo->prepare("SELECT * FROM category");
+    $stmt = saasPrepare($pdo, "SELECT * FROM category");
     $stmt->execute();
     $list_category = [
         'keyboard' => [],

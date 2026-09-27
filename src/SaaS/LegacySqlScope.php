@@ -60,6 +60,9 @@ final class LegacySqlScope
         if (!in_array($operation, ['SELECT', 'UPDATE', 'DELETE'], true)) {
             return $sql;
         }
+        if (preg_match('/\(\s*SELECT\b|\bUNION\b/i', $sql)) {
+            throw new RuntimeException('Subqueries and UNIONs must be migrated explicitly before tenant dispatch.');
+        }
         if (preg_match('/\b(?:[A-Za-z_][A-Za-z0-9_]*\.)?tenant_id\s*=\s*/i', $sql)) {
             return $sql;
         }

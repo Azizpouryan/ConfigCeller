@@ -59,6 +59,13 @@ $scopedSql = LegacySqlScope::scope('SELECT * FROM invoice WHERE id_user = :id OR
 $pass(str_contains($scopedSql, 'tenant_id = @mirza_tenant_id'), 'Legacy SELECT was not tenant-scoped.');
 $insertSql = LegacySqlScope::scope('INSERT INTO invoice (id_invoice) VALUES (?)');
 $pass($insertSql === 'INSERT INTO invoice (id_invoice) VALUES (?)', 'Legacy INSERT was unexpectedly rewritten.');
+$blockedComplexSql = false;
+try {
+    LegacySqlScope::scope('SELECT u.id FROM user u WHERE EXISTS (SELECT 1 FROM invoice i WHERE i.id_user = u.id)');
+} catch (RuntimeException) {
+    $blockedComplexSql = true;
+}
+$pass($blockedComplexSql, 'Complex legacy SQL was not fail-closed.');
 unset($GLOBALS['mirzaSaasTenantContext']);
 
 fwrite(STDOUT, "SaaS foundation tests passed.\n");

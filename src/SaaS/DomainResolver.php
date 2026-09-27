@@ -42,7 +42,7 @@ final class DomainResolver
             $host = explode(':', $host, 2)[0];
         }
         $host = rtrim($host, '.');
-        if ($host === '' || filter_var($host, FILTER_VALIDATE_IP) !== false || !preg_match('/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/', $host)) {
+        if ($host === '' || $host === 'localhost' || str_ends_with($host, '.localhost') || str_ends_with($host, '.local') || str_ends_with($host, '.internal') || filter_var($host, FILTER_VALIDATE_IP) !== false || !preg_match('/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/', $host)) {
             throw new InvalidArgumentException('Invalid hostname.');
         }
         return $host;

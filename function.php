@@ -4,6 +4,13 @@ require_once __DIR__ . '/src/SaaS/bootstrap.php';
 require 'config.php';
 ini_set('error_log', 'error_log');
 
+// Every CLI/webhook entrypoint that includes the legacy helpers gets the same
+// trusted bot-to-tenant resolution. It is a no-op before the SaaS migrations
+// exist and never accepts a tenant id from request input.
+if (isset($pdo, $APIKEY) && is_string($APIKEY) && $APIKEY !== '') {
+    \MirzaBot\SaaS\LegacyBotContext::activate($pdo, $APIKEY);
+}
+
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;

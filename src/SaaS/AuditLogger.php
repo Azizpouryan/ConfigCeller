@@ -49,15 +49,9 @@ final class AuditLogger
         $sensitive = ['token', 'bot_token', 'password', 'password_panel', 'secret', 'secret_code', 'api_key', 'valuepay', 'ciphertext'];
         $result = [];
         foreach ($metadata as $key => $value) {
-            $normalized = strtolower((string) $key);
-            $isSensitive = false;
-            foreach ($sensitive as $needle) {
-                if (str_contains($normalized, $needle)) {
-                    $isSensitive = true;
-                    break;
-                }
-            }
-            $result[$key] = $isSensitive ? '[redacted]' : $this->redactValue($value, $sensitive);
+            $result[$key] = $this->isSensitiveKey((string) $key, $sensitive)
+                ? '[redacted]'
+                : $this->redactValue($value, $sensitive);
         }
         return $result;
     }
@@ -69,10 +63,22 @@ final class AuditLogger
         }
         $result = [];
         foreach ($value as $key => $item) {
-            $normalized = strtolower((string) $key);
-            $result[$key] = in_array($normalized, $sensitive, true) ? '[redacted]' : $this->redactValue($item, $sensitive);
+            $result[$key] = $this->isSensitiveKey((string) $key, $sensitive)
+                ? '[redacted]'
+                : $this->redactValue($item, $sensitive);
         }
         return $result;
+    }
+
+    private function isSensitiveKey(string $key, array $sensitive): bool
+    {
+        $normalized = strtolower($key);
+        foreach ($sensitive as $needle) {
+            if (str_contains($normalized, $needle)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private function requestId(): ?string

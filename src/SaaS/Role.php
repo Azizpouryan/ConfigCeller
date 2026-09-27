@@ -18,13 +18,13 @@ final class Role
             'tenant.read', 'tenant.update', 'members.read', 'members.manage',
             'bots.read', 'bots.manage', 'panels.read', 'panels.manage',
             'products.read', 'products.manage', 'orders.read', 'orders.manage',
-            'payments.read', 'settings.read', 'settings.manage', 'backups.manage', 'domains.manage',
+            'payments.read', 'payments.manage', 'settings.read', 'settings.manage', 'backups.manage', 'domains.manage',
             'audit.read',
         ],
         self::TENANT_ADMIN => [
             'tenant.read', 'members.read', 'members.manage', 'bots.read', 'bots.manage',
             'panels.read', 'panels.manage', 'products.read', 'products.manage',
-            'orders.read', 'orders.manage', 'payments.read', 'settings.read',
+            'orders.read', 'orders.manage', 'payments.read', 'payments.manage', 'settings.read',
             'settings.manage', 'backups.manage', 'domains.manage', 'audit.read',
         ],
         self::TENANT_STAFF => [

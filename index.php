@@ -24,6 +24,12 @@ if (!$managedWebhookVerified) {
     if (!$webhookSecret['created'] && $webhookSecret['secret'] !== '' && !webhookSecretMatches($webhookSecret['secret']))
         die("Unauthorized access");
 }
+// Resolve the configured bot token to the trusted legacy Tenant. This keeps
+// the original webhook path tenant-scoped after migration 013 without using
+// a tenant id from the request.
+if (isset($APIKEY) && is_string($APIKEY) && $APIKEY !== '') {
+    \MirzaBot\SaaS\LegacyBotContext::activate($pdo, $APIKEY);
+}
 if ($is_bot)
     return;
 if (isset($update['chat_member'])) {

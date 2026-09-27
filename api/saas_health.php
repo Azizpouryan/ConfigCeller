@@ -30,6 +30,26 @@ try {
     $missing = array_values(array_filter($requiredTables, static fn(string $table): bool => !in_array(strtolower($table), $present, true)));
     $checks['schema'] = ['ok' => $missing === [], 'missing' => $missing];
 
+    $legacyTables = [
+        'admin', 'user', 'help', 'setting', 'channels', 'marzban_panel', 'product',
+        'invoice', 'Payment_report', 'Discount', 'Giftcodeconsumed', 'PaySetting',
+        'DiscountSell', 'affiliates', 'shopSetting', 'cancel_service', 'service_other',
+        'card_number', 'Requestagent', 'topicid', 'manualsell', 'departman',
+        'support_message', 'wheel_list', 'botsaz', 'app', 'logs_api', 'category',
+        'reagent_report',
+    ];
+    $nullTenantRows = [];
+    foreach ($legacyTables as $table) {
+        if (!in_array(strtolower($table), $present, true)) {
+            continue;
+        }
+        $nullTenantRows[$table] = (int) $pdo->query("SELECT COUNT(*) FROM `{$table}` WHERE tenant_id IS NULL OR tenant_id = ''")->fetchColumn();
+    }
+    $checks['tenant_backfill'] = [
+        'ok' => array_sum($nullTenantRows) === 0,
+        'null_rows' => $nullTenantRows,
+    ];
+
     $checks['secret_key'] = ['ok' => \MirzaBot\SaaS\SecretBox::isConfigured()];
     $baseUrl = trim((string) getenv('MIRZABOT_WEBHOOK_BASE_URL'));
     $parts = parse_url($baseUrl);

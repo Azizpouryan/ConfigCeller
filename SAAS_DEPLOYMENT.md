@@ -11,6 +11,7 @@ MIRZABOT_SECRET_KEY=base64:<32-byte-key>
 MIRZABOT_WEBHOOK_BASE_URL=https://bot.example.com
 MIRZABOT_BACKUP_PATH=/var/lib/mirzabot/backups
 MIRZABOT_SAAS_WORKER_BATCH=10
+MIRZABOT_FORCE_SECURE_COOKIE=1
 ```
 
 `MIRZABOT_WEBHOOK_BASE_URL` باید HTTPS عمومی باشد. Token تلگرام و Secret وب‌هوک هرگز در این فایل، URL، HTML یا Log قرار نمی‌گیرند.

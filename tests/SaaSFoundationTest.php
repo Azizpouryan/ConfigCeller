@@ -56,7 +56,7 @@ $scopeContext = new TenantContext();
 $scopeContext->set($tenantId);
 $GLOBALS['mirzaSaasTenantContext'] = $scopeContext;
 $scopedSql = LegacySqlScope::scope('SELECT * FROM invoice WHERE id_user = :id ORDER BY id_invoice DESC');
-$pass(str_contains($scopedSql, 'tenant_id = :__mirza_tenant_id'), 'Legacy SELECT was not tenant-scoped.');
+$pass(str_contains($scopedSql, 'tenant_id = @mirza_tenant_id'), 'Legacy SELECT was not tenant-scoped.');
 $insertSql = LegacySqlScope::scope('INSERT INTO invoice (id_invoice) VALUES (?)');
 $pass($insertSql === 'INSERT INTO invoice (id_invoice) VALUES (?)', 'Legacy INSERT was unexpectedly rewritten.');
 unset($GLOBALS['mirzaSaasTenantContext']);

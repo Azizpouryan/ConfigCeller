@@ -32,11 +32,10 @@ final class LegacySqlScope
     public static function prepare(PDO $pdo, string $sql, array $options = []): PDOStatement
     {
         $scoped = self::scope($sql);
-        $statement = $pdo->prepare($scoped, $options);
-        if (str_contains($scoped, ':__mirza_tenant_id')) {
-            $statement->bindValue(':__mirza_tenant_id', self::tenantId(), PDO::PARAM_STR);
-        }
-        return $statement;
+        // Use the trusted PDO session variable instead of adding a named
+        // placeholder: legacy callers legitimately mix positional and named
+        // parameters, which PDO does not allow in one statement.
+        return $pdo->prepare($scoped, $options);
     }
 
     public static function query(PDO $pdo, string $sql): PDOStatement
@@ -87,7 +86,7 @@ final class LegacySqlScope
         }
 
         $field = ($alias === '' ? '' : $alias . '.') . 'tenant_id';
-        $condition = $field . ' = :__mirza_tenant_id';
+        $condition = $field . ' = @mirza_tenant_id';
         $tailOffset = strlen($sql);
         if (preg_match('/\b(GROUP\s+BY|ORDER\s+BY|HAVING|LIMIT|UNION|FOR\s+UPDATE)\b/i', $sql, $tail, PREG_OFFSET_CAPTURE)) {
             $tailOffset = $tail[0][1];

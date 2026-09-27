@@ -179,7 +179,7 @@ function ensureTableUtf8mb4($table)
     global $pdo;
 
     try {
-        $stmt = $pdo->prepare('SELECT TABLE_COLLATION FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?');
+        $stmt = saasPrepare($pdo, 'SELECT TABLE_COLLATION FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?');
         $stmt->execute([$table]);
         $currentCollation = $stmt->fetchColumn();
 
@@ -219,7 +219,7 @@ function ensureCardNumberTableSupportsUnicode()
 
         ensureTableUtf8mb4('card_number');
 
-        $columnInfo = $pdo->query("SHOW FULL COLUMNS FROM card_number WHERE Field IN ('cardnumber', 'namecard')");
+        $columnInfo = saasQuery($pdo, "SHOW FULL COLUMNS FROM card_number WHERE Field IN ('cardnumber', 'namecard')");
         if ($columnInfo instanceof PDOStatement) {
             while ($column = $columnInfo->fetch(PDO::FETCH_ASSOC)) {
                 $collation = $column['Collation'] ?? '';
@@ -291,7 +291,7 @@ function copyDirectoryContents($source, $destination)
 function step($step, $from_id)
 {
     global $pdo;
-    $stmt = $pdo->prepare('UPDATE user SET step = ? WHERE id = ?');
+    $stmt = saasPrepare($pdo, 'UPDATE user SET step = ? WHERE id = ?');
     $stmt->execute([$step, $from_id]);
     clearSelectCache('user');
 }
@@ -344,7 +344,7 @@ function ensureColumnExistsForUpdate($tableName, $fieldName, $valueSample = null
     }
 
     try {
-        $stmt = $pdo->prepare('SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?');
+        $stmt = saasPrepare($pdo, 'SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?');
         $stmt->execute([$tableName, $fieldName]);
         if ((int) $stmt->fetchColumn() > 0) {
             $knownColumns[$columnKey] = true;
@@ -421,7 +421,7 @@ function update($table, $field, $newValue, $whereField = null, $whereValue = nul
                 $sql .= ' AND tenant_id = ?';
                 $params[] = $tenantId;
             }
-            $stmt = $pdo->prepare($sql);
+            $stmt = saasPrepare($pdo, $sql);
             $stmt->execute($params);
         } else {
             $sql = "UPDATE $table SET $field = ?";
@@ -430,7 +430,7 @@ function update($table, $field, $newValue, $whereField = null, $whereValue = nul
                 $sql .= ' WHERE tenant_id = ?';
                 $params[] = $tenantId;
             }
-            $stmt = $pdo->prepare($sql);
+            $stmt = saasPrepare($pdo, $sql);
             $stmt->execute($params);
         }
     };
@@ -562,7 +562,7 @@ function select($table, $field, $whereField = null, $whereValue = null, $type = 
     $result = null;
     $queryFailed = false;
     try {
-        $stmt = $pdo->prepare($query);
+        $stmt = saasPrepare($pdo, $query);
         if ($whereField !== null) {
             $stmt->bindValue(':whereValue', $whereValue, PDO::PARAM_STR);
         }
@@ -630,7 +630,7 @@ function rowExists($table, $field, $value)
             $params[] = $tenantId;
         }
         $sql .= ' LIMIT 1';
-        $stmt = $pdo->prepare($sql);
+        $stmt = saasPrepare($pdo, $sql);
         $stmt->execute($params);
         return $stmt->fetchColumn() !== false;
     } catch (PDOException $e) {
@@ -1017,7 +1017,7 @@ function deductBalance($user, $amount)
         return true;
     }
     $minBalance = $user['agent'] == "n2" ? (intval($user['maxbuyagent']) != 0 ? -intval($user['maxbuyagent']) : null) : 0;
-    $stmt = $pdo->prepare("UPDATE user SET Balance = Balance - ? WHERE id = ? AND (? IS NULL OR Balance - ? >= ?)");
+    $stmt = saasPrepare($pdo, "UPDATE user SET Balance = Balance - ? WHERE id = ? AND (? IS NULL OR Balance - ? >= ?)");
     $stmt->execute([$amount, $user['id'], $minBalance, $amount, $minBalance]);
     return $stmt->rowCount() === 1;
 }
@@ -1027,13 +1027,13 @@ function addBalance($userId, $amount)
     if ($amount <= 0) {
         return;
     }
-    $stmt = $pdo->prepare("UPDATE user SET Balance = Balance + ? WHERE id = ?");
+    $stmt = saasPrepare($pdo, "UPDATE user SET Balance = Balance + ? WHERE id = ?");
     $stmt->execute([$amount, $userId]);
 }
 function claimPaymentPaid($order_id)
 {
     global $pdo;
-    $stmt = $pdo->prepare("UPDATE Payment_report SET payment_Status = 'paid' WHERE id_order = :id_order AND payment_Status <> 'paid'");
+    $stmt = saasPrepare($pdo, "UPDATE Payment_report SET payment_Status = 'paid' WHERE id_order = :id_order AND payment_Status <> 'paid'");
     $stmt->bindValue(':id_order', $order_id);
     $stmt->execute();
     clearSelectCache('Payment_report');
@@ -1054,7 +1054,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
     $format_price_cart = number_format($Payment_report['price']);
     $Balance_id = select("user", "*", "id", $Payment_report['id_user'], "select");
     $steppay = explode("|", $Payment_report['id_invoice']);
-    $stmtReset = $pdo->prepare("UPDATE user SET Processing_value = '0', Processing_value_one = '0', Processing_value_tow = '0', Processing_value_four = '0' WHERE id = ?");
+    $stmtReset = saasPrepare($pdo, "UPDATE user SET Processing_value = '0', Processing_value_one = '0', Processing_value_tow = '0', Processing_value_four = '0' WHERE id = ?");
     $stmtReset->execute([$Balance_id['id']]);
     clearSelectCache('user');
     if ($steppay[0] == "getconfigafterpay") {
@@ -1062,7 +1062,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
         if ($get_invoice['Status'] == "active") {
             return;
         }
-        $stmt = $pdo->prepare("SELECT * FROM product WHERE name_product = :name_product AND (Location = :Service_location  or Location = '/all')");
+        $stmt = saasPrepare($pdo, "SELECT * FROM product WHERE name_product = :name_product AND (Location = :Service_location  or Location = '/all')");
         $stmt->bindParam(':name_product', $get_invoice['name_product'], PDO::PARAM_STR);
         $stmt->bindParam(':Service_location', $get_invoice['Service_location'], PDO::PARAM_STR);
         $stmt->execute();
@@ -1093,7 +1093,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
         $invoiceStatusBefore = $get_invoice['Status'] ?? null;
         $invoiceClaimed = false;
         if (!empty($get_invoice['id_invoice'])) {
-            $claimInvoice = $pdo->prepare("UPDATE invoice SET Status = 'active' WHERE id_invoice = ? AND Status <> 'active'");
+            $claimInvoice = saasPrepare($pdo, "UPDATE invoice SET Status = 'active' WHERE id_invoice = ? AND Status <> 'active'");
             $claimInvoice->execute([$get_invoice['id_invoice']]);
             clearSelectCache('invoice');
             if ($claimInvoice->rowCount() === 0) {
@@ -1160,7 +1160,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
             $SellDiscountlimit = select("DiscountSell", "*", "codeDiscount", $partsdic[1], "select");
             $value = intval($SellDiscountlimit['usedDiscount']) + 1;
             update("DiscountSell", "usedDiscount", $value, "codeDiscount", $partsdic[1]);
-            $stmt = $pdo->prepare("INSERT INTO Giftcodeconsumed (id_user,code) VALUES (:id_user,:code)");
+            $stmt = saasPrepare($pdo, "INSERT INTO Giftcodeconsumed (id_user,code) VALUES (:id_user,:code)");
             $stmt->bindParam(':id_user', $Balance_id['id']);
             $stmt->bindParam(':code', $partsdic[1]);
             $stmt->execute();
@@ -1175,7 +1175,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
         }
         $affiliatescommission = select("affiliates", "*", null, null, "select");
         $marzbanporsant_one_buy = select("affiliates", "*", null, null, "select");
-        $stmt = $pdo->prepare("SELECT * FROM invoice WHERE name_product != :name_product  AND id_user = :id_user AND Status != 'Unpaid'");
+        $stmt = saasPrepare($pdo, "SELECT * FROM invoice WHERE name_product != :name_product  AND id_user = :id_user AND Status != 'Unpaid'");
         $stmt->bindParam(':id_user', $Balance_id['id']);
         $stmt->bindParam(':name_product', $textbotlang['common']['labels']['testServiceName']);
         $stmt->execute();
@@ -1287,7 +1287,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
         $partsdic = explode("%", $steppay[1]);
         $usernamepanel = $partsdic[0];
         $sql = "SELECT * FROM service_other WHERE username = :username  AND value  LIKE CONCAT('%', :value, '%') AND id_user = :id_user ";
-        $stmt = $pdo->prepare($sql);
+        $stmt = saasPrepare($pdo, $sql);
         $stmt->bindParam(':username', $usernamepanel, PDO::PARAM_STR);
         $stmt->bindParam(':value', $partsdic[1], PDO::PARAM_STR);
         $stmt->bindParam(':id_user', $Balance_id['id']);
@@ -1309,7 +1309,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
             $prodcut['Service_time'] = $service_other['Service_time'];
             $prodcut['Volume_constraint'] = $service_other['volumebuy'];
         } else {
-            $stmt = $pdo->prepare("SELECT * FROM product WHERE (Location = :mp2 OR Location = '/all') AND agent= :mp3 AND code_product = :mp4");
+            $stmt = saasPrepare($pdo, "SELECT * FROM product WHERE (Location = :mp2 OR Location = '/all') AND agent= :mp3 AND code_product = :mp4");
             $stmt->execute([':mp2' => $nameloc['Service_location'], ':mp3' => $Balance_id['agent'], ':mp4' => $codeproduct]);
             $prodcut = $stmt->fetch(PDO::FETCH_ASSOC);
         }
@@ -1348,7 +1348,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
             $SellDiscountlimit = select("DiscountSell", "*", "codeDiscount", $partsdic[1], "select");
             $value = intval($SellDiscountlimit['usedDiscount']) + 1;
             update("DiscountSell", "usedDiscount", $value, "codeDiscount", $partsdic[1]);
-            $stmt = $pdo->prepare("INSERT INTO Giftcodeconsumed (id_user,code) VALUES (:id_user,:code)");
+            $stmt = saasPrepare($pdo, "INSERT INTO Giftcodeconsumed (id_user,code) VALUES (:id_user,:code)");
             $stmt->bindParam(':id_user', $Balance_id['id']);
             $stmt->bindParam(':code', $partsdic[1]);
             $stmt->execute();
@@ -1438,7 +1438,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
             }
             return;
         }
-        $stmt = $pdo->prepare("INSERT IGNORE INTO service_other (id_user, username,value,type,time,price,output) VALUES (:id_user,:username,:value,:type,:time,:price,:output)");
+        $stmt = saasPrepare($pdo, "INSERT IGNORE INTO service_other (id_user, username,value,type,time,price,output) VALUES (:id_user,:username,:value,:type,:time,:price,:output)");
         $stmt->bindParam(':id_user', $Balance_id['id']);
         $stmt->bindParam(':username', $steppay[0]);
         $stmt->bindParam(':value', $data_for_database);
@@ -1510,7 +1510,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
             }
             return;
         }
-        $stmt = $pdo->prepare("INSERT IGNORE INTO service_other (id_user, username,value,type,time,price,output) VALUES (:id_user,:username,:value,:type,:time,:price,:output)");
+        $stmt = saasPrepare($pdo, "INSERT IGNORE INTO service_other (id_user, username,value,type,time,price,output) VALUES (:id_user,:username,:value,:type,:time,:price,:output)");
         $stmt->bindParam(':id_user', $Balance_id['id']);
         $stmt->bindParam(':username', $steppay[0]);
         $stmt->bindParam(':value', $data_for_database);
@@ -1620,22 +1620,22 @@ function addFieldToTable($tableName, $fieldName, $defaultValue = null, $datatype
 
     assertSqlIdentifier($tableName);
     assertSqlIdentifier($fieldName);
-    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM information_schema.tables WHERE table_name = :tableName");
+    $stmt = saasPrepare($pdo, "SELECT COUNT(*) as count FROM information_schema.tables WHERE table_name = :tableName");
     $stmt->bindParam(':tableName', $tableName);
     $stmt->execute();
     $tableExists = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($tableExists['count'] == 0)
         return;
-    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?");
-    $stmt->execute([$pdo->query("SELECT DATABASE()")->fetchColumn(), $tableName, $fieldName]);
+    $stmt = saasPrepare($pdo, "SELECT COUNT(*) as count FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?");
+    $stmt->execute([saasQuery($pdo, "SELECT DATABASE()")->fetchColumn(), $tableName, $fieldName]);
     $filedExists = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($filedExists['count'] != 0)
         return;
     $query = "ALTER TABLE $tableName ADD $fieldName $datatype";
-    $statement = $pdo->prepare($query);
+    $statement = saasPrepare($pdo, $query);
     $statement->execute();
     if ($defaultValue != null) {
-        $stmt = $pdo->prepare("UPDATE $tableName SET $fieldName= ?");
+        $stmt = saasPrepare($pdo, "UPDATE $tableName SET $fieldName= ?");
         $stmt->bindParam(1, $defaultValue);
         $stmt->execute();
     }

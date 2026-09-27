@@ -80,7 +80,7 @@ if ($text == "📞 تنظیم نام کاربری پشتیبانی") {
             ]
         ]
     ]);
-    $stmt = $pdo->prepare("SELECT * FROM Payment_report WHERE id_order = ? AND bottype = ?");
+    $stmt = saasPrepare($pdo, "SELECT * FROM Payment_report WHERE id_order = ? AND bottype = ?");
     $stmt->execute([$order_id, $ApiToken]);
     $Payment_report = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($Payment_report == false) {
@@ -134,7 +134,7 @@ if ($text == "📞 تنظیم نام کاربری پشتیبانی") {
     update("user", "Processing_value_four", "none", "id", $Balance_id['id']);
 } elseif (preg_match('/reject_pay_(\w+)/', $datain, $datagetr)) {
     $id_order = $datagetr[1];
-    $stmt = $pdo->prepare("SELECT * FROM Payment_report WHERE id_order = ? AND bottype = ?");
+    $stmt = saasPrepare($pdo, "SELECT * FROM Payment_report WHERE id_order = ? AND bottype = ?");
     $stmt->execute([$id_order, $ApiToken]);
     $Payment_report = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($Payment_report == false) {
@@ -242,22 +242,22 @@ if ($text == "📞 تنظیم نام کاربری پشتیبانی") {
         return;
     }
     $date = date("Y-m-d");
-    $__q28 = $pdo->prepare("SELECT COUNT(*) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND id_user = ? AND bottype = ?");
+    $__q28 = saasPrepare($pdo, "SELECT COUNT(*) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND id_user = ? AND bottype = ?");
     $__q28->bindValue(1, $id_user, PDO::PARAM_STR);
     $__q28->bindValue(2, $ApiToken, PDO::PARAM_STR);
     $__q28->execute();
     $dayListSell = $__q28->fetch(PDO::FETCH_ASSOC);
-    $__q29 = $pdo->prepare("SELECT SUM(price) FROM Payment_report WHERE payment_Status = 'paid' AND id_user = ? AND Payment_Method != 'low balance by admin' AND bottype = ?");
+    $__q29 = saasPrepare($pdo, "SELECT SUM(price) FROM Payment_report WHERE payment_Status = 'paid' AND id_user = ? AND Payment_Method != 'low balance by admin' AND bottype = ?");
     $__q29->bindValue(1, $id_user, PDO::PARAM_STR);
     $__q29->bindValue(2, $ApiToken, PDO::PARAM_STR);
     $__q29->execute();
     $balanceall = $__q29->fetch(PDO::FETCH_ASSOC);
-    $__q30 = $pdo->prepare("SELECT SUM(price_product) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND id_user = ? AND bottype = ?");
+    $__q30 = saasPrepare($pdo, "SELECT SUM(price_product) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND id_user = ? AND bottype = ?");
     $__q30->bindValue(1, $id_user, PDO::PARAM_STR);
     $__q30->bindValue(2, $ApiToken, PDO::PARAM_STR);
     $__q30->execute();
     $subbuyuser = $__q30->fetch(PDO::FETCH_ASSOC);
-    $__q31 = $pdo->prepare("SELECT count(*) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND id_user = ? AND bottype = ?");
+    $__q31 = saasPrepare($pdo, "SELECT count(*) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND id_user = ? AND bottype = ?");
     $__q31->bindValue(1, $id_user, PDO::PARAM_STR);
     $__q31->bindValue(2, $ApiToken, PDO::PARAM_STR);
     $__q31->execute();
@@ -265,7 +265,7 @@ if ($text == "📞 تنظیم نام کاربری پشتیبانی") {
     if ($invoicecount == 0) {
         $sumvolume['SUM(Volume)'] = 0;
     } else {
-        $__q32 = $pdo->prepare("SELECT SUM(Volume) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND id_user = ? AND name_product != 'سرویس تست'");
+        $__q32 = saasPrepare($pdo, "SELECT SUM(Volume) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND id_user = ? AND name_product != 'سرویس تست'");
         $__q32->bindValue(1, $id_user, PDO::PARAM_STR);
         $__q32->execute();
         $sumvolume = $__q32->fetch(PDO::FETCH_ASSOC);
@@ -294,13 +294,13 @@ if ($text == "📞 تنظیم نام کاربری پشتیبانی") {
     $desired_date_time_start = time() - 3600;
     $month_date_time_start = time() - 2592000;
     $sql = "SELECT * FROM invoice WHERE time_sell > :requestedDate AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND name_product != 'سرویس تست' AND id_user = :id_user AND bottype = '$ApiToken'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':id_user', $id_user);
     $stmt->bindParam(':requestedDate', $desired_date_time_start);
     $stmt->execute();
     $listhours = $stmt->rowCount();
     $sql = "SELECT SUM(price_product) FROM invoice WHERE time_sell > :requestedDate AND (Status = 'active' OR Status = 'end_of_time'  OR Status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND name_product != 'سرویس تست' AND id_user = :id_user AND bottype = '$ApiToken'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':id_user', $id_user);
     $stmt->bindParam(':requestedDate', $desired_date_time_start);
     $stmt->execute();
@@ -309,13 +309,13 @@ if ($text == "📞 تنظیم نام کاربری پشتیبانی") {
         $suminvoicehours = "0";
     }
     $sql = "SELECT * FROM invoice WHERE time_sell > :requestedDate AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND name_product != 'سرویس تست' AND id_user = :id_user AND bottype = '$ApiToken'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':id_user', $id_user);
     $stmt->bindParam(':requestedDate', $month_date_time_start);
     $stmt->execute();
     $listmonth = $stmt->rowCount();
     $sql = "SELECT SUM(price_product) FROM invoice WHERE time_sell > :requestedDate AND (Status = 'active' OR Status = 'end_of_time'  OR Status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND name_product != 'سرویس تست' AND id_user = :id_user AND bottype = '$ApiToken'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':id_user', $id_user);
     $stmt->bindParam(':requestedDate', $month_date_time_start);
     $stmt->execute();
@@ -374,7 +374,7 @@ if ($text == "📞 تنظیم نام کاربری پشتیبانی") {
     }
     $dateacc = date('Y/m/d H:i:s');
     $randomString = bin2hex(random_bytes(5));
-    $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method,id_invoice,bottype) VALUES (?,?,?,?,?,?,?,?)");
+    $stmt = saasPrepare($pdo, "INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method,id_invoice,bottype) VALUES (?,?,?,?,?,?,?,?)");
     $payment_Status = "paid";
     $Payment_Method = "add balance by admin";
     $invoice = null;
@@ -404,7 +404,7 @@ if ($text == "📞 تنظیم نام کاربری پشتیبانی") {
     }
     $dateacc = date('Y/m/d H:i:s');
     $randomString = bin2hex(random_bytes(5));
-    $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method,id_invoice,bottype) VALUES (?,?,?,?,?,?,?,?)");
+    $stmt = saasPrepare($pdo, "INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method,id_invoice,bottype) VALUES (?,?,?,?,?,?,?,?)");
     $payment_Status = "paid";
     $Payment_Method = "low balance by admin";
     $invoice = null;
@@ -422,18 +422,18 @@ if ($text == "📞 تنظیم نام کاربری پشتیبانی") {
     $Balance_user_afters = number_format(select("user", "*", "id", $user['Processing_value'], "select")['Balance']);
 } elseif ($text == "📊 آمار ربات") {
     $statistics = select("user", "*", "bottype", $ApiToken, "count");
-    $stmt2 = $pdo->prepare("SELECT COUNT( DISTINCT id_user) as count FROM `invoice` WHERE name_product = 'سرویس تست' AND  bottype = :mp1");
+    $stmt2 = saasPrepare($pdo, "SELECT COUNT( DISTINCT id_user) as count FROM `invoice` WHERE name_product = 'سرویس تست' AND  bottype = :mp1");
     $stmt2->execute([':mp1' => $ApiToken]);
     $statisticsorder = $stmt2->fetch(PDO::FETCH_ASSOC)['count'];
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE name_product = 'سرویس تست' AND bottype = :mp1");
+    $stmt = saasPrepare($pdo, "SELECT * FROM invoice WHERE name_product = 'سرویس تست' AND bottype = :mp1");
     $stmt->execute([':mp1' => $ApiToken]);
     $count_usertest = $stmt->rowCount();
     $sql1 = "SELECT COUNT(*) AS invoice_count FROM invoice WHERE (status = 'active' OR status = 'end_of_time' OR status = 'end_of_volume' OR status = 'sendedwarn' OR status = 'send_on_hold') AND name_product != 'سرویس تست' AND bottype = :mp1";
-    $stmt1 = $pdo->prepare($sql1);
+    $stmt1 = saasPrepare($pdo, $sql1);
     $stmt1->execute([':mp1' => $ApiToken]);
     $invoice = $stmt1->fetch(PDO::FETCH_ASSOC)['invoice_count'];
     $sql2 = "SELECT SUM(price_product) AS total_price FROM invoice WHERE (status = 'active' OR status = 'end_of_time' OR status = 'end_of_volume' OR status = 'sendedwarn' OR status = 'send_on_hold') AND name_product != 'سرویس تست' AND bottype = :mp1";
-    $stmt2 = $pdo->prepare($sql2);
+    $stmt2 = saasPrepare($pdo, $sql2);
     $stmt2->execute([':mp1' => $ApiToken]);
     $invoicesum = number_format($stmt2->fetch(PDO::FETCH_ASSOC)['total_price'], 0);
     $statisticsall = "
@@ -451,7 +451,7 @@ if ($text == "📞 تنظیم نام کاربری پشتیبانی") {
         file_put_contents('product.json', "{}");
     }
     $product = [];
-    $getdataproduct = $pdo->prepare("SELECT * FROM product WHERE agent = ?");
+    $getdataproduct = saasPrepare($pdo, "SELECT * FROM product WHERE agent = ?");
     $getdataproduct->bindValue(1, $userbot['agent'], PDO::PARAM_STR);
     $getdataproduct->execute();
     while ($row = ($getdataproduct)->fetch(PDO::FETCH_ASSOC)) {
@@ -660,7 +660,7 @@ if ($text == "📞 تنظیم نام کاربری پشتیبانی") {
         file_put_contents('product_name.json', "{}");
     }
     $product = [];
-    $getdataproduct = $pdo->prepare("SELECT * FROM product WHERE agent = ?");
+    $getdataproduct = saasPrepare($pdo, "SELECT * FROM product WHERE agent = ?");
     $getdataproduct->bindValue(1, $userbot['agent'], PDO::PARAM_STR);
     $getdataproduct->execute();
     while ($row = ($getdataproduct)->fetch(PDO::FETCH_ASSOC)) {

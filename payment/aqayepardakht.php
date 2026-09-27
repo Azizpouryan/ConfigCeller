@@ -64,7 +64,7 @@ if (is_object($result) && $result->code == "1") {
         return;
     }
     $pricecashback = select("PaySetting", "ValuePay", "NamePay", "chashbackaqaypardokht","select")['ValuePay'];
-    $__q16 = $pdo->prepare("SELECT * FROM user WHERE id = ? LIMIT 1");
+    $__q16 = saasPrepare($pdo, "SELECT * FROM user WHERE id = ? LIMIT 1");
     $__q16->bindValue(1, $Payment_report['id_user'], PDO::PARAM_STR);
     $__q16->execute();
     $Balance_id = $__q16->fetch(PDO::FETCH_ASSOC);

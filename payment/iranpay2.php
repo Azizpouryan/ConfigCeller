@@ -201,7 +201,7 @@ if ($pricecashback != "0") {
 $paymentreports = select("topicid", "idreport", "report", "paymentreport", "select")['idreport'];
 $text_reportpayment = sprintf($textbotlang['paymentGateway']['reportTronado'], $Balance_id['username'], $Balance_id['id'], $price);
 $database = json_encode($response);
-$statement = $pdo->prepare("UPDATE Payment_report SET dec_not_confirmed = :dec_not_confirmed WHERE id_order = :id_order");
+$statement = saasPrepare($pdo, "UPDATE Payment_report SET dec_not_confirmed = :dec_not_confirmed WHERE id_order = :id_order");
 $statement->bindValue(':dec_not_confirmed', $database);
 $statement->bindValue(':id_order', $Payment_report['id_order']);
 $statement->execute();

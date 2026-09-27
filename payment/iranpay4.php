@@ -103,7 +103,8 @@ try {
     iranpay4_finish(false, $failedTitle, 'پرداخت تایید شد ولی تحویل سرویس خطا داد. با پشتیبانی تماس بگیرید.');
 }
 
-$statement = $pdo->prepare(
+$statement = saasPrepare(
+    $pdo,
     "UPDATE Payment_report SET dec_not_confirmed = :answer WHERE id_order = :id_order"
 );
 $statement->bindValue(':answer', json_encode($response, JSON_UNESCAPED_UNICODE));

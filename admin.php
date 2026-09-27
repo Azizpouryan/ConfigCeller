@@ -214,7 +214,7 @@ if ($datain == "paygwback") {
     step('home', $from_id);
 
     $insertChannel = function ($remarkValue) use ($pdo, $link, $text) {
-        $stmt = $pdo->prepare("INSERT INTO channels (link, remark, linkjoin) VALUES (:link, :remark, :linkjoin)");
+        $stmt = saasPrepare($pdo, "INSERT INTO channels (link, remark, linkjoin) VALUES (:link, :remark, :linkjoin)");
         $stmt->bindValue(':remark', $remarkValue, PDO::PARAM_STR);
         $stmt->bindValue(':link', $link, PDO::PARAM_STR);
         $stmt->bindValue(':linkjoin', $text, PDO::PARAM_STR);
@@ -249,7 +249,7 @@ if ($datain == "paygwback") {
 } elseif ($user['step'] == "removechannel") {
     sendmessage($from_id, $textbotlang['Admin']['channel']['removedChannel'], $channelkeyboard, 'HTML');
     step('home', $from_id);
-    $stmt = $pdo->prepare("DELETE FROM channels WHERE link = :link");
+    $stmt = saasPrepare($pdo, "DELETE FROM channels WHERE link = :link");
     $stmt->bindParam(':link', $text, PDO::PARAM_STR);
     $stmt->execute();
 } elseif ($datain == "addnewadmin" && $adminrulecheck['rule'] == "administrator") {
@@ -274,7 +274,7 @@ if ($datain == "paygwback") {
     sendmessage($user['Processing_value'], $textbotlang['Admin']['manageadmin']['adminAddedSendUser'], null, 'HTML');
     step('home', $from_id);
     $unusablePasswordHash = password_hash(bin2hex(random_bytes(16)), PASSWORD_BCRYPT);
-    $stmt = $pdo->prepare("INSERT INTO admin (id_admin, username, password, rule) VALUES (:id_admin, :username, :password, :rule)");
+    $stmt = saasPrepare($pdo, "INSERT INTO admin (id_admin, username, password, rule) VALUES (:id_admin, :username, :password, :rule)");
     $stmt->bindParam(':id_admin', $user['Processing_value'], PDO::PARAM_STR);
     $stmt->bindParam(':username', $user['Processing_value'], PDO::PARAM_STR);
     $stmt->bindParam(':password', $unusablePasswordHash, PDO::PARAM_STR);
@@ -314,35 +314,35 @@ if ($datain == "paygwback") {
     $statistics = select("user", "*", null, null, "count");
     $sumpanel = select("marzban_panel", "*", null, null, "count");
     $sql1 = "SELECT COUNT(id) AS count FROM user WHERE agent != 'f'";
-    $stmt1 = $pdo->query($sql1);
+    $stmt1 = saasQuery($pdo, $sql1);
     $agentsum = $stmt1->fetch(PDO::FETCH_ASSOC)['count'];
     $agentsumn = select("user", "COUNT(id)", "agent", "n", "select")['COUNT(id)'];
     $agentsumn2 = select("user", "COUNT(id)", "agent", "n2", "select")['COUNT(id)'];
     $sql1 = "SELECT COUNT(*) AS invoice_count FROM invoice WHERE (status = 'active' OR status = 'end_of_time' OR status = 'end_of_volume' OR status = 'sendedwarn' OR status = 'send_on_hold') AND name_product != '{$textbotlang['common']['labels']['testServiceName']}'";
-    $stmt1 = $pdo->query($sql1);
+    $stmt1 = saasQuery($pdo, $sql1);
     $invoiceactive = $stmt1->fetch(PDO::FETCH_ASSOC)['invoice_count'];
     $sqlall = "SELECT COUNT(*) AS invoice_count FROM invoice WHERE status != 'Unpaid' AND name_product != '{$textbotlang['common']['labels']['testServiceName']}'";
-    $sqlall = $pdo->query($sqlall);
+    $sqlall = saasQuery($pdo, $sqlall);
     $invoice = $sqlall->fetch(PDO::FETCH_ASSOC)['invoice_count'];
     $sql2 = "SELECT SUM(price_product) AS total_price FROM invoice WHERE (status = 'active' OR status = 'end_of_time' OR status = 'end_of_volume' OR status = 'sendedwarn' OR status = 'send_on_hold') AND name_product != '{$textbotlang['common']['labels']['testServiceName']}'";
-    $stmt2 = $pdo->query($sql2);
+    $stmt2 = saasQuery($pdo, $sql2);
     $invoicesum = $stmt2->fetch(PDO::FETCH_ASSOC)['total_price'];
     $sql33 = "SELECT SUM(price_product) AS total_price FROM invoice WHERE status!= 'Unpaid' AND name_product != '{$textbotlang['common']['labels']['testServiceName']}'";
-    $sql33 = $pdo->query($sql33);
+    $sql33 = saasQuery($pdo, $sql33);
     $invoiceSumRow = $sql33->fetch(PDO::FETCH_ASSOC);
     $invoiceTotal = isset($invoiceSumRow['total_price']) ? (float) $invoiceSumRow['total_price'] : 0;
     $invoicesumall = number_format($invoiceTotal, 0);
     $sql3 = "SELECT SUM(price) AS total_extend FROM service_other WHERE type = 'extend_user'";
-    $stmt3 = $pdo->query($sql3);
+    $stmt3 = saasQuery($pdo, $sql3);
     $extendSumRow = $stmt3->fetch(PDO::FETCH_ASSOC);
     $extendsum = isset($extendSumRow['total_extend']) ? (float) $extendSumRow['total_extend'] : 0;
     $count_usertest = select("invoice", "*", "name_product", $textbotlang['common']['labels']['testServiceName'], "count");
     $timeacc = jdate('H:i:s', time());
-    $stmt2 = $pdo->prepare("SELECT COUNT(DISTINCT id_user) as count FROM `invoice` WHERE Status != 'Unpaid'");
+    $stmt2 = saasPrepare($pdo, "SELECT COUNT(DISTINCT id_user) as count FROM `invoice` WHERE Status != 'Unpaid'");
     $stmt2->execute();
     $statisticsorder = $stmt2->fetch(PDO::FETCH_ASSOC)['count'];
     $sqlsum = "SELECT SUM(price) AS sumpay , Payment_Method,COUNT(price) AS countpay FROM Payment_report WHERE payment_Status = 'paid' AND Payment_Method NOT IN ('add balance by admin','low balance by admin') GROUP BY  Payment_Method;";
-    $stmt = $pdo->prepare($sqlsum);
+    $stmt = saasPrepare($pdo, $sqlsum);
     $stmt->execute();
     $statispay = $stmt->fetchAll();
     $date = date("Y-m-d");
@@ -352,7 +352,7 @@ if ($datain == "paygwback") {
     $start_time_timestamp = strtotime($start_time);
     $end_time_timestamp = strtotime($end_time);
     $sql = "SELECT SUM(price_product) FROM invoice WHERE (time_sell BETWEEN :requestedDate AND :requestedDateend) AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR Status = 'send_on_hold' OR Status = 'sendedwarn') AND name_product != '{$textbotlang['common']['labels']['testServiceName']}'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time_timestamp);
     $stmt->bindParam(':requestedDateend', $end_time_timestamp);
     $stmt->execute();
@@ -396,7 +396,7 @@ if ($datain == "paygwback") {
 } elseif ($datain == "hoursago_stat") {
     $desired_date_time_start = time() - 3600;
     $sql = "SELECT COUNT(*) AS count,SUM(price_product) as sum FROM invoice WHERE (time_sell BETWEEN :requestedDate AND :requestedDateend) AND Status != 'Unpaid'  AND name_product != '{$textbotlang['common']['labels']['testServiceName']}'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $time_current = time();
     $stmt->bindParam(':requestedDate', $desired_date_time_start);
     $stmt->bindParam(':requestedDateend', $time_current);
@@ -405,36 +405,36 @@ if ($datain == "paygwback") {
     $count_order = $statorder['count'];
     $sum_order = number_format($statorder['sum'], 0);
     $sql = "SELECT COUNT(*) AS count FROM invoice WHERE (time_sell BETWEEN :requestedDate AND :requestedDateend)  AND name_product = '{$textbotlang['common']['labels']['testServiceName']}'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $desired_date_time_start);
     $stmt->bindParam(':requestedDateend', $time_current);
     $stmt->execute();
     $count_test = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  time  >= NOW() - INTERVAL 1 HOUR AND type = 'extend_user' AND status != 'unpaid'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->execute();
     $extend_stat = $stmt->fetch(PDO::FETCH_ASSOC);
     $count_extend = $extend_stat['count'];
     $sum_extend = number_format($extend_stat['sum'], 0);
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  time  >= NOW() - INTERVAL 1 HOUR AND type = 'extra_user'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->execute();
     $extra_volume_stat = $stmt->fetch(PDO::FETCH_ASSOC);
     $count_extra_volume = $extra_volume_stat['count'];
     $sum_extra_volume = number_format($extra_volume_stat['sum'], 0);
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  time  >= NOW() - INTERVAL 1 HOUR AND type = 'extra_time_user'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->execute();
     $extra_time_stat = $stmt->fetch(PDO::FETCH_ASSOC);
     $count_extra_time = $extra_time_stat['count'];
     $sum_extrat_time = number_format($extra_time_stat['sum'], 0);
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  time  >= NOW() - INTERVAL 1 HOUR AND type = 'change_location'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->execute();
     $change_location_stat = $stmt->fetch(PDO::FETCH_ASSOC);
     $count_change_location = $change_location_stat['count'];
     $sum_change_location = number_format($change_location_stat['sum'], 0);
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM user WHERE  (register BETWEEN :requestedDate AND :requestedDateend)  AND register != 'none'");
+    $stmt = saasPrepare($pdo, "SELECT COUNT(*) FROM user WHERE  (register BETWEEN :requestedDate AND :requestedDateend)  AND register != 'none'");
     $stmt->bindParam(':requestedDate', $desired_date_time_start);
     $stmt->bindParam(':requestedDateend', $time_current);
     $stmt->execute();
@@ -447,7 +447,7 @@ if ($datain == "paygwback") {
     $start_time_timestamp = strtotime($start_time);
     $end_time_timestamp = strtotime($end_time);
     $sql = "SELECT COUNT(*) AS count,SUM(price_product) as sum FROM invoice WHERE (time_sell BETWEEN :requestedDate AND :requestedDateend) AND Status != 'Unpaid'  AND name_product != '{$textbotlang['common']['labels']['testServiceName']}'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time_timestamp);
     $stmt->bindParam(':requestedDateend', $end_time_timestamp);
     $stmt->execute();
@@ -455,13 +455,13 @@ if ($datain == "paygwback") {
     $count_order = $statorder['count'];
     $sum_order = number_format($statorder['sum'], 0);
     $sql = "SELECT COUNT(*) AS count FROM invoice WHERE (time_sell BETWEEN :requestedDate AND :requestedDateend)  AND name_product = '{$textbotlang['common']['labels']['testServiceName']}'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time_timestamp);
     $stmt->bindParam(':requestedDateend', $end_time_timestamp);
     $stmt->execute();
     $count_test = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'extend_user' AND status != 'unpaid'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
@@ -469,7 +469,7 @@ if ($datain == "paygwback") {
     $count_extend = $extend_stat['count'];
     $sum_extend = number_format($extend_stat['sum'], 0);
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'extra_user'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
@@ -477,7 +477,7 @@ if ($datain == "paygwback") {
     $count_extra_volume = $extra_volume_stat['count'];
     $sum_extra_volume = number_format($extra_volume_stat['sum'], 0);
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'extra_time_user'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
@@ -485,14 +485,14 @@ if ($datain == "paygwback") {
     $count_extra_time = $extra_time_stat['count'];
     $sum_extrat_time = number_format($extra_time_stat['sum'], 0);
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'change_location'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
     $change_location_stat = $stmt->fetch(PDO::FETCH_ASSOC);
     $count_change_location = $change_location_stat['count'];
     $sum_change_location = number_format($change_location_stat['sum'], 0);
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM user WHERE  (register BETWEEN :requestedDate AND :requestedDateend)  AND register != 'none'");
+    $stmt = saasPrepare($pdo, "SELECT COUNT(*) FROM user WHERE  (register BETWEEN :requestedDate AND :requestedDateend)  AND register != 'none'");
     $stmt->bindParam(':requestedDate', $start_time_timestamp);
     $stmt->bindParam(':requestedDateend', $end_time_timestamp);
     $stmt->execute();
@@ -505,7 +505,7 @@ if ($datain == "paygwback") {
     $start_time_timestamp = strtotime($start_time);
     $end_time_timestamp = strtotime($end_time);
     $sql = "SELECT COUNT(*) AS count,SUM(price_product) as sum FROM invoice WHERE (time_sell BETWEEN :requestedDate AND :requestedDateend) AND Status != 'Unpaid' AND name_product != '{$textbotlang['common']['labels']['testServiceName']}'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time_timestamp);
     $stmt->bindParam(':requestedDateend', $end_time_timestamp);
     $stmt->execute();
@@ -513,13 +513,13 @@ if ($datain == "paygwback") {
     $count_order = $statorder['count'];
     $sum_order = number_format($statorder['sum'], 0);
     $sql = "SELECT COUNT(*) AS count FROM invoice WHERE (time_sell BETWEEN :requestedDate AND :requestedDateend)  AND name_product = '{$textbotlang['common']['labels']['testServiceName']}'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time_timestamp);
     $stmt->bindParam(':requestedDateend', $end_time_timestamp);
     $stmt->execute();
     $count_test = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'extend_user' AND status != 'unpaid'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
@@ -527,7 +527,7 @@ if ($datain == "paygwback") {
     $count_extend = $extend_stat['count'];
     $sum_extend = number_format($extend_stat['sum'], 0);
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'extra_user'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
@@ -535,7 +535,7 @@ if ($datain == "paygwback") {
     $count_extra_volume = $extra_volume_stat['count'];
     $sum_extra_volume = number_format($extra_volume_stat['sum'], 0);
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'extra_time_user'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
@@ -543,14 +543,14 @@ if ($datain == "paygwback") {
     $count_extra_time = $extra_time_stat['count'];
     $sum_extrat_time = number_format($extra_time_stat['sum'], 0);
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'change_location'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
     $change_location_stat = $stmt->fetch(PDO::FETCH_ASSOC);
     $count_change_location = $change_location_stat['count'];
     $sum_change_location = number_format($change_location_stat['sum'], 0);
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM user WHERE  (register BETWEEN :requestedDate AND :requestedDateend)  AND register != 'none'");
+    $stmt = saasPrepare($pdo, "SELECT COUNT(*) FROM user WHERE  (register BETWEEN :requestedDate AND :requestedDateend)  AND register != 'none'");
     $stmt->bindParam(':requestedDate', $start_time_timestamp);
     $stmt->bindParam(':requestedDateend', $end_time_timestamp);
     $stmt->execute();
@@ -565,7 +565,7 @@ if ($datain == "paygwback") {
     $start_time_timestamp = strtotime($start_time);
     $end_time_timestamp = strtotime($end_time);
     $sql = "SELECT COUNT(*) AS count,SUM(price_product) as sum FROM invoice WHERE (time_sell BETWEEN :requestedDate AND :requestedDateend) AND Status != 'Unpaid'  AND name_product != '{$textbotlang['common']['labels']['testServiceName']}'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time_timestamp);
     $stmt->bindParam(':requestedDateend', $end_time_timestamp);
     $stmt->execute();
@@ -573,13 +573,13 @@ if ($datain == "paygwback") {
     $count_order = $statorder['count'];
     $sum_order = number_format($statorder['sum'], 0);
     $sql = "SELECT COUNT(*) AS count FROM invoice WHERE (time_sell BETWEEN :requestedDate AND :requestedDateend)  AND name_product = '{$textbotlang['common']['labels']['testServiceName']}'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time_timestamp);
     $stmt->bindParam(':requestedDateend', $end_time_timestamp);
     $stmt->execute();
     $count_test = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'extend_user' AND status != 'unpaid'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
@@ -587,7 +587,7 @@ if ($datain == "paygwback") {
     $count_extend = $extend_stat['count'];
     $sum_extend = number_format($extend_stat['sum'], 0);
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'extra_user'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
@@ -595,7 +595,7 @@ if ($datain == "paygwback") {
     $count_extra_volume = $extra_volume_stat['count'];
     $sum_extra_volume = number_format($extra_volume_stat['sum'], 0);
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'extra_time_user'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
@@ -603,14 +603,14 @@ if ($datain == "paygwback") {
     $count_extra_time = $extra_time_stat['count'];
     $sum_extrat_time = number_format($extra_time_stat['sum'], 0);
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'change_location'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
     $change_location_stat = $stmt->fetch(PDO::FETCH_ASSOC);
     $count_change_location = $change_location_stat['count'];
     $sum_change_location = number_format($change_location_stat['sum'], 0);
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM user WHERE  (register BETWEEN :requestedDate AND :requestedDateend)  AND register != 'none'");
+    $stmt = saasPrepare($pdo, "SELECT COUNT(*) FROM user WHERE  (register BETWEEN :requestedDate AND :requestedDateend)  AND register != 'none'");
     $stmt->bindParam(':requestedDate', $start_time_timestamp);
     $stmt->bindParam(':requestedDateend', $end_time_timestamp);
     $stmt->execute();
@@ -625,7 +625,7 @@ if ($datain == "paygwback") {
     $start_time_timestamp = strtotime($start_time);
     $end_time_timestamp = strtotime($end_time);
     $sql = "SELECT COUNT(*) AS count,SUM(price_product) as sum FROM invoice WHERE (time_sell BETWEEN :requestedDate AND :requestedDateend) AND Status != 'Unpaid'  AND name_product != '{$textbotlang['common']['labels']['testServiceName']}'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time_timestamp);
     $stmt->bindParam(':requestedDateend', $end_time_timestamp);
     $stmt->execute();
@@ -633,13 +633,13 @@ if ($datain == "paygwback") {
     $count_order = $statorder['count'];
     $sum_order = number_format($statorder['sum'], 0);
     $sql = "SELECT COUNT(*) AS count FROM invoice WHERE (time_sell BETWEEN :requestedDate AND :requestedDateend)  AND name_product = '{$textbotlang['common']['labels']['testServiceName']}'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time_timestamp);
     $stmt->bindParam(':requestedDateend', $end_time_timestamp);
     $stmt->execute();
     $count_test = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'extend_user' AND status != 'unpaid'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
@@ -647,7 +647,7 @@ if ($datain == "paygwback") {
     $count_extend = $extend_stat['count'];
     $sum_extend = number_format($extend_stat['sum'], 0);
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'extra_user'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
@@ -655,7 +655,7 @@ if ($datain == "paygwback") {
     $count_extra_volume = $extra_volume_stat['count'];
     $sum_extra_volume = number_format($extra_volume_stat['sum'], 0);
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'extra_time_user'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
@@ -663,14 +663,14 @@ if ($datain == "paygwback") {
     $count_extra_time = $extra_time_stat['count'];
     $sum_extrat_time = number_format($extra_time_stat['sum'], 0);
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'change_location'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
     $change_location_stat = $stmt->fetch(PDO::FETCH_ASSOC);
     $count_change_location = $change_location_stat['count'];
     $sum_change_location = number_format($change_location_stat['sum'], 0);
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM user WHERE  (register BETWEEN :requestedDate AND :requestedDateend)  AND register != 'none'");
+    $stmt = saasPrepare($pdo, "SELECT COUNT(*) FROM user WHERE  (register BETWEEN :requestedDate AND :requestedDateend)  AND register != 'none'");
     $stmt->bindParam(':requestedDate', $start_time_timestamp);
     $stmt->bindParam(':requestedDateend', $end_time_timestamp);
     $stmt->execute();
@@ -699,7 +699,7 @@ if ($datain == "paygwback") {
     $start_time_timestamp = strtotime($start_time);
     $end_time_timestamp = strtotime($end_time);
     $sql = "SELECT COUNT(*) AS count,SUM(price_product) as sum FROM invoice WHERE (time_sell BETWEEN :requestedDate AND :requestedDateend)  AND  Status != 'Unpaid' AND name_product != '{$textbotlang['common']['labels']['testServiceName']}'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time_timestamp);
     $stmt->bindParam(':requestedDateend', $end_time_timestamp);
     $stmt->execute();
@@ -707,13 +707,13 @@ if ($datain == "paygwback") {
     $count_order = $statorder['count'];
     $sum_order = number_format($statorder['sum'], 0);
     $sql = "SELECT COUNT(*) AS count FROM invoice WHERE (time_sell BETWEEN :requestedDate AND :requestedDateend)  AND name_product = '{$textbotlang['common']['labels']['testServiceName']}'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time_timestamp);
     $stmt->bindParam(':requestedDateend', $end_time_timestamp);
     $stmt->execute();
     $count_test = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'extend_user' AND status != 'unpaid'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
@@ -721,7 +721,7 @@ if ($datain == "paygwback") {
     $count_extend = $extend_stat['count'];
     $sum_extend = number_format($extend_stat['sum'], 0);
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'extra_user'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
@@ -729,7 +729,7 @@ if ($datain == "paygwback") {
     $count_extra_volume = $extra_volume_stat['count'];
     $sum_extra_volume = number_format($extra_volume_stat['sum'], 0);
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE  (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'extra_time_user'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
@@ -737,14 +737,14 @@ if ($datain == "paygwback") {
     $count_extra_time = $extra_time_stat['count'];
     $sum_extrat_time = number_format($extra_time_stat['sum'], 0);
     $sql = "SELECT COUNT(*) AS count,SUM(price) as sum FROM service_other WHERE (time BETWEEN :requestedDate AND :requestedDateend) AND type = 'change_location'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':requestedDate', $start_time);
     $stmt->bindParam(':requestedDateend', $end_time);
     $stmt->execute();
     $change_location_stat = $stmt->fetch(PDO::FETCH_ASSOC);
     $count_change_location = $change_location_stat['count'];
     $sum_change_location = number_format($change_location_stat['sum'], 0);
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM user WHERE  (register BETWEEN :requestedDate AND :requestedDateend)  AND register != 'none'");
+    $stmt = saasPrepare($pdo, "SELECT COUNT(*) FROM user WHERE  (register BETWEEN :requestedDate AND :requestedDateend)  AND register != 'none'");
     $stmt->bindParam(':requestedDate', $start_time_timestamp);
     $stmt->bindParam(':requestedDateend', $end_time_timestamp);
     $stmt->execute();
@@ -867,7 +867,7 @@ if ($datain == "paygwback") {
     ));
     $version_panel = $userdata['type'] == "pasarguard" ? "1" : "0";
     $userdata['type'] = $userdata['type'] == "pasarguard" ? "marzban" : $userdata['type'];
-    $stmt = $pdo->prepare("INSERT INTO marzban_panel (code_panel,name_panel,sublink,config,MethodUsername,TestAccount,status,limit_panel,namecustom,Methodextend,type,conecton,inboundid,agent,inbound_deactive,inboundstatus,url_panel,username_panel,password_panel,time_usertest,val_usertest,linksubx,priceextravolume,priceextratime,pricecustomvolume,pricecustomtime,mainvolume,maxvolume,maintime,maxtime,status_extend,subvip,changeloc,customvolume,on_hold_test,version_panel) VALUES (:code_panel,:name_panel,:sublink,:config,:MethodUsername,:TestAccount,:status,:limit_panel,:namecustom,:Methodextend,:type,:conecton,:inboundid,:agent,:inbound_deactive,'offinbounddisable',:url_panel,:username_panel,:password_panel,:val_usertest,:time_usertest,:linksubx,:priceextravolume,:priceextratime,:pricecustomvolume,:pricecustomtime,:mainvolume,:maxvolume,:maintime,:maxtime,'on_extend','offsubvip',:changeloc,:customvolume,'1',:version_panel)");
+    $stmt = saasPrepare($pdo, "INSERT INTO marzban_panel (code_panel,name_panel,sublink,config,MethodUsername,TestAccount,status,limit_panel,namecustom,Methodextend,type,conecton,inboundid,agent,inbound_deactive,inboundstatus,url_panel,username_panel,password_panel,time_usertest,val_usertest,linksubx,priceextravolume,priceextratime,pricecustomvolume,pricecustomtime,mainvolume,maxvolume,maintime,maxtime,status_extend,subvip,changeloc,customvolume,on_hold_test,version_panel) VALUES (:code_panel,:name_panel,:sublink,:config,:MethodUsername,:TestAccount,:status,:limit_panel,:namecustom,:Methodextend,:type,:conecton,:inboundid,:agent,:inbound_deactive,'offinbounddisable',:url_panel,:username_panel,:password_panel,:val_usertest,:time_usertest,:linksubx,:priceextravolume,:priceextratime,:pricecustomvolume,:pricecustomtime,:mainvolume,:maxvolume,:maintime,:maxtime,'on_extend','offsubvip',:changeloc,:customvolume,'1',:version_panel)");
     $stmt->bindParam(':code_panel', $randomString);
     $stmt->bindParam(':name_panel', $userdata['namepanel'], PDO::PARAM_STR);
     $stmt->bindParam(':sublink', $sublink);
@@ -1025,7 +1025,7 @@ elseif ($datain == "systemsms") {
     }
     savedata("save", "agent", $type);
     if ($userdata['typeusermessage'] == "customer") {
-        $stmt = $pdo->prepare("SELECT * FROM marzban_panel WHERE agent = :agent OR agent = 'all'");
+        $stmt = saasPrepare($pdo, "SELECT * FROM marzban_panel WHERE agent = :agent OR agent = 'all'");
         $stmt->bindParam(':agent', $type);
         $stmt->execute();
         $list_panel = ['inline_keyboard' => []];
@@ -1235,7 +1235,7 @@ elseif ($datain == "systemsms") {
                 $userslist = json_encode(select("user", "id", "User_Status", "Active", "fetchAll"));
             } elseif ($typeusermessage == "customer") {
                 if (($userdata['selectpanel'] ?? 'all') == "all") {
-                    $stmt = $pdo->prepare("SELECT u.id FROM user u WHERE EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id) AND u.User_Status = 'Active'");
+                    $stmt = saasPrepare($pdo, "SELECT u.id FROM user u WHERE EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id) AND u.User_Status = 'Active'");
                     $stmt->execute();
                 } else {
                     $panel = select("marzban_panel", "*", "code_panel", $userdata['selectpanel'], "select");
@@ -1243,12 +1243,12 @@ elseif ($datain == "systemsms") {
                         sendmessage($from_id, $textbotlang['Admin']['messageBulk']['errorRestart'], $keyboardadmin, 'HTML');
                         return;
                     }
-                    $stmt = $pdo->prepare("SELECT u.id FROM user u WHERE EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id AND i.Service_location = :mp1) AND u.User_Status = 'Active'");
+                    $stmt = saasPrepare($pdo, "SELECT u.id FROM user u WHERE EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id AND i.Service_location = :mp1) AND u.User_Status = 'Active'");
                     $stmt->execute([':mp1' => $panel['name_panel']]);
                 }
                 $userslist = json_encode($stmt->fetchAll());
             } elseif ($typeusermessage == "nonecustomer") {
-                $stmt = $pdo->prepare("SELECT u.id FROM user u WHERE NOT EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id) AND u.User_Status = 'Active'");
+                $stmt = saasPrepare($pdo, "SELECT u.id FROM user u WHERE NOT EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id) AND u.User_Status = 'Active'");
                 $stmt->execute();
                 $userslist = json_encode($stmt->fetchAll());
             }
@@ -1257,7 +1257,7 @@ elseif ($datain == "systemsms") {
                 $userslist = json_encode(select("user", "id", "agent", $agent, "fetchAll"));
             } elseif ($typeusermessage == "customer") {
                 if (($userdata['selectpanel'] ?? 'all') == "all") {
-                    $stmt = $pdo->prepare("SELECT u.id FROM user u WHERE u.agent =  :agent AND EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id) AND u.User_Status = 'Active'");
+                    $stmt = saasPrepare($pdo, "SELECT u.id FROM user u WHERE u.agent =  :agent AND EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id) AND u.User_Status = 'Active'");
                     $stmt->bindParam(':agent', $agent, PDO::PARAM_STR);
                     $stmt->execute();
                 } else {
@@ -1266,14 +1266,14 @@ elseif ($datain == "systemsms") {
                         sendmessage($from_id, $textbotlang['Admin']['messageBulk']['errorRestart'], $keyboardadmin, 'HTML');
                         return;
                     }
-                    $stmt = $pdo->prepare("SELECT u.id FROM user u WHERE  u.agent =  :agent AND EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id AND i.Service_location = :location) AND u.User_Status = 'Active'");
+                    $stmt = saasPrepare($pdo, "SELECT u.id FROM user u WHERE  u.agent =  :agent AND EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id AND i.Service_location = :location) AND u.User_Status = 'Active'");
                     $stmt->bindParam(':agent', $agent, PDO::PARAM_STR);
                     $stmt->bindParam(':location', $panel['name_panel'], PDO::PARAM_STR);
                     $stmt->execute();
                 }
                 $userslist = json_encode($stmt->fetchAll());
             } elseif ($typeusermessage == "nonecustomer") {
-                $stmt = $pdo->prepare("SELECT u.id FROM user u WHERE u.agent =  :agent AND NOT EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id) AND u.User_Status = 'Active'");
+                $stmt = saasPrepare($pdo, "SELECT u.id FROM user u WHERE u.agent =  :agent AND NOT EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id) AND u.User_Status = 'Active'");
                 $stmt->bindParam(':agent', $agent, PDO::PARAM_STR);
                 $stmt->execute();
                 $userslist = json_encode($stmt->fetchAll());
@@ -1296,7 +1296,7 @@ elseif ($datain == "systemsms") {
                 $userslist = json_encode(select("user", "id", "User_Status", "Active", "fetchAll"));
             } elseif ($typeusermessage == "customer") {
                 if (($userdata['selectpanel'] ?? 'all') == "all") {
-                    $stmt = $pdo->prepare("SELECT u.id FROM user u WHERE EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id) AND u.User_Status = 'Active'");
+                    $stmt = saasPrepare($pdo, "SELECT u.id FROM user u WHERE EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id) AND u.User_Status = 'Active'");
                     $stmt->execute();
                 } else {
                     $panel = select("marzban_panel", "*", "code_panel", $userdata['selectpanel'], "select");
@@ -1304,12 +1304,12 @@ elseif ($datain == "systemsms") {
                         sendmessage($from_id, $textbotlang['Admin']['messageBulk']['errorRestart'], $keyboardadmin, 'HTML');
                         return;
                     }
-                    $stmt = $pdo->prepare("SELECT u.id FROM user u WHERE EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id AND i.Service_location = :mp3) AND u.User_Status = 'Active'");
+                    $stmt = saasPrepare($pdo, "SELECT u.id FROM user u WHERE EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id AND i.Service_location = :mp3) AND u.User_Status = 'Active'");
                     $stmt->execute([':mp3' => $panel['name_panel']]);
                 }
                 $userslist = json_encode($stmt->fetchAll());
             } elseif ($typeusermessage == "nonecustomer") {
-                $stmt = $pdo->prepare("SELECT u.id FROM user u WHERE NOT EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id) AND u.User_Status = 'Active'");
+                $stmt = saasPrepare($pdo, "SELECT u.id FROM user u WHERE NOT EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id) AND u.User_Status = 'Active'");
                 $stmt->execute();
                 $userslist = json_encode($stmt->fetchAll());
             }
@@ -1318,7 +1318,7 @@ elseif ($datain == "systemsms") {
                 $userslist = json_encode(select("user", "id", "agent", $agent, "fetchAll"));
             } elseif ($typeusermessage == "customer") {
                 if (($userdata['selectpanel'] ?? 'all') == "all") {
-                    $stmt = $pdo->prepare("SELECT u.id FROM user u WHERE u.agent =  :agent AND EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id) AND u.User_Status = 'Active'");
+                    $stmt = saasPrepare($pdo, "SELECT u.id FROM user u WHERE u.agent =  :agent AND EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id) AND u.User_Status = 'Active'");
                     $stmt->bindParam(':agent', $agent, PDO::PARAM_STR);
                     $stmt->execute();
                 } else {
@@ -1327,14 +1327,14 @@ elseif ($datain == "systemsms") {
                         sendmessage($from_id, $textbotlang['Admin']['messageBulk']['errorRestart'], $keyboardadmin, 'HTML');
                         return;
                     }
-                    $stmt = $pdo->prepare("SELECT u.id FROM user u WHERE u.agent =  :agent AND EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id AND i.Service_location = :location) AND u.User_Status = 'Active'");
+                    $stmt = saasPrepare($pdo, "SELECT u.id FROM user u WHERE u.agent =  :agent AND EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id AND i.Service_location = :location) AND u.User_Status = 'Active'");
                     $stmt->bindParam(':agent', $agent, PDO::PARAM_STR);
                     $stmt->bindParam(':location', $panel['name_panel'], PDO::PARAM_STR);
                     $stmt->execute();
                 }
                 $userslist = json_encode($stmt->fetchAll());
             } elseif ($typeusermessage == "nonecustomer") {
-                $stmt = $pdo->prepare("SELECT u.id FROM user u WHERE u.agent =  :agent AND NOT EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id) AND u.User_Status = 'Active'");
+                $stmt = saasPrepare($pdo, "SELECT u.id FROM user u WHERE u.agent =  :agent AND NOT EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id) AND u.User_Status = 'Active'");
                 $stmt->bindParam(':agent', $agent, PDO::PARAM_STR);
                 $stmt->execute();
                 $userslist = json_encode($stmt->fetchAll());
@@ -1354,21 +1354,21 @@ elseif ($datain == "systemsms") {
         $timedaystamp = intval($userdata['daynoyuse']) * 86400;
         $timenouser = time() - $timedaystamp;
         if ($agent == "all") {
-            $stmt = $pdo->prepare("SELECT id FROM user  WHERE last_message_time < $timenouser");
+            $stmt = saasPrepare($pdo, "SELECT id FROM user  WHERE last_message_time < $timenouser");
             $stmt->execute();
             $userslist = json_encode($stmt->fetchAll());
         } else {
             if ($typeusermessage == "all") {
-                $stmt = $pdo->prepare("SELECT u.id FROM user u WHERE u.last_message_time < :time");
+                $stmt = saasPrepare($pdo, "SELECT u.id FROM user u WHERE u.last_message_time < :time");
                 $stmt->bindParam(':time', $timenouser, PDO::PARAM_STR);
                 $stmt->execute();
                 $userslist = json_encode($stmt->fetchAll());
             } elseif ($typeusermessage == "customer") {
                 if ($userdata['selectpanel'] == "all") {
-                    $stmt = $pdo->prepare("SELECT u.id FROM user u WHERE u.agent =  :agent AND u.last_message_time < :time AND EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id);");
+                    $stmt = saasPrepare($pdo, "SELECT u.id FROM user u WHERE u.agent =  :agent AND u.last_message_time < :time AND EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id);");
                 } else {
                     $panel = select("marzban_panel", "*", "code_panel", $userdata['selectpanel'], "select");
-                    $stmt = $pdo->prepare("SELECT u.id FROM user u WHERE u.agent =  :agent AND u.last_message_time < :time AND EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id AND i.Service_location = :location);");
+                    $stmt = saasPrepare($pdo, "SELECT u.id FROM user u WHERE u.agent =  :agent AND u.last_message_time < :time AND EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id AND i.Service_location = :location);");
                     $stmt->bindParam(':location', $panel['name_panel'], PDO::PARAM_STR);
                 }
                 $stmt->bindParam(':agent', $agent, PDO::PARAM_STR);
@@ -1376,7 +1376,7 @@ elseif ($datain == "systemsms") {
                 $stmt->execute();
                 $userslist = json_encode($stmt->fetchAll());
             } elseif ($typeusermessage == "nonecustomer") {
-                $stmt = $pdo->prepare("SELECT u.id FROM user u WHERE u.agent =  :agent AND u.last_message_time < :time AND NOT EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id);");
+                $stmt = saasPrepare($pdo, "SELECT u.id FROM user u WHERE u.agent =  :agent AND u.last_message_time < :time AND NOT EXISTS ( SELECT 1 FROM invoice i WHERE i.id_user = u.id);");
                 $stmt->bindParam(':agent', $agent, PDO::PARAM_STR);
                 $stmt->bindParam(':time', $timenouser, PDO::PARAM_STR);
                 $stmt->execute();
@@ -1476,7 +1476,7 @@ elseif ($datain == "systemsms") {
         sendmessage($from_id, $textbotlang['Admin']['Help']['nameExists'], null, 'HTML');
         return;
     }
-    $stmt = $pdo->prepare("INSERT IGNORE INTO help (name_os) VALUES (?)");
+    $stmt = saasPrepare($pdo, "INSERT IGNORE INTO help (name_os) VALUES (?)");
     $stmt->execute([$text]);
     update("user", "Processing_value", $text, "id", $from_id);
     if ($setting['categoryhelp'] == "0") {
@@ -1519,7 +1519,7 @@ elseif ($datain == "systemsms") {
     sendmessage($from_id, $textbotlang['Admin']['Help']['selectName'], $json_list_helpkey, 'HTML');
     step('remove_help', $from_id);
 } elseif ($user['step'] == "remove_help") {
-    $stmt = $pdo->prepare("DELETE FROM help WHERE name_os = :name_os");
+    $stmt = saasPrepare($pdo, "DELETE FROM help WHERE name_os = :name_os");
     $stmt->bindParam(':name_os', $text, PDO::PARAM_STR);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Help']['removeHelp'], $keyboardhelpadmin, 'HTML');
@@ -1852,7 +1852,7 @@ elseif ($datain == "systemsms") {
     $varhide_panel = "{}";
     if (!isset($userdata['category']))
         $userdata['category'] = null;
-    $stmt = $pdo->prepare("INSERT IGNORE INTO product (name_product,code_product,price_product,Volume_constraint,Service_time,Location,agent,data_limit_reset,note,category,hide_panel,one_buy_status) VALUES (:name_product,:code_product,:price_product,:Volume_constraint,:Service_time,:Location,:agent,:data_limit_reset,:note,:category,:hide_panel,'0')");
+    $stmt = saasPrepare($pdo, "INSERT IGNORE INTO product (name_product,code_product,price_product,Volume_constraint,Service_time,Location,agent,data_limit_reset,note,category,hide_panel,one_buy_status) VALUES (:name_product,:code_product,:price_product,:Volume_constraint,:Service_time,:Location,:agent,:data_limit_reset,:note,:category,:hide_panel,'0')");
     $stmt->bindParam(':name_product', $userdata['name_product']);
     $stmt->bindParam(':code_product', $randomString);
     $stmt->bindParam(':price_product', $userdata['price_product']);
@@ -1912,7 +1912,7 @@ elseif ($datain == "systemsms") {
         return;
     }
     $sql = "SELECT * FROM Payment_report WHERE id_user = '{$Payment_report['id_user']}' AND payment_Status != 'paid' AND payment_Status != 'Unpaid' AND payment_Status != 'expire' AND payment_Status != 'reject' AND  (id_invoice  LIKE CONCAT('%','getconfigafterpay', '%') OR id_invoice  LIKE CONCAT('%','getextenduser', '%') OR id_invoice  LIKE CONCAT('%','getextravolumeuser', '%') OR id_invoice  LIKE CONCAT('%','getextratimeuser', '%'))";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->execute();
     $countpay = $stmt->rowCount();
     $typepay = explode('|', $Payment_report['id_invoice']);
@@ -1933,7 +1933,7 @@ elseif ($datain == "systemsms") {
         Editmessagetext($from_id, $message_id, $textconfrom, $Confirm_pay);
         return;
     }
-    $claim = $pdo->prepare("UPDATE Payment_report SET payment_Status = 'paid' WHERE id_order = ? AND payment_Status NOT IN ('paid', 'reject')");
+    $claim = saasPrepare($pdo, "UPDATE Payment_report SET payment_Status = 'paid' WHERE id_order = ? AND payment_Status NOT IN ('paid', 'reject')");
     $claim->execute([$order_id]);
     clearSelectCache('Payment_report');
     if ($claim->rowCount() === 0) {
@@ -2028,7 +2028,7 @@ elseif ($datain == "systemsms") {
         sendmessage($from_id, $textbotlang['users']['sell']['errorProduct'], null, 'HTML');
         return;
     }
-    $stmt = $pdo->prepare("DELETE FROM product WHERE name_product =:name_product AND (Location= :Location or Location= '/all')");
+    $stmt = saasPrepare($pdo, "DELETE FROM product WHERE name_product =:name_product AND (Location= :Location or Location= '/all')");
     $stmt->bindParam(':name_product', $text, PDO::PARAM_STR);
     $stmt->bindParam(':Location', $user['Processing_value'], PDO::PARAM_STR);
     $stmt->execute();
@@ -2060,7 +2060,7 @@ elseif ($datain == "systemsms") {
     update("user", "Processing_value_tow", $typeagent, "id", $from_id);
     $product = [];
     $panel = select("marzban_panel", "*", "code_panel", $user['Processing_value_one'], "select");
-    $getdataproduct = $pdo->prepare("SELECT * FROM product WHERE (Location = ? or Location = '/all') AND agent = ?");
+    $getdataproduct = saasPrepare($pdo, "SELECT * FROM product WHERE (Location = ? or Location = '/all') AND agent = ?");
     $getdataproduct->bindValue(1, $panel['name_panel'], PDO::PARAM_STR);
     $getdataproduct->bindValue(2, $typeagent, PDO::PARAM_STR);
     $getdataproduct->execute();
@@ -2085,7 +2085,7 @@ elseif ($datain == "systemsms") {
     deletemessage($from_id, $message_id);
     update("user", "Processing_value", $id_product, "id", $from_id);
     $panel = select("marzban_panel", "*", "code_panel", $user['Processing_value_one'], "select");
-    $__q36 = $pdo->prepare("SELECT * FROM product WHERE id = ?  AND agent = ? AND (Location = ? OR Location = '/all') LIMIT 1");
+    $__q36 = saasPrepare($pdo, "SELECT * FROM product WHERE id = ?  AND agent = ? AND (Location = ? OR Location = '/all') LIMIT 1");
     $__q36->bindValue(1, $id_product, PDO::PARAM_STR);
     $__q36->bindValue(2, $user['Processing_value_tow'], PDO::PARAM_STR);
     $__q36->bindValue(3, $panel['name_panel'], PDO::PARAM_STR);
@@ -2104,7 +2104,7 @@ elseif ($datain == "systemsms") {
         return;
     }
     $panel = select("marzban_panel", "*", "code_panel", $user['Processing_value_one'], "select");
-    $stmt = $pdo->prepare("UPDATE product SET price_product = :price_product WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
+    $stmt = saasPrepare($pdo, "UPDATE product SET price_product = :price_product WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
     $stmt->bindParam(':price_product', $text);
     $stmt->bindParam(':name_product', $user['Processing_value']);
     $stmt->bindParam(':Location', $panel['name_panel']);
@@ -2117,7 +2117,7 @@ elseif ($datain == "systemsms") {
     step('change_note', $from_id);
 } elseif ($user['step'] == "change_note") {
     $panel = select("marzban_panel", "*", "code_panel", $user['Processing_value_one'], "select");
-    $stmt = $pdo->prepare("UPDATE product SET note = :notes WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
+    $stmt = saasPrepare($pdo, "UPDATE product SET note = :notes WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
     $stmt->bindParam(':notes', $text);
     $stmt->bindParam(':name_product', $user['Processing_value']);
     $stmt->bindParam(':Location', $panel['name_panel']);
@@ -2135,7 +2135,7 @@ elseif ($datain == "systemsms") {
         return;
     }
     $panel = select("marzban_panel", "*", "code_panel", $user['Processing_value_one'], "select");
-    $stmt = $pdo->prepare("UPDATE product SET category = :categroy WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
+    $stmt = saasPrepare($pdo, "UPDATE product SET category = :categroy WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
     $stmt->bindParam(':categroy', $text);
     $stmt->bindParam(':name_product', $user['Processing_value']);
     $stmt->bindParam(':Location', $panel['name_panel']);
@@ -2160,7 +2160,7 @@ elseif ($datain == "systemsms") {
         return;
     }
     $panel = select("marzban_panel", "*", "code_panel", $user['Processing_value_one'], "select");
-    $stmt = $pdo->prepare("UPDATE product SET name_product = :name_products WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
+    $stmt = saasPrepare($pdo, "UPDATE product SET name_product = :name_products WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
     $stmt->bindParam(':name_products', $text);
     $stmt->bindParam(':name_product', $user['Processing_value']);
     $stmt->bindParam(':Location', $panel['name_panel']);
@@ -2177,7 +2177,7 @@ elseif ($datain == "systemsms") {
         return;
     }
     $panel = select("marzban_panel", "*", "code_panel", $user['Processing_value_one'], "select");
-    $stmt = $pdo->prepare("UPDATE product SET agent = :agents WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
+    $stmt = saasPrepare($pdo, "UPDATE product SET agent = :agents WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
     $stmt->bindParam(':agents', $text);
     $stmt->bindParam(':name_product', $user['Processing_value']);
     $stmt->bindParam(':Location', $panel['name_panel']);
@@ -2190,7 +2190,7 @@ elseif ($datain == "systemsms") {
     step('change_reset_data', $from_id);
 } elseif ($user['step'] == "change_reset_data") {
     $panel = select("marzban_panel", "*", "code_panel", $user['Processing_value_one'], "select");
-    $stmt = $pdo->prepare("UPDATE product SET data_limit_reset = :data_limit_reset WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
+    $stmt = saasPrepare($pdo, "UPDATE product SET data_limit_reset = :data_limit_reset WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
     $stmt->bindParam(':data_limit_reset', $text);
     $stmt->bindParam(':name_product', $user['Processing_value']);
     $stmt->bindParam(':Location', $panel['name_panel']);
@@ -2208,13 +2208,13 @@ elseif ($datain == "systemsms") {
     }
     $product = select("product", "*", "name_product", $user['Processing_value']);
     $panel = select("marzban_panel", "*", "code_panel", $user['Processing_value_one'], "select");
-    $stmt = $pdo->prepare("UPDATE product SET Location = :Location2 WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
+    $stmt = saasPrepare($pdo, "UPDATE product SET Location = :Location2 WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
     $stmt->bindParam(':Location2', $text);
     $stmt->bindParam(':name_product', $user['Processing_value']);
     $stmt->bindParam(':Location', $panel['name_panel']);
     $stmt->bindParam(':agent', $user['Processing_value_tow']);
     $stmt->execute();
-    $stmt = $pdo->prepare("UPDATE invoice SET Service_location = :Service_location WHERE name_product = :name_product AND Service_location = :Location ");
+    $stmt = saasPrepare($pdo, "UPDATE invoice SET Service_location = :Service_location WHERE name_product = :name_product AND Service_location = :Location ");
     $stmt->bindParam(':Service_location', $text);
     $stmt->bindParam(':name_product', $product['name_product']);
     $stmt->bindParam(':Location', $panel['name_panel']);
@@ -2231,7 +2231,7 @@ elseif ($datain == "systemsms") {
     }
     $product = select("product", "*", "id", $user['Processing_value']);
     $panel = select("marzban_panel", "*", "code_panel", $user['Processing_value_one']);
-    $stmt = $pdo->prepare("UPDATE product SET Volume_constraint = :Volume_constraint WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
+    $stmt = saasPrepare($pdo, "UPDATE product SET Volume_constraint = :Volume_constraint WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
     $stmt->bindParam(':Volume_constraint', $text);
     $stmt->bindParam(':name_product', $product['id']);
     $stmt->bindParam(':Location', $panel['name_panel']);
@@ -2248,7 +2248,7 @@ elseif ($datain == "systemsms") {
         return;
     }
     $panel = select("marzban_panel", "*", "code_panel", $user['Processing_value_one'], "select");
-    $stmt = $pdo->prepare("UPDATE product SET Service_time = :Service_time WHERE id = :id_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
+    $stmt = saasPrepare($pdo, "UPDATE product SET Service_time = :Service_time WHERE id = :id_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
     $stmt->bindParam(':Service_time', $text);
     $stmt->bindParam(':id_product', $user['Processing_value']);
     $stmt->bindParam(':Location', $panel['name_panel']);
@@ -2329,10 +2329,10 @@ elseif ($datain == "systemsms") {
         }
         $query_params = [':agent' => $userdata['agent']];
     }
-    $stmt = $pdo->prepare("SELECT u.id FROM user u" . $query_where);
+    $stmt = saasPrepare($pdo, "SELECT u.id FROM user u" . $query_where);
     $stmt->execute($query_params);
     $Balance_user = $stmt->fetchAll();
-    $stmt = $pdo->prepare("UPDATE user as u SET Balance = Balance + :price" . $query_where);
+    $stmt = saasPrepare($pdo, "UPDATE user as u SET Balance = Balance + :price" . $query_where);
     $stmt->execute($query_params + [':price' => intval($userdata['price'])]);
     step('home', $from_id);
     if ($text == "1") {
@@ -2374,15 +2374,15 @@ elseif ($datain == "systemsms") {
         return;
     }
     $date = date("Y-m-d");
-    $__q37 = $pdo->prepare("SELECT COUNT(*) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND id_user = ?");
+    $__q37 = saasPrepare($pdo, "SELECT COUNT(*) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND id_user = ?");
     $__q37->bindValue(1, $id_user, PDO::PARAM_STR);
     $__q37->execute();
     $dayListSell = $__q37->fetch(PDO::FETCH_ASSOC);
-    $__q38 = $pdo->prepare("SELECT SUM(price) FROM Payment_report WHERE payment_Status = 'paid' AND id_user = ? AND Payment_Method != 'low balance by admin'");
+    $__q38 = saasPrepare($pdo, "SELECT SUM(price) FROM Payment_report WHERE payment_Status = 'paid' AND id_user = ? AND Payment_Method != 'low balance by admin'");
     $__q38->bindValue(1, $id_user, PDO::PARAM_STR);
     $__q38->execute();
     $balanceall = $__q38->fetch(PDO::FETCH_ASSOC);
-    $__q39 = $pdo->prepare("SELECT SUM(price_product) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND id_user = ?");
+    $__q39 = saasPrepare($pdo, "SELECT SUM(price_product) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND id_user = ?");
     $__q39->bindValue(1, $id_user, PDO::PARAM_STR);
     $__q39->execute();
     $subbuyuser = $__q39->fetch(PDO::FETCH_ASSOC);
@@ -2390,7 +2390,7 @@ elseif ($datain == "systemsms") {
     if ($invoicecount == 0) {
         $sumvolume['SUM(Volume)'] = 0;
     } else {
-        $__q40 = $pdo->prepare("SELECT SUM(Volume) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND id_user = ? AND name_product != ?");
+        $__q40 = saasPrepare($pdo, "SELECT SUM(Volume) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND id_user = ? AND name_product != ?");
         $__q40->bindValue(1, $id_user, PDO::PARAM_STR);
         $__q40->bindValue(2, $textbotlang['common']['labels']['testServiceName'], PDO::PARAM_STR);
         $__q40->execute();
@@ -2478,14 +2478,14 @@ elseif ($datain == "systemsms") {
     $desired_date_time_start = time() - 3600;
     $month_date_time_start = time() - 2592000;
     $sql = "SELECT COUNT(*) AS cnt, COALESCE(SUM(price_product),0) AS total FROM invoice WHERE time_sell > :requestedDate AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND name_product != '{$textbotlang['common']['labels']['testServiceName']}' AND id_user = :id_user";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':id_user', $id_user);
     $stmt->bindParam(':requestedDate', $desired_date_time_start);
     $stmt->execute();
     $hoursStat = $stmt->fetch(PDO::FETCH_ASSOC);
     $listhours = (int) $hoursStat['cnt'];
     $suminvoicehours = $hoursStat['total'] ?: "0";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':id_user', $id_user);
     $stmt->bindParam(':requestedDate', $month_date_time_start);
     $stmt->execute();
@@ -2533,7 +2533,7 @@ elseif ($datain == "systemsms") {
     step('getlimitcodedis', $from_id);
 } elseif ($user['step'] == "getlimitcodedis") {
     $userdata = json_decode($user['Processing_value'], true);
-    $stmt = $pdo->prepare("INSERT INTO Discount (code, price, limituse, limitused) VALUES (:code, :price, :limituse, '0')");
+    $stmt = saasPrepare($pdo, "INSERT INTO Discount (code, price, limituse, limitused) VALUES (:code, :price, :limituse, '0')");
     $stmt->execute([':code' => $userdata['code'], ':price' => $userdata['price'], ':limituse' => $text]);
     step("home", $from_id);
     [$giftText, $giftKeyboard] = giftCodesMenu();
@@ -2544,7 +2544,7 @@ elseif ($datain == "systemsms") {
 } elseif (($datain == "giftcode_list" || preg_match('/^giftcode_delete_(\w+)$/', $datain, $dataget)) && $adminrulecheck['rule'] == "administrator") {
     step('home', $from_id);
     if ($datain != "giftcode_list") {
-        $stmt = $pdo->prepare("DELETE FROM Discount WHERE code = :code");
+        $stmt = saasPrepare($pdo, "DELETE FROM Discount WHERE code = :code");
         $stmt->execute([':code' => $dataget[1]]);
     }
     [$giftText, $giftKeyboard] = giftCodesMenu();
@@ -2624,7 +2624,7 @@ elseif ($datain == "systemsms") {
             ensureCardNumberTableSupportsUnicode();
         }
 
-        $stmt = $pdo->prepare("INSERT INTO card_number (cardnumber,namecard) VALUES (?,?)");
+        $stmt = saasPrepare($pdo, "INSERT INTO card_number (cardnumber,namecard) VALUES (?,?)");
         $stmt->execute([$user['Processing_value'], $text]);
         sendmessage($from_id, $textbotlang['Admin']['SettingPayment']['saveCard'], $CartManage, 'HTML');
         step('home', $from_id);
@@ -2714,12 +2714,12 @@ elseif ($datain == "systemsms") {
             $mem_total = formatBytes($System_Stats['mem_total']);
             $mem_used = formatBytes($System_Stats['mem_used']);
             $bandwidth = formatBytes($System_Stats['outgoing_bandwidth'] + $System_Stats['incoming_bandwidth']);
-            $__q41 = $pdo->prepare("SELECT COUNT(*) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND Service_location = ? AND name_product != ?");
+            $__q41 = saasPrepare($pdo, "SELECT COUNT(*) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND Service_location = ? AND name_product != ?");
             $__q41->bindValue(1, $marzban_list_get['name_panel'], PDO::PARAM_STR);
             $__q41->bindValue(2, $textbotlang['common']['labels']['testServiceName'], PDO::PARAM_STR);
             $__q41->execute();
             $ListSell = number_format($__q41->fetch(PDO::FETCH_ASSOC)['COUNT(*)'] ?? 0);
-            $__q42 = $pdo->prepare("SELECT SUM(price_product) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND Service_location = ? AND name_product != ?");
+            $__q42 = saasPrepare($pdo, "SELECT SUM(price_product) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND Service_location = ? AND name_product != ?");
             $__q42->bindValue(1, $marzban_list_get['name_panel'], PDO::PARAM_STR);
             $__q42->bindValue(2, $textbotlang['common']['labels']['testServiceName'], PDO::PARAM_STR);
             $__q42->execute();
@@ -2839,12 +2839,12 @@ elseif ($datain == "systemsms") {
             $System_Stats = json_decode($System_Stats['body'], true);
             $active_users = $System_Stats['active'];
             $total_user = $System_Stats['total'];
-            $__q43 = $pdo->prepare("SELECT COUNT(*) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND Service_location = ? AND name_product != ?");
+            $__q43 = saasPrepare($pdo, "SELECT COUNT(*) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND Service_location = ? AND name_product != ?");
             $__q43->bindValue(1, $marzban_list_get['name_panel'], PDO::PARAM_STR);
             $__q43->bindValue(2, $textbotlang['common']['labels']['testServiceName'], PDO::PARAM_STR);
             $__q43->execute();
             $ListSell = number_format($__q43->fetch(PDO::FETCH_ASSOC)['COUNT(*)'] ?? 0);
-            $__q44 = $pdo->prepare("SELECT SUM(price_product) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND Service_location = ? AND name_product != ?");
+            $__q44 = saasPrepare($pdo, "SELECT SUM(price_product) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND Service_location = ? AND name_product != ?");
             $__q44->bindValue(1, $marzban_list_get['name_panel'], PDO::PARAM_STR);
             $__q44->bindValue(2, $textbotlang['common']['labels']['testServiceName'], PDO::PARAM_STR);
             $__q44->execute();
@@ -2884,12 +2884,12 @@ elseif ($datain == "systemsms") {
     } elseif ($marzban_list_get['type'] == "rebecca") {
         $Check_connection = Get_System_Stats_rebecca($marzban_list_get['name_panel']);
         if (empty($Check_connection['error']) && (empty($Check_connection['status']) || $Check_connection['status'] < 400)) {
-            $ListSell = $pdo->prepare("SELECT COUNT(*) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND Service_location = ? AND name_product != ?");
+            $ListSell = saasPrepare($pdo, "SELECT COUNT(*) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND Service_location = ? AND name_product != ?");
             $ListSell->bindValue(1, $marzban_list_get['name_panel'], PDO::PARAM_STR);
             $ListSell->bindValue(2, $textbotlang['common']['labels']['testServiceName'], PDO::PARAM_STR);
             $ListSell->execute();
             $ListSell = number_format($ListSell->fetch(PDO::FETCH_ASSOC)['COUNT(*)'] ?? 0);
-            $ListSellSum = $pdo->prepare("SELECT SUM(price_product) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND Service_location = ? AND name_product != ?");
+            $ListSellSum = saasPrepare($pdo, "SELECT SUM(price_product) FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND Service_location = ? AND name_product != ?");
             $ListSellSum->bindValue(1, $marzban_list_get['name_panel'], PDO::PARAM_STR);
             $ListSellSum->bindValue(2, $textbotlang['common']['labels']['testServiceName'], PDO::PARAM_STR);
             $ListSellSum->execute();
@@ -3055,7 +3055,7 @@ elseif ($datain == "systemsms") {
     if ($text == $textbotlang['keyboard']['confirm']) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['removedPanel'], $keyboardadmin, 'HTML');
         $marzban = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-        $stmt = $pdo->prepare("DELETE FROM marzban_panel WHERE name_panel = :name_panel");
+        $stmt = saasPrepare($pdo, "DELETE FROM marzban_panel WHERE name_panel = :name_panel");
         $stmt->bindParam(':name_panel', $user['Processing_value'], PDO::PARAM_STR);
         $stmt->execute();
     }
@@ -3103,7 +3103,7 @@ elseif ($datain == "systemsms") {
     $page = 1;
     $items_per_page = 10;
     $start_index = ($page - 1) * $items_per_page;
-    $result = $pdo->prepare("SELECT * FROM user  LIMIT ?, ?");
+    $result = saasPrepare($pdo, "SELECT * FROM user  LIMIT ?, ?");
     $result->bindValue(1, $start_index, PDO::PARAM_INT);
     $result->bindValue(2, $items_per_page, PDO::PARAM_INT);
     $result->execute();
@@ -3162,7 +3162,7 @@ elseif ($datain == "systemsms") {
         $next_page = $page + 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $result = $pdo->prepare("SELECT * FROM user LIMIT ?, ?");
+    $result = saasPrepare($pdo, "SELECT * FROM user LIMIT ?, ?");
     $result->bindValue(1, $start_index, PDO::PARAM_INT);
     $result->bindValue(2, $items_per_page, PDO::PARAM_INT);
     $result->execute();
@@ -3213,7 +3213,7 @@ elseif ($datain == "systemsms") {
         $next_page = $page - 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $result = $pdo->prepare("SELECT * FROM user LIMIT ?, ?");
+    $result = saasPrepare($pdo, "SELECT * FROM user LIMIT ?, ?");
     $result->bindValue(1, $start_index, PDO::PARAM_INT);
     $result->bindValue(2, $items_per_page, PDO::PARAM_INT);
     $result->execute();
@@ -3275,12 +3275,12 @@ elseif ($datain == "systemsms") {
     $items_per_page = 10;
     $start_index = ($page - 1) * $items_per_page;
     if ($typeagent == "all") {
-        $result = $pdo->prepare("SELECT * FROM user WHERE agent != 'f'  LIMIT ?, ?");
+        $result = saasPrepare($pdo, "SELECT * FROM user WHERE agent != 'f'  LIMIT ?, ?");
         $result->bindValue(1, $start_index, PDO::PARAM_INT);
         $result->bindValue(2, $items_per_page, PDO::PARAM_INT);
         $result->execute();
     } else {
-        $result = $pdo->prepare("SELECT * FROM user WHERE agent = ?  LIMIT ?, ?");
+        $result = saasPrepare($pdo, "SELECT * FROM user WHERE agent = ?  LIMIT ?, ?");
         $result->bindValue(1, $typeagent, PDO::PARAM_STR);
         $result->bindValue(2, $start_index, PDO::PARAM_INT);
         $result->bindValue(3, $items_per_page, PDO::PARAM_INT);
@@ -3339,12 +3339,12 @@ elseif ($datain == "systemsms") {
     }
     $start_index = ($next_page - 1) * $items_per_page;
     if ($typeagent == "all") {
-        $result = $pdo->prepare("SELECT * FROM user WHERE agent != 'f'  LIMIT ?, ?");
+        $result = saasPrepare($pdo, "SELECT * FROM user WHERE agent != 'f'  LIMIT ?, ?");
         $result->bindValue(1, $start_index, PDO::PARAM_INT);
         $result->bindValue(2, $items_per_page, PDO::PARAM_INT);
         $result->execute();
     } else {
-        $result = $pdo->prepare("SELECT * FROM user WHERE agent = ?  LIMIT ?, ?");
+        $result = saasPrepare($pdo, "SELECT * FROM user WHERE agent = ?  LIMIT ?, ?");
         $result->bindValue(1, $typeagent, PDO::PARAM_STR);
         $result->bindValue(2, $start_index, PDO::PARAM_INT);
         $result->bindValue(3, $items_per_page, PDO::PARAM_INT);
@@ -3399,12 +3399,12 @@ elseif ($datain == "systemsms") {
     }
     $start_index = ($next_page - 1) * $items_per_page;
     if ($typeagent == "all") {
-        $result = $pdo->prepare("SELECT * FROM user WHERE agent != 'f'  LIMIT ?, ?");
+        $result = saasPrepare($pdo, "SELECT * FROM user WHERE agent != 'f'  LIMIT ?, ?");
         $result->bindValue(1, $start_index, PDO::PARAM_INT);
         $result->bindValue(2, $items_per_page, PDO::PARAM_INT);
         $result->execute();
     } else {
-        $result = $pdo->prepare("SELECT * FROM user WHERE agent = ?  LIMIT ?, ?");
+        $result = saasPrepare($pdo, "SELECT * FROM user WHERE agent = ?  LIMIT ?, ?");
         $result->bindValue(1, $typeagent, PDO::PARAM_STR);
         $result->bindValue(2, $start_index, PDO::PARAM_INT);
         $result->bindValue(3, $items_per_page, PDO::PARAM_INT);
@@ -3453,7 +3453,7 @@ elseif ($datain == "systemsms") {
     $page = 1;
     $items_per_page = 10;
     $start_index = ($page - 1) * $items_per_page;
-    $result = $pdo->prepare("SELECT * FROM user WHERE Balance != '0'  LIMIT ?, ?");
+    $result = saasPrepare($pdo, "SELECT * FROM user WHERE Balance != '0'  LIMIT ?, ?");
     $result->bindValue(1, $start_index, PDO::PARAM_INT);
     $result->bindValue(2, $items_per_page, PDO::PARAM_INT);
     $result->execute();
@@ -3512,7 +3512,7 @@ elseif ($datain == "systemsms") {
         $next_page = $page + 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $result = $pdo->prepare("SELECT * FROM user WHERE Balance != '0'  LIMIT ?, ?");
+    $result = saasPrepare($pdo, "SELECT * FROM user WHERE Balance != '0'  LIMIT ?, ?");
     $result->bindValue(1, $start_index, PDO::PARAM_INT);
     $result->bindValue(2, $items_per_page, PDO::PARAM_INT);
     $result->execute();
@@ -3563,7 +3563,7 @@ elseif ($datain == "systemsms") {
         $next_page = $page - 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $result = $pdo->prepare("SELECT * FROM user WHERE Balance != '0'  LIMIT ?, ?");
+    $result = saasPrepare($pdo, "SELECT * FROM user WHERE Balance != '0'  LIMIT ?, ?");
     $result->bindValue(1, $start_index, PDO::PARAM_INT);
     $result->bindValue(2, $items_per_page, PDO::PARAM_INT);
     $result->execute();
@@ -3610,7 +3610,7 @@ elseif ($datain == "systemsms") {
     $page = 1;
     $items_per_page = 10;
     $start_index = ($page - 1) * $items_per_page;
-    $result = $pdo->prepare("SELECT * FROM user WHERE affiliatescount != '0'  LIMIT ?, ?");
+    $result = saasPrepare($pdo, "SELECT * FROM user WHERE affiliatescount != '0'  LIMIT ?, ?");
     $result->bindValue(1, $start_index, PDO::PARAM_INT);
     $result->bindValue(2, $items_per_page, PDO::PARAM_INT);
     $result->execute();
@@ -3669,7 +3669,7 @@ elseif ($datain == "systemsms") {
         $next_page = $page + 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $result = $pdo->prepare("SELECT * FROM user WHERE affiliatescount != '0'  LIMIT ?, ?");
+    $result = saasPrepare($pdo, "SELECT * FROM user WHERE affiliatescount != '0'  LIMIT ?, ?");
     $result->bindValue(1, $start_index, PDO::PARAM_INT);
     $result->bindValue(2, $items_per_page, PDO::PARAM_INT);
     $result->execute();
@@ -3720,7 +3720,7 @@ elseif ($datain == "systemsms") {
         $next_page = $page - 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $result = $pdo->prepare("SELECT * FROM user WHERE affiliatescount != '0'  LIMIT ?, ?");
+    $result = saasPrepare($pdo, "SELECT * FROM user WHERE affiliatescount != '0'  LIMIT ?, ?");
     $result->bindValue(1, $start_index, PDO::PARAM_INT);
     $result->bindValue(2, $items_per_page, PDO::PARAM_INT);
     $result->execute();
@@ -3784,7 +3784,7 @@ elseif ($datain == "systemsms") {
     }
     $dateacc = date('Y/m/d H:i:s');
     $randomString = bin2hex(random_bytes(5));
-    $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method,id_invoice) VALUES (?,?,?,?,?,?,?)");
+    $stmt = saasPrepare($pdo, "INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method,id_invoice) VALUES (?,?,?,?,?,?,?)");
     $payment_Status = "paid";
     $Payment_Method = "add balance by admin";
     $invoice = null;
@@ -3830,7 +3830,7 @@ elseif ($datain == "systemsms") {
     }
     $dateacc = date('Y/m/d H:i:s');
     $randomString = bin2hex(random_bytes(5));
-    $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method,id_invoice) VALUES (?,?,?,?,?,?,?)");
+    $stmt = saasPrepare($pdo, "INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method,id_invoice) VALUES (?,?,?,?,?,?,?)");
     $payment_Status = "paid";
     $Payment_Method = "low balance by admin";
     $invoice = null;
@@ -4126,7 +4126,7 @@ elseif ($datain == "systemsms") {
     if (!$product)
         return;
     $userdata = json_decode($user['Processing_value'], true);
-    $stmt = $pdo->prepare("INSERT INTO DiscountSell (codeDiscount, usedDiscount, price, limitDiscount, agent, usefirst, useuser, code_panel, code_product, time,type) VALUES (:codeDiscount, :usedDiscount, :price, :limitDiscount, :agent, :usefirst, :useuser, :code_panel, :code_product, :time,:type)");
+    $stmt = saasPrepare($pdo, "INSERT INTO DiscountSell (codeDiscount, usedDiscount, price, limitDiscount, agent, usefirst, useuser, code_panel, code_product, time,type) VALUES (:codeDiscount, :usedDiscount, :price, :limitDiscount, :agent, :usefirst, :useuser, :code_panel, :code_product, :time,:type)");
     $values = "0";
     $values1 = "1";
     $code_product = "0";
@@ -4152,9 +4152,9 @@ elseif ($datain == "systemsms") {
 } elseif (($datain == "discountcode_list" || preg_match('/^discountcode_delete_(\w+)$/', $datain, $dataget)) && $adminrulecheck['rule'] == "administrator") {
     step('home', $from_id);
     if ($datain != "discountcode_list") {
-        $stmt = $pdo->prepare("DELETE FROM Giftcodeconsumed WHERE code = :code");
+        $stmt = saasPrepare($pdo, "DELETE FROM Giftcodeconsumed WHERE code = :code");
         $stmt->execute([':code' => $dataget[1]]);
-        $stmt = $pdo->prepare("DELETE FROM DiscountSell WHERE codeDiscount = :code");
+        $stmt = saasPrepare($pdo, "DELETE FROM DiscountSell WHERE codeDiscount = :code");
         $stmt->execute([':code' => $dataget[1]]);
     }
     [$discountText, $discountKeyboard] = discountCodesMenu();
@@ -4343,7 +4343,7 @@ elseif ($datain == "systemsms") {
     update("user", "agent", "f", "id", $id_user);
     update("user", "pricediscount", "0", "id", $id_user);
     update("user", "expire", null, "id", $id_user);
-    $stmt = $pdo->prepare("DELETE FROM Requestagent WHERE id = :mp7");
+    $stmt = saasPrepare($pdo, "DELETE FROM Requestagent WHERE id = :mp7");
     $stmt->execute([':mp7' => $id_user]);
     step('home', $from_id);
 } elseif (preg_match('/addagent_(\w+)/', $datain, $dataget) && $adminrulecheck['rule'] == "administrator") {
@@ -4406,7 +4406,7 @@ elseif ($datain == "systemsms") {
     if ($user['step'] == "GetusernameconfigAndOrdedrs") {
         $usernameconfig = $text;
         $sql = "SELECT * FROM invoice WHERE username LIKE CONCAT('%', :username, '%') OR note  LIKE CONCAT('%', :notes, '%')";
-        $stmt = $pdo->prepare($sql);
+        $stmt = saasPrepare($pdo, $sql);
         $stmt->bindParam(':username', $usernameconfig, PDO::PARAM_STR);
         $stmt->bindParam(':notes', $usernameconfig, PDO::PARAM_STR);
     } elseif (isset($text[0]) && $text[0] == "/") {
@@ -4415,13 +4415,13 @@ elseif ($datain == "systemsms") {
             return;
         }
         $sql = "SELECT * FROM invoice WHERE username LIKE CONCAT('%', :username, '%') OR note  LIKE CONCAT('%', :notes, '%')";
-        $stmt = $pdo->prepare($sql);
+        $stmt = saasPrepare($pdo, $sql);
         $stmt->bindParam(':username', $usernameconfig, PDO::PARAM_STR);
         $stmt->bindParam(':notes', $usernameconfig, PDO::PARAM_STR);
     } else {
         $usernameconfig = select("invoice", "*", "id_invoice", $datagetr[1], "select")['username'];
         $sql = "SELECT * FROM invoice WHERE username = :username OR note  = :notes";
-        $stmt = $pdo->prepare($sql);
+        $stmt = saasPrepare($pdo, $sql);
         $stmt->bindParam(':username', $usernameconfig, PDO::PARAM_STR);
         $stmt->bindParam(':notes', $usernameconfig, PDO::PARAM_STR);
     }
@@ -4486,7 +4486,7 @@ elseif ($datain == "systemsms") {
         $OrderUser['Service_time'] = $OrderUser['Service_time'] . $textbotlang['Admin']['unit']['days'];
         $OrderUser['Volume'] = $OrderUser['Volume'] . $textbotlang['Admin']['unit']['gigabytes'];
     }
-    $stmt = $pdo->prepare("SELECT value FROM service_other WHERE username = :username AND type = 'extend_user' AND status = 'paid' ORDER BY time DESC LIMIT 20");
+    $stmt = saasPrepare($pdo, "SELECT value FROM service_other WHERE username = :username AND type = 'extend_user' AND status = 'paid' ORDER BY time DESC LIMIT 20");
     $stmt->execute([
         ':username' => $OrderUser['username'],
     ]);
@@ -4580,7 +4580,7 @@ elseif ($datain == "systemsms") {
     ];
     $keyboard_json = json_encode($keyboardlists);
     sendmessage($from_id, $text_order, $keyboard_json, 'HTML');
-    $stmt = $pdo->prepare("SELECT * FROM service_other s WHERE username = :username AND (status = 'paid' OR status IS NULL)");
+    $stmt = saasPrepare($pdo, "SELECT * FROM service_other s WHERE username = :username AND (status = 'paid' OR status IS NULL)");
     $stmt->bindParam(':username', $usernameconfig, PDO::PARAM_STR);
     $stmt->execute();
     $list_service = $stmt->fetchAll();
@@ -4913,7 +4913,7 @@ elseif ($datain == "systemsms") {
     $nameloc = select("invoice", "*", "username", $requestcheck['username'], "select");
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
     $DataUserOut = $ManagePanel->DataUser($nameloc['Service_location'], $requestcheck['username']);
-    $stmt = $pdo->prepare("SELECT  SUM(price) FROM service_other WHERE username = :username AND type != 'change_location' AND type != 'extend_user' LIMIT 1");
+    $stmt = saasPrepare($pdo, "SELECT  SUM(price) FROM service_other WHERE username = :username AND type != 'change_location' AND type != 'extend_user' LIMIT 1");
     $stmt->bindParam(':username', $nameloc['username']);
     $stmt->execute();
     $sumproduct = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -5171,7 +5171,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
         sendmessage($from_id, $textbotlang['common']['invalidUsername'], $backuser, 'html');
         return;
     }
-    $stmtDup = $pdo->prepare("SELECT 1 FROM invoice WHERE BINARY username = ? LIMIT 1");
+    $stmtDup = saasPrepare($pdo, "SELECT 1 FROM invoice WHERE BINARY username = ? LIMIT 1");
     $stmtDup->execute([$text]);
     if ($stmtDup->fetchColumn() !== false) {
         sendmessage($from_id, $textbotlang['Admin']['addorder']['usernameExists'], null, 'HTML');
@@ -5186,7 +5186,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     step('stependforaddorder', $from_id);
 } elseif ($user['step'] == "stependforaddorder") {
     $sql = "SELECT * FROM product  WHERE name_product = :name_product AND (Location = :location OR Location = '/all') LIMIT 1";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':name_product', $text, PDO::PARAM_STR);
     $stmt->bindParam(':location', $user['Processing_value_tow'], PDO::PARAM_STR);
     $stmt->execute();
@@ -5232,7 +5232,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
         'volume' => false,
         'time' => false,
     ));
-    $stmt = $pdo->prepare("INSERT IGNORE INTO invoice (id_user, id_invoice, username, time_sell, Service_location, name_product, price_product, Volume, Service_time, Status,notifctions) VALUES (:id_user, :id_invoice, :username, :time_sell, :Service_location, :name_product, :price_product, :Volume, :Service_time, :Status,:notifctions)");
+    $stmt = saasPrepare($pdo, "INSERT IGNORE INTO invoice (id_user, id_invoice, username, time_sell, Service_location, name_product, price_product, Volume, Service_time, Status,notifctions) VALUES (:id_user, :id_invoice, :username, :time_sell, :Service_location, :name_product, :price_product, :Volume, :Service_time, :Status,:notifctions)");
     $Status = "active";
     $stmt->bindParam(':id_user', $user['Processing_value'], PDO::PARAM_STR);
     $stmt->bindParam(':id_invoice', $randomString, PDO::PARAM_STR);
@@ -5307,7 +5307,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     sendmessage($from_id, $textbotlang['Admin']['card']['askDelete'], $list_card_remove, 'HTML');
     step('getcardremove', $from_id);
 } elseif ($user['step'] == "getcardremove") {
-    $stmt = $pdo->prepare("DELETE FROM card_number WHERE cardnumber = :cardnumber");
+    $stmt = saasPrepare($pdo, "DELETE FROM card_number WHERE cardnumber = :cardnumber");
     $stmt->bindParam(':cardnumber', $text, PDO::PARAM_STR);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['card']['deleted'], $CartManage, 'HTML');
@@ -5564,22 +5564,22 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
 } elseif ($datain == "optimizebot") {
     #remove data
     $testServiceName = $textbotlang['common']['labels']['testServiceName'];
-    $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status = 'unpaid' AND name_product != :mp11");
+    $stmt = saasPrepare($pdo, "DELETE FROM invoice WHERE Status = 'unpaid' AND name_product != :mp11");
     $stmt->execute([':mp11' => $testServiceName]);
     $countunpiadorder = $stmt->rowCount();
-    $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status IN ('disabled', 'disabledn', 'disablebyadmin') AND name_product != :mp12");
+    $stmt = saasPrepare($pdo, "DELETE FROM invoice WHERE Status IN ('disabled', 'disabledn', 'disablebyadmin') AND name_product != :mp12");
     $stmt->execute([':mp12' => $testServiceName]);
     $countdisableorder = $stmt->rowCount();
-    $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status IN ('removebyadmin', 'removedbyadmin')");
+    $stmt = saasPrepare($pdo, "DELETE FROM invoice WHERE Status IN ('removebyadmin', 'removedbyadmin')");
     $stmt->execute();
     $countremoveadminorder = $stmt->rowCount();
-    $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status IN ('disabled', 'disabledn', 'disablebyadmin') AND name_product = :mp13");
+    $stmt = saasPrepare($pdo, "DELETE FROM invoice WHERE Status IN ('disabled', 'disabledn', 'disablebyadmin') AND name_product = :mp13");
     $stmt->execute([':mp13' => $testServiceName]);
     $countdisableordtester = $stmt->rowCount();
-    $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status = 'removebyuser'");
+    $stmt = saasPrepare($pdo, "DELETE FROM invoice WHERE Status = 'removebyuser'");
     $stmt->execute();
     $countremoveuserorder = $stmt->rowCount();
-    $stmt = $pdo->prepare("DELETE FROM invoice WHERE Status IN ('removeTime', 'removevolume')");
+    $stmt = saasPrepare($pdo, "DELETE FROM invoice WHERE Status IN ('removeTime', 'removevolume')");
     $stmt->execute();
     $countexpiredorder = $stmt->rowCount();
     $optimizebot = sprintf($textbotlang['Admin']['report']['optimizeResult'], $countunpiadorder, $countdisableorder, $countremoveadminorder, $countdisableordtester, $countremoveuserorder, $countexpiredorder);
@@ -6088,7 +6088,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     update("PaySetting", "ValuePay", $text, "NamePay", "chashbackvariza");
 } elseif ($text == $textbotlang['keyboard']['addConfig']) {
     $product = [];
-    $stmt = $pdo->prepare("SELECT * FROM product WHERE Location = :text or Location = '/all' ");
+    $stmt = saasPrepare($pdo, "SELECT * FROM product WHERE Location = :text or Location = '/all' ");
     $stmt->bindParam(':text', $user['Processing_value'], PDO::PARAM_STR);
     $stmt->execute();
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -6136,7 +6136,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     $status = "active";
     foreach ($config as $content_config) {
 
-        $stmt = $pdo->prepare("INSERT IGNORE INTO manualsell (codepanel,namerecord,contentrecord,status,codeproduct) VALUES (:codepanel,:namerecord,:contentrecord,:status,:codeproduct)");
+        $stmt = saasPrepare($pdo, "INSERT IGNORE INTO manualsell (codepanel,namerecord,contentrecord,status,codeproduct) VALUES (:codepanel,:namerecord,:contentrecord,:status,:codeproduct)");
         $stmt->bindParam(':codepanel', $panel['code_panel']);
         $stmt->bindParam(':namerecord', $content_config['name']);
         $stmt->bindParam(':contentrecord', $content_config['config']);
@@ -6148,7 +6148,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
 } elseif ($text == $textbotlang['Admin']['config']['btnDelete']) {
     $panel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
     $listconfig = [];
-    $stmt = $pdo->prepare("SELECT * FROM manualsell WHERE codepanel = :mp14");
+    $stmt = saasPrepare($pdo, "SELECT * FROM manualsell WHERE codepanel = :mp14");
     $stmt->execute([':mp14' => $panel['code_panel']]);
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $listconfig[] = [$row['namerecord']];
@@ -6170,7 +6170,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     step("getnameremove", $from_id);
 } elseif ($user['step'] == "getnameremove") {
     sendmessage($from_id, $textbotlang['Admin']['config']['deleted'], $optionManualsale, 'HTML');
-    $stmt = $pdo->prepare("DELETE FROM manualsell WHERE namerecord = ?");
+    $stmt = saasPrepare($pdo, "DELETE FROM manualsell WHERE namerecord = ?");
     $stmt->bindParam(1, $text);
     $stmt->execute();
     step("home", $from_id);
@@ -6349,7 +6349,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
 } elseif ($text == $textbotlang['keyboard']['editConfig']) {
     $panel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
     $listconfig = [];
-    $stmt = $pdo->prepare("SELECT * FROM manualsell WHERE codepanel = :mp15");
+    $stmt = saasPrepare($pdo, "SELECT * FROM manualsell WHERE codepanel = :mp15");
     $stmt->execute([':mp15' => $panel['code_panel']]);
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $listconfig[] = [$row['namerecord']];
@@ -6414,7 +6414,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
         return;
     }
     $userdata = json_decode($user['Processing_value'], true);
-    $stmt = $pdo->prepare("SELECT * FROM product WHERE Location = :mp16 AND agent = :mp17");
+    $stmt = saasPrepare($pdo, "SELECT * FROM product WHERE Location = :mp16 AND agent = :mp17");
     $stmt->execute([':mp16' => $userdata['namepanel'], ':mp17' => $userdata['agent']]);
     $product = $stmt->fetchAll();
     if ($product == false) {
@@ -6423,10 +6423,10 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
         return;
     }
     if ($userdata['type_price'] == "static") {
-        $stmt = $pdo->prepare("UPDATE  product set price_product = price_product + :price WHERE Location = :location AND agent = :agent");
+        $stmt = saasPrepare($pdo, "UPDATE  product set price_product = price_product + :price WHERE Location = :location AND agent = :agent");
         $stmt->bindParam(':price', $text, PDO::PARAM_STR);
     } else {
-        $stmt = $pdo->prepare("UPDATE  product set price_product = price_product + (price_product * :price / 100)  WHERE Location = :location AND agent = :agent");
+        $stmt = saasPrepare($pdo, "UPDATE  product set price_product = price_product + (price_product * :price / 100)  WHERE Location = :location AND agent = :agent");
         $stmt->bindParam(':price', $text, PDO::PARAM_STR);
     }
     $stmt->bindParam(':location', $userdata['namepanel'], PDO::PARAM_STR);
@@ -6451,14 +6451,14 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
         return;
     }
     $userdata = json_decode($user['Processing_value'], true);
-    $stmt = $pdo->prepare("SELECT * FROM product WHERE Location = :mp22 AND agent = :mp23");
+    $stmt = saasPrepare($pdo, "SELECT * FROM product WHERE Location = :mp22 AND agent = :mp23");
     $stmt->execute([':mp22' => $userdata['namepanel'], ':mp23' => $userdata['agent']]);
     $product = $stmt->fetchAll();
     if ($product == false) {
         sendmessage($from_id, $textbotlang['Admin']['price']['noProductFound'], $shopkeyboard, 'HTML');
         return;
     }
-    $stmt = $pdo->prepare("UPDATE product SET price_product = ROUND(price_product - :price) WHERE Location = :location AND agent = :agent");
+    $stmt = saasPrepare($pdo, "UPDATE product SET price_product = ROUND(price_product - :price) WHERE Location = :location AND agent = :agent");
     $stmt->bindValue(':price', intval($text), PDO::PARAM_INT);
     $stmt->bindParam(':location', $userdata['namepanel'], PDO::PARAM_STR);
     $stmt->bindParam(':agent', $userdata['agent'], PDO::PARAM_STR);
@@ -6799,7 +6799,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     step("getdeparteman", $from_id);
 } elseif ($user['step'] == "getdeparteman") {
     $userdata = json_decode($user['Processing_value'], true);
-    $stmt = $pdo->prepare("INSERT IGNORE INTO departman (idsupport,name_departman) VALUES (:idsupport,:name_departman)");
+    $stmt = saasPrepare($pdo, "INSERT IGNORE INTO departman (idsupport,name_departman) VALUES (:idsupport,:name_departman)");
     $stmt->bindParam(':idsupport', $userdata['idadmin']);
     $stmt->bindParam(':name_departman', $text);
     $stmt->execute();
@@ -6814,7 +6814,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     sendmessage($from_id, $textbotlang['Admin']['department']['askDelete'], $departemanslist, 'HTML');
     step("getremovedep", $from_id);
 } elseif ($user['step'] == "getremovedep") {
-    $stmt = $pdo->prepare("DELETE FROM departman WHERE name_departman = ?");
+    $stmt = saasPrepare($pdo, "DELETE FROM departman WHERE name_departman = ?");
     $stmt->bindParam(1, $text);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['department']['deleted'], $supportcenter, 'HTML');
@@ -7238,7 +7238,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
         return;
     }
     sendmessage($from_id, $textbotlang['Admin']['manageUser']['transferDone'], $keyboardadmin, 'HTML');
-    $stmt = $pdo->prepare("DELETE FROM user WHERE id = :id_user");
+    $stmt = saasPrepare($pdo, "DELETE FROM user WHERE id = :id_user");
     $stmt->bindParam(':id_user', $text, PDO::PARAM_STR);
     $stmt->execute();
     update("user", "id", $text, "id", $user['Processing_value']);
@@ -7440,7 +7440,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
         sendmessage($from_id, $textbotlang['Admin']['manageadmin']['cannotDeleteMain'], null, 'HTML');
         return;
     }
-    $stmt = $pdo->prepare("DELETE FROM admin WHERE TRIM(id_admin) = :id_admin");
+    $stmt = saasPrepare($pdo, "DELETE FROM admin WHERE TRIM(id_admin) = :id_admin");
     $stmt->bindParam(':id_admin', $idadmin, PDO::PARAM_STR);
     $stmt->execute();
     if ($stmt->rowCount() === 0) {
@@ -7605,7 +7605,7 @@ elseif ($text == $textbotlang['keyboard']['hidePanelForUser'] && $adminrulecheck
     editFlowMessage($textbotlang['Admin']['price']['rewardSaved'] . "\n\n" . $wheelText, $wheelKeyboard);
 } elseif ($text == $textbotlang['keyboard']['pendingReceipts']) {
     $sql = "SELECT * FROM Payment_report WHERE Payment_Method = 'cart to cart' AND payment_Status = 'waiting'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->execute();
     $list_payment = $stmt->fetchAll();
     $list_payment_count = count($list_payment);
@@ -7637,7 +7637,7 @@ elseif ($text == $textbotlang['keyboard']['hidePanelForUser'] && $adminrulecheck
     deletemessage($from_id, $message_id);
     sendmessage($from_id, $textbotlang['Admin']['Payment']['allReceiptsDeleted'], $list_payment, 'HTML');
     $sql = "UPDATE Payment_report SET payment_Status = 'reject',dec_not_confirmed = 'remove_all' WHERE Payment_Method = 'cart to cart' AND payment_Status = 'waiting'";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->execute();
 } elseif (preg_match('/showinfopay_(\w+)/', $datain, $dataget)) {
     $idorder = $dataget[1];
@@ -7686,7 +7686,7 @@ elseif ($text == $textbotlang['keyboard']['hidePanelForUser'] && $adminrulecheck
                 $DataUserOut['proxies'][$key] = new stdClass();
             }
         }
-        $stmt = $pdo->prepare("UPDATE product SET proxies = :proxies WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
+        $stmt = saasPrepare($pdo, "UPDATE product SET proxies = :proxies WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
         $proxies_json = json_encode($DataUserOut['proxies']);
         $stmt->bindParam(':proxies', $proxies_json);
         $stmt->bindParam(':name_product', $user['Processing_value']);
@@ -7735,7 +7735,7 @@ elseif ($text == $textbotlang['keyboard']['hidePanelForUser'] && $adminrulecheck
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['inboundUnsupported'], $shopkeyboard, 'HTML');
         return;
     }
-    $stmt = $pdo->prepare("UPDATE product SET inbounds = :inbounds WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
+    $stmt = saasPrepare($pdo, "UPDATE product SET inbounds = :inbounds WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
     $stmt->bindParam(':inbounds', $datainbound);
     $stmt->bindParam(':name_product', $user['Processing_value']);
     $stmt->bindParam(':Location', $marzban_list_get['name_panel']);
@@ -7846,7 +7846,7 @@ elseif ($text == $textbotlang['keyboard']['hidePanelForUser'] && $adminrulecheck
         }
         return;
     }
-    $stmt = $pdo->prepare("INSERT IGNORE INTO service_other (id_user, username, value, type, time, price, output) VALUES (:id_user, :username, :value, :type, :time, :price, :output)");
+    $stmt = saasPrepare($pdo, "INSERT IGNORE INTO service_other (id_user, username, value, type, time, price, output) VALUES (:id_user, :username, :value, :type, :time, :price, :output)");
     $dateacc = date('Y/m/d H:i:s');
     $value = $prodcut['Volume_constraint'] . "_" . $prodcut['Service_time'];
     $type = "extend_user_by_admin";
@@ -7872,14 +7872,14 @@ elseif ($text == $textbotlang['keyboard']['hidePanelForUser'] && $adminrulecheck
     }
 } elseif (preg_match('/removeresid_(\w+)/', $datain, $dataget)) {
     $idorder = $dataget[1];
-    $stmt = $pdo->prepare("DELETE FROM Payment_report WHERE id_order = :id_order");
+    $stmt = saasPrepare($pdo, "DELETE FROM Payment_report WHERE id_order = :id_order");
     $stmt->bindParam(':id_order', $idorder, PDO::PARAM_STR);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Payment']['receiptDeleted'], null, 'HTML');
 }
 if (isset($update["inline_query"])) {
     $sql = "SELECT * FROM invoice WHERE (username LIKE CONCAT('%', :username, '%') OR note  LIKE CONCAT('%', :notes, '%') OR Volume LIKE CONCAT('%',:Volume, '%') OR Service_time LIKE CONCAT('%',:Service_time, '%')) AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') LIMIT 50";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':username', $query, PDO::PARAM_STR);
     $stmt->bindParam(':Service_time', $query, PDO::PARAM_STR);
     $stmt->bindParam(':Volume', $query, PDO::PARAM_STR);
@@ -7918,7 +7918,7 @@ if (isset($update["inline_query"])) {
     $page = 1;
     $items_per_page = 10;
     $start_index = ($page - 1) * $items_per_page;
-    $result = $pdo->prepare("SELECT * FROM invoice WHERE id_user = ?  LIMIT ?, ?");
+    $result = saasPrepare($pdo, "SELECT * FROM invoice WHERE id_user = ?  LIMIT ?, ?");
     $result->bindValue(1, $id_user, PDO::PARAM_STR);
     $result->bindValue(2, $start_index, PDO::PARAM_INT);
     $result->bindValue(3, $items_per_page, PDO::PARAM_INT);
@@ -7972,7 +7972,7 @@ if (isset($update["inline_query"])) {
         $next_page = $page + 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $result = $pdo->prepare("SELECT * FROM invoice WHERE id_user = ?  LIMIT ?, ?");
+    $result = saasPrepare($pdo, "SELECT * FROM invoice WHERE id_user = ?  LIMIT ?, ?");
     $result->bindValue(1, $id_user, PDO::PARAM_STR);
     $result->bindValue(2, $start_index, PDO::PARAM_INT);
     $result->bindValue(3, $items_per_page, PDO::PARAM_INT);
@@ -8026,7 +8026,7 @@ if (isset($update["inline_query"])) {
         $next_page = $page - 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $result = $pdo->prepare("SELECT * FROM invoice WHERE id_user = ?  LIMIT ?, ?");
+    $result = saasPrepare($pdo, "SELECT * FROM invoice WHERE id_user = ?  LIMIT ?, ?");
     $result->bindValue(1, $id_user, PDO::PARAM_STR);
     $result->bindValue(2, $start_index, PDO::PARAM_INT);
     $result->bindValue(3, $items_per_page, PDO::PARAM_INT);
@@ -8074,7 +8074,7 @@ if (isset($update["inline_query"])) {
     $page = 1;
     $items_per_page = 10;
     $start_index = ($page - 1) * $items_per_page;
-    $result = $pdo->prepare("SELECT * FROM user WHERE cardpayment = '1'  LIMIT ?, ?");
+    $result = saasPrepare($pdo, "SELECT * FROM user WHERE cardpayment = '1'  LIMIT ?, ?");
     $result->bindValue(1, $start_index, PDO::PARAM_INT);
     $result->bindValue(2, $items_per_page, PDO::PARAM_INT);
     $result->execute();
@@ -8133,7 +8133,7 @@ if (isset($update["inline_query"])) {
         $next_page = $page + 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $result = $pdo->prepare("SELECT * FROM user WHERE cardpayment = '1'  LIMIT ?, ?");
+    $result = saasPrepare($pdo, "SELECT * FROM user WHERE cardpayment = '1'  LIMIT ?, ?");
     $result->bindValue(1, $start_index, PDO::PARAM_INT);
     $result->bindValue(2, $items_per_page, PDO::PARAM_INT);
     $result->execute();
@@ -8184,7 +8184,7 @@ if (isset($update["inline_query"])) {
         $next_page = $page - 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $result = $pdo->prepare("SELECT * FROM user WHERE cardpayment = '1'  LIMIT ?, ?");
+    $result = saasPrepare($pdo, "SELECT * FROM user WHERE cardpayment = '1'  LIMIT ?, ?");
     $result->bindValue(1, $start_index, PDO::PARAM_INT);
     $result->bindValue(2, $items_per_page, PDO::PARAM_INT);
     $result->execute();
@@ -8289,7 +8289,7 @@ if (isset($update["inline_query"])) {
         'show_product' => true,
     ));
     $value = "{}";
-    $stmt = $pdo->prepare("INSERT INTO botsaz (id_user,bot_token,admin_ids,username,time,setting,hide_panel,webhook_secret) VALUES (:id_user,:bot_token,:admin_ids,:username,:time,:setting,:hide_panel,:webhook_secret)");
+    $stmt = saasPrepare($pdo, "INSERT INTO botsaz (id_user,bot_token,admin_ids,username,time,setting,hide_panel,webhook_secret) VALUES (:id_user,:bot_token,:admin_ids,:username,:time,:setting,:hide_panel,:webhook_secret)");
     $stmt->bindParam(':id_user', $userdate['id_user'], PDO::PARAM_STR);
     $stmt->bindParam(':bot_token', $userdate['token'], PDO::PARAM_STR);
     $stmt->bindParam(':admin_ids', $admin_ids);
@@ -8313,7 +8313,7 @@ if (isset($update["inline_query"])) {
     if (!empty($contentbto['bot_token'])) {
         file_get_contents("https://api.telegram.org/bot{$contentbto['bot_token']}/deletewebhook");
     }
-    $stmt = $pdo->prepare("DELETE FROM botsaz WHERE id_user = :id_user");
+    $stmt = saasPrepare($pdo, "DELETE FROM botsaz WHERE id_user = :id_user");
     $stmt->bindParam(':id_user', $id_user, PDO::PARAM_STR);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['agentbot']['deleted'], $keyboardadmin, 'HTML');
@@ -8380,7 +8380,7 @@ if ($datain == "settimecornday" && $adminrulecheck['rule'] == "administrator") {
         return;
     }
     $userdate = json_decode($user['Processing_value'], true);
-    $stmt = $pdo->prepare("INSERT INTO app (name, link) VALUES (:name, :link)");
+    $stmt = saasPrepare($pdo, "INSERT INTO app (name, link) VALUES (:name, :link)");
     $stmt->bindParam(':name', $userdate['name'], PDO::PARAM_STR);
     $stmt->bindParam(':link', $text, PDO::PARAM_STR);
     $stmt->execute();
@@ -8392,7 +8392,7 @@ if ($datain == "settimecornday" && $adminrulecheck['rule'] == "administrator") {
 } elseif ($user['step'] == "getnameappforremove") {
     sendmessage($from_id, $textbotlang['Admin']['apps']['deleted'], $keyboardlinkapp, 'HTML');
     step('home', $from_id);
-    $stmt = $pdo->prepare("DELETE FROM app WHERE name = :name");
+    $stmt = saasPrepare($pdo, "DELETE FROM app WHERE name = :name");
     $stmt->bindParam(':name', $text, PDO::PARAM_STR);
     $stmt->execute();
 } elseif ($text == $textbotlang['keyboard']['panelFeatureStatus'] && $adminrulecheck['rule'] == "administrator") {
@@ -9110,7 +9110,7 @@ if ($datain == "settimecornday" && $adminrulecheck['rule'] == "administrator") {
     }
     $message_id = Editmessagetext($from_id, $message_id, $textbotlang['Admin']['gift']['started'], $keyboardstatistics);
     $userdata['id_message'] = $message_id['result']['message_id'];
-    $stmt = $pdo->prepare("SELECT username FROM invoice WHERE  (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND Service_location = :mp24 AND name_product != :mp25");
+    $stmt = saasPrepare($pdo, "SELECT username FROM invoice WHERE  (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND Service_location = :mp24 AND name_product != :mp25");
     $stmt->execute([':mp24' => $userdata['name_panel'], ':mp25' => $textbotlang['common']['labels']['testServiceName']]);
     $userslist = json_encode($stmt->fetchAll());
     file_put_contents('cronbot/gift', json_encode($userdata));
@@ -9243,7 +9243,7 @@ if ($datain == "settimecornday" && $adminrulecheck['rule'] == "administrator") {
 } elseif (preg_match('/confirmremovefulls-(.*)/', $datain, $dataget)) {
     $id_invoice = $dataget[1];
     $invocie = select("invoice", "*", "id_invoice", $id_invoice, "select");
-    $stmt = $pdo->prepare("DELETE FROM invoice WHERE id_invoice = :id_invoice");
+    $stmt = saasPrepare($pdo, "DELETE FROM invoice WHERE id_invoice = :id_invoice");
     $stmt->bindParam(':id_invoice', $id_invoice, PDO::PARAM_STR);
     $stmt->execute();
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['order']['deleted'], json_encode(['inline_keyboard' => []]));
@@ -9261,7 +9261,7 @@ if ($datain == "settimecornday" && $adminrulecheck['rule'] == "administrator") {
 } elseif ($user['step'] == "getremarkcategory") {
     sendmessage($from_id, $textbotlang['Admin']['category']['added'], $shopkeyboard, 'HTML');
     step("home", $from_id);
-    $stmt = $pdo->prepare("INSERT INTO category (remark) VALUES (?)");
+    $stmt = saasPrepare($pdo, "INSERT INTO category (remark) VALUES (?)");
     $stmt->bindParam(1, $text);
     $stmt->execute();
 } elseif ($text == $textbotlang['keyboard']['deleteCategory']) {
@@ -9270,7 +9270,7 @@ if ($datain == "settimecornday" && $adminrulecheck['rule'] == "administrator") {
 } elseif ($user['step'] == "removecategory") {
     sendmessage($from_id, $textbotlang['Admin']['category']['deleted'], $shopkeyboard, 'HTML');
     step("home", $from_id);
-    $stmt = $pdo->prepare("DELETE FROM category WHERE remark = :remark ");
+    $stmt = saasPrepare($pdo, "DELETE FROM category WHERE remark = :remark ");
     $stmt->bindParam(':remark', $text);
     $stmt->execute();
 } elseif ($text == $textbotlang['keyboard']['hidePanel'] && $adminrulecheck['rule'] == "administrator") {
@@ -9348,7 +9348,7 @@ if ($datain == "settimecornday" && $adminrulecheck['rule'] == "administrator") {
     $page = 1;
     $items_per_page = 10;
     $start_index = ($page - 1) * $items_per_page;
-    $result = $pdo->prepare("SELECT * FROM user WHERE Balance < 0  LIMIT ?, ?");
+    $result = saasPrepare($pdo, "SELECT * FROM user WHERE Balance < 0  LIMIT ?, ?");
     $result->bindValue(1, $start_index, PDO::PARAM_INT);
     $result->bindValue(2, $items_per_page, PDO::PARAM_INT);
     $result->execute();
@@ -9403,7 +9403,7 @@ if ($datain == "settimecornday" && $adminrulecheck['rule'] == "administrator") {
         $next_page = $page + 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $result = $pdo->prepare("SELECT * FROM user WHERE Balance < 0  LIMIT ?, ?");
+    $result = saasPrepare($pdo, "SELECT * FROM user WHERE Balance < 0  LIMIT ?, ?");
     $result->bindValue(1, $start_index, PDO::PARAM_INT);
     $result->bindValue(2, $items_per_page, PDO::PARAM_INT);
     $result->execute();
@@ -9461,7 +9461,7 @@ if ($datain == "settimecornday" && $adminrulecheck['rule'] == "administrator") {
         $next_page = $page - 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $result = $pdo->prepare("SELECT * FROM user WHERE Balance < 0  LIMIT ?, ?");
+    $result = saasPrepare($pdo, "SELECT * FROM user WHERE Balance < 0  LIMIT ?, ?");
     $result->bindValue(1, $start_index, PDO::PARAM_INT);
     $result->bindValue(2, $items_per_page, PDO::PARAM_INT);
     $result->execute();
@@ -9535,7 +9535,7 @@ if ($datain == "settimecornday" && $adminrulecheck['rule'] == "administrator") {
     step("home", $from_id);
 } elseif ($text == $textbotlang['keyboard']['showFirstPurchase']) {
     $panel = select("marzban_panel", "*", "code_panel", $user['Processing_value_one'], "select");
-    $stmt = $pdo->prepare("SELECT * FROM product WHERE id = :name_product  AND agent = :agent AND (Location = :Location OR Location = '/all') LIMIT 1");
+    $stmt = saasPrepare($pdo, "SELECT * FROM product WHERE id = :name_product  AND agent = :agent AND (Location = :Location OR Location = '/all') LIMIT 1");
     $stmt->bindParam(':name_product', $user['Processing_value']);
     $stmt->bindParam(':Location', $panel['name_panel']);
     $stmt->bindParam(':agent', $user['Processing_value_tow']);
@@ -9562,13 +9562,13 @@ if ($datain == "settimecornday" && $adminrulecheck['rule'] == "administrator") {
         $status_now = '0';
     }
     $panel = select("marzban_panel", "*", "code_panel", $user['Processing_value_one'], "select");
-    $stmt = $pdo->prepare("UPDATE product SET one_buy_status = :one_buy_status WHERE code_product = :code_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
+    $stmt = saasPrepare($pdo, "UPDATE product SET one_buy_status = :one_buy_status WHERE code_product = :code_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
     $stmt->bindParam(':one_buy_status', $status_now);
     $stmt->bindParam(':code_product', $code_product);
     $stmt->bindParam(':Location', $panel['name_panel']);
     $stmt->bindParam(':agent', $user['Processing_value_tow']);
     $stmt->execute();
-    $stmt = $pdo->prepare("SELECT * FROM product WHERE code_product = :code_product  AND agent = :agent AND (Location = :Location OR Location = '/all') LIMIT 1");
+    $stmt = saasPrepare($pdo, "SELECT * FROM product WHERE code_product = :code_product  AND agent = :agent AND (Location = :Location OR Location = '/all') LIMIT 1");
     $stmt->bindParam(':code_product', $code_product);
     $stmt->bindParam(':Location', $panel['name_panel']);
     $stmt->bindParam(':agent', $user['Processing_value_tow']);

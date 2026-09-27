@@ -86,7 +86,7 @@ if ($from_id != 0) {
         ));
         file_put_contents("data/$from_id/$from_id.json", $data_user);
     }
-    $stmt = $pdo->prepare("INSERT IGNORE INTO user (id , step,limit_usertest,User_Status,number,Balance,pagenumber,username,agent,message_count,last_message_time,affiliates,affiliatescount,cardpayment,number_username,namecustom,register,verify,codeInvitation,pricediscount,maxbuyagent,joinchannel,score,bottype,status_cron) VALUES (:from_id, 'none',:limit_usertest_all,'Active','none','0','1',:username,'f','0','0','0','0',:showcard,'100','none',:date,:verifycode,:codeInvitation,'0','0','0','0',:bottype,'1')");
+    $stmt = saasPrepare($pdo, "INSERT IGNORE INTO user (id , step,limit_usertest,User_Status,number,Balance,pagenumber,username,agent,message_count,last_message_time,affiliates,affiliatescount,cardpayment,number_username,namecustom,register,verify,codeInvitation,pricediscount,maxbuyagent,joinchannel,score,bottype,status_cron) VALUES (:from_id, 'none',:limit_usertest_all,'Active','none','0','1',:username,'f','0','0','0','0',:showcard,'100','none',:date,:verifycode,:codeInvitation,'0','0','0','0',:bottype,'1')");
     $stmt->bindParam(':bottype', $ApiToken);
     $stmt->bindParam(':from_id', $from_id);
     $stmt->bindParam(':limit_usertest_all', $settingmain['limit_usertest_all']);
@@ -154,7 +154,7 @@ if ($text == "/start") {
     $timeacc = jdate('H:i:s', $current_time);
     $first_name = htmlspecialchars($first_name);
     $Balanceuser = number_format($user['Balance'], 0);
-    $stmt = $pdo->prepare("SELECT * FROM Payment_report WHERE id_user = :from_id AND payment_Status = 'paid' AND bottype = :apibot");
+    $stmt = saasPrepare($pdo, "SELECT * FROM Payment_report WHERE id_user = :from_id AND payment_Status = 'paid' AND bottype = :apibot");
     $stmt->execute([
         ':from_id' => $from_id,
         ':apibot' => $ApiToken
@@ -180,7 +180,7 @@ if ($text == "/start") {
     }
     return;
 } elseif ($text == $text_bot_var['btn_keyboard']['my_service'] or $datain == "backorder") {
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND bottype = :apibot");
+    $stmt = saasPrepare($pdo, "SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND bottype = :apibot");
     $stmt->bindParam(':id_user', $from_id);
     $stmt->bindParam(':apibot', $ApiToken);
     $stmt->execute();
@@ -197,7 +197,7 @@ if ($text == "/start") {
     $keyboardlists = [
         'inline_keyboard' => [],
     ];
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :mp1 AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR status = 'send_on_hold') AND bottype = :mp2 ORDER BY time_sell DESC LIMIT :mp3, :mp4");
+    $stmt = saasPrepare($pdo, "SELECT * FROM invoice WHERE id_user = :mp1 AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR status = 'send_on_hold') AND bottype = :mp2 ORDER BY time_sell DESC LIMIT :mp3, :mp4");
     $stmt->execute([':mp1' => $from_id, ':mp2' => $ApiToken, ':mp3' => $start_index, ':mp4' => $items_per_page]);
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $data = "";
@@ -231,7 +231,7 @@ if ($text == "/start") {
         sendmessage($from_id, "🛍 برای مشاهده اطلاعات سرویس خود از لیست زیر سرویس خود را انتخاب نمایید", $keyboard_json, 'html');
     }
 } elseif ($datain == 'next_page') {
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND bottype = :apibot");
+    $stmt = saasPrepare($pdo, "SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND bottype = :apibot");
     $stmt->bindParam(':id_user', $from_id);
     $stmt->bindParam(':apibot', $ApiToken);
     $stmt->execute();
@@ -248,7 +248,7 @@ if ($text == "/start") {
     $keyboardlists = [
         'inline_keyboard' => [],
     ];
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :mp5 AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR status = 'send_on_hold') AND bottype = :mp6 ORDER BY time_sell DESC LIMIT :mp7, :mp8");
+    $stmt = saasPrepare($pdo, "SELECT * FROM invoice WHERE id_user = :mp5 AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR status = 'send_on_hold') AND bottype = :mp6 ORDER BY time_sell DESC LIMIT :mp7, :mp8");
     $stmt->execute([':mp5' => $from_id, ':mp6' => $ApiToken, ':mp7' => $start_index, ':mp8' => $items_per_page]);
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $keyboardlists['inline_keyboard'][] = [
@@ -280,7 +280,7 @@ if ($text == "/start") {
     update("user", "pagenumber", $next_page, "id", $from_id);
     Editmessagetext($from_id, $message_id, "🛍 برای مشاهده اطلاعات سرویس خود از لیست زیر سرویس خود را انتخاب نمایید", $keyboard_json);
 } elseif ($datain == 'previous_page') {
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND bottype = :apibot");
+    $stmt = saasPrepare($pdo, "SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND bottype = :apibot");
     $stmt->bindParam(':id_user', $from_id);
     $stmt->bindParam(':apibot', $ApiToken);
     $stmt->execute();
@@ -297,7 +297,7 @@ if ($text == "/start") {
     $keyboardlists = [
         'inline_keyboard' => [],
     ];
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :mp9 AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR status = 'send_on_hold') AND bottype = :mp10 ORDER BY time_sell DESC LIMIT :mp11, :mp12");
+    $stmt = saasPrepare($pdo, "SELECT * FROM invoice WHERE id_user = :mp9 AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR status = 'send_on_hold') AND bottype = :mp10 ORDER BY time_sell DESC LIMIT :mp11, :mp12");
     $stmt->execute([':mp9' => $from_id, ':mp10' => $ApiToken, ':mp11' => $start_index, ':mp12' => $items_per_page]);
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $keyboardlists['inline_keyboard'][] = [
@@ -401,7 +401,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtest_(.*)/', $data
         deletemessage($from_id, $message_id);
     }
     if ($marzban_list_get['type'] == "Manualsale") {
-        $stmt = $pdo->prepare("SELECT * FROM manualsell WHERE codepanel = :codepanel AND codeproduct = :codeproduct AND status = 'active'");
+        $stmt = saasPrepare($pdo, "SELECT * FROM manualsell WHERE codepanel = :codepanel AND codeproduct = :codeproduct AND status = 'active'");
         $value = "usertest";
         $stmt->bindParam(':codepanel', $marzban_list_get['code_panel']);
         $stmt->bindParam(':codeproduct', $value);
@@ -437,7 +437,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtest_(.*)/', $data
         'volume' => false,
         'time' => false,
     ));
-    $stmt = $pdo->prepare("INSERT IGNORE INTO invoice (id_user, id_invoice, username,time_sell, Service_location, name_product, price_product, Volume, Service_time,Status,bottype,notifctions) VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?,?,?)");
+    $stmt = saasPrepare($pdo, "INSERT IGNORE INTO invoice (id_user, id_invoice, username,time_sell, Service_location, name_product, price_product, Volume, Service_time,Status,bottype,notifctions) VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?,?,?)");
     $Status = "active";
     $info_product['name_product'] = "سرویس تست";
     $info_product['price_product'] = "0";
@@ -590,7 +590,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
     step("statusnamecustom", $from_id);
     return;
 } elseif ($text == $text_bot_var['btn_keyboard']['buy'] || $user['step'] == "statusnamecustom") {
-    $locationproduct = $pdo->prepare("SELECT * FROM marzban_panel  WHERE status = 'active' AND (agent = ? OR agent = 'all')");
+    $locationproduct = saasPrepare($pdo, "SELECT * FROM marzban_panel  WHERE status = 'active' AND (agent = ? OR agent = 'all')");
     $locationproduct->bindValue(1, $userbot['agent'], PDO::PARAM_STR);
     $locationproduct->execute();
     if (($locationproduct)->rowCount() == 0) {
@@ -601,7 +601,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
         $location = ($locationproduct)->fetch(PDO::FETCH_ASSOC)['name_panel'];
         $locationproduct = select("marzban_panel", "*", "name_panel", $location, "select");
         $query = "SELECT * FROM product WHERE (Location = '{$locationproduct['name_panel']}' OR Location = '/all')AND agent= '{$userbot['agent']}'";
-        $stmt = $pdo->prepare($query);
+        $stmt = saasPrepare($pdo, $query);
         $stmt->execute();
         $productnotexits = $stmt->rowCount();
         if ($locationproduct['hide_user'] != null) {
@@ -611,7 +611,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
                 return;
             }
         }
-        $stmt = $pdo->prepare("SELECT * FROM invoice WHERE status = 'active' OR status = 'end_of_time' OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold'");
+        $stmt = saasPrepare($pdo, "SELECT * FROM invoice WHERE status = 'active' OR status = 'end_of_time' OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold'");
         $stmt->execute();
         $countinovoice = $stmt->rowCount();
         if ($locationproduct['limit_panel'] != "unlimited") {
@@ -694,7 +694,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
     } else {
         savedata("clear", "name_panel", $locationproduct['name_panel']);
     }
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE (status = 'active' OR status = 'end_of_time' OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND  Service_location = :mp13");
+    $stmt = saasPrepare($pdo, "SELECT * FROM invoice WHERE (status = 'active' OR status = 'end_of_time' OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND  Service_location = :mp13");
     $stmt->execute([':mp13' => $locationproduct['name_panel']]);
     $countinovoice = $stmt->rowCount();
     if ($locationproduct['limit_panel'] != "unlimited") {
@@ -704,7 +704,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
         }
     }
     $query = "SELECT * FROM product WHERE (Location = '{$locationproduct['name_panel']}' OR Location = '/all')AND agent= '{$userbot['agent']}'";
-    $stmt = $pdo->prepare($query);
+    $stmt = saasPrepare($pdo, $query);
     $stmt->execute();
     $productnotexits = $stmt->rowCount();
     if ($productnotexits != 0 and $setting['show_product'] == false) {
@@ -1027,7 +1027,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
     }
     if ($marzban_list_get['type'] == "Manualsale") {
         $marzban_list_get = select("marzban_panel", "*", "name_panel", $userdate['name_panel'], "select");
-        $stmt = $pdo->prepare("SELECT * FROM manualsell WHERE codepanel = :codepanel AND codeproduct = :codeproduct AND status = 'active'");
+        $stmt = saasPrepare($pdo, "SELECT * FROM manualsell WHERE codepanel = :codepanel AND codeproduct = :codeproduct AND status = 'active'");
         $stmt->bindParam(':codepanel', $marzban_list_get['code_panel']);
         $stmt->bindParam(':codeproduct', $datafactor['code_product']);
         $stmt->execute();
@@ -1041,7 +1041,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
         'volume' => false,
         'time' => false,
     ));
-    $stmt = $pdo->prepare("INSERT IGNORE INTO invoice (id_user, id_invoice, username,time_sell, Service_location, name_product, price_product, Volume, Service_time,Status,bottype,note,notifctions) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?)");
+    $stmt = saasPrepare($pdo, "INSERT IGNORE INTO invoice (id_user, id_invoice, username,time_sell, Service_location, name_product, price_product, Volume, Service_time,Status,bottype,note,notifctions) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?)");
     $Status = "unpaid";
     $stmt->execute([$from_id, $randomString, $username_ac, $date, $marzban_list_get['name_panel'], $datafactor['name_product'], $datafactor['price_product'], $datafactor['Volume_constraint'], $datafactor['Service_time'], $Status, $ApiToken, $userdate['note'], $notifctions]);
     if ($datafactor['price_product'] > $user['Balance'] && intval($datafactor['price_product']) != 0) {
@@ -1219,7 +1219,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
         file_put_contents("data/$from_id/$from_id.json", json_encode($userbalance));
     }
     $Balancebot = $userbotbalance['Balance'] - $datafactor['price_productMain'];
-    $stmt = $pdo->prepare("UPDATE user SET Balance = Balance - :price WHERE id = :id");
+    $stmt = saasPrepare($pdo, "UPDATE user SET Balance = Balance - :price WHERE id = :id");
     $stmt->execute([':price' => $datafactor['price_productMain'], ':id' => $userbotbalance['id']]);
     if (in_array(usernameMethodKey($marzban_list_get['MethodUsername']), ['customTextSequential', 'usernameSequential', 'numericIdSequential', 'agentCustomTextSequential'], true)) {
         $value = intval($user['number_username']) + 1;
@@ -1230,7 +1230,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
         }
     }
     $balanceformatsell = number_format(select("user", "Balance", "id", $from_id, "select")['Balance'], 0);
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE name_product != 'سرویس تست'  AND id_user = :id_user");
+    $stmt = saasPrepare($pdo, "SELECT * FROM invoice WHERE name_product != 'سرویس تست'  AND id_user = :id_user");
     $stmt->bindParam(':id_user', $from_id);
     $stmt->execute();
     $countinvoice = $stmt->rowCount();
@@ -1289,7 +1289,7 @@ $textonebuy
     }
     $dateacc = date('Y/m/d H:i:s');
     $randomString = bin2hex(random_bytes(5));
-    $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method,id_invoice,bottype) VALUES (?,?,?,?,?,?,?,?)");
+    $stmt = saasPrepare($pdo, "INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method,id_invoice,bottype) VALUES (?,?,?,?,?,?,?,?)");
     $payment_Status = "Unpaid";
     $Payment_Method = "cart to cart";
     $invoice = "0 | 0";
@@ -1336,7 +1336,7 @@ $textonebuy
 } elseif (preg_match('/product_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
     $sql = "SELECT * FROM invoice WHERE id_invoice = :username AND id_user = :id_user";
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     $stmt->bindParam(':username', $username);
     $stmt->bindParam(':id_user', $from_id);
     $stmt->execute();
@@ -1563,7 +1563,7 @@ $output
 } elseif (preg_match('/extend_(\w+)/', $datain, $dataget)) {
     $id_invoice = $dataget[1];
     savedata("clear", "id_invoice", $id_invoice);
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_invoice = ? AND id_user = ? AND bottype = ?");
+    $stmt = saasPrepare($pdo, "SELECT * FROM invoice WHERE id_invoice = ? AND id_user = ? AND bottype = ?");
     $stmt->execute([$id_invoice, $from_id, $ApiToken]);
     $nameloc = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($nameloc == false) {
@@ -1588,7 +1588,7 @@ $output
     deletemessage($from_id, $message_id);
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
     $query = "SELECT * FROM product WHERE (Location = '{$nameloc['Service_location']}' OR Location = '/all')AND agent= '{$userbot['agent']}'";
-    $stmt = $pdo->prepare($query);
+    $stmt = saasPrepare($pdo, $query);
     $stmt->execute();
     $productnotexits = $stmt->rowCount();
     if ($productnotexits != 0 and $setting['show_product'] == false) {
@@ -1629,7 +1629,7 @@ $output
 } elseif ($user['step'] == "gettimecustomvolextend") {
     savedata("save", "volume", $text);
     $userdate = json_decode($user['Processing_value'], true);
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_invoice = ? AND id_user = ? AND bottype = ?");
+    $stmt = saasPrepare($pdo, "SELECT * FROM invoice WHERE id_invoice = ? AND id_user = ? AND bottype = ?");
     $stmt->execute([$userdate['id_invoice'], $from_id, $ApiToken]);
     $nameloc = $stmt->fetch(PDO::FETCH_ASSOC);
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
@@ -1664,7 +1664,7 @@ $output
         }
     }
     $userdate = json_decode($user['Processing_value'], true);
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_invoice = ? AND id_user = ? AND bottype = ?");
+    $stmt = saasPrepare($pdo, "SELECT * FROM invoice WHERE id_invoice = ? AND id_user = ? AND bottype = ?");
     $stmt->execute([$userdate['id_invoice'], $from_id, $ApiToken]);
     $nameloc = $stmt->fetch(PDO::FETCH_ASSOC);
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
@@ -1731,7 +1731,7 @@ $output
     Editmessagetext($from_id, $message_id, $text_inline, json_encode(['inline_keyboard' => []]));
     $id_invoice = $dataget[1];
     $userdate = json_decode($user['Processing_value'], true);
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_invoice = ? AND id_user = ? AND bottype = ?");
+    $stmt = saasPrepare($pdo, "SELECT * FROM invoice WHERE id_invoice = ? AND id_user = ? AND bottype = ?");
     $stmt->execute([$id_invoice, $from_id, $ApiToken]);
     $nameloc = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$nameloc) {
@@ -1839,7 +1839,7 @@ $output
         }
         return;
     }
-    $stmt = $pdo->prepare("INSERT IGNORE INTO service_other (id_user, username,value,type,time,price,output) VALUES (?, ?, ?, ?,?,?,?)");
+    $stmt = saasPrepare($pdo, "INSERT IGNORE INTO service_other (id_user, username,value,type,time,price,output) VALUES (?, ?, ?, ?,?,?,?)");
     $dateacc = date('Y/m/d H:i:s');
     $value = $datafactor['Volume_constraint'] . "_" . $datafactor['Service_time'];
     $value = json_encode(array(
@@ -1864,7 +1864,7 @@ $output
         $datafactor['price_productMain'] = $datafactor['price_productMain'] - $resultper;
     }
     $Balancebot = $userbotbalance['Balance'] - $datafactor['price_productMain'];
-    $stmt = $pdo->prepare("UPDATE user SET Balance = Balance - :price WHERE id = :id");
+    $stmt = saasPrepare($pdo, "UPDATE user SET Balance = Balance - :price WHERE id = :id");
     $stmt->execute([':price' => $datafactor['price_productMain'], ':id' => $userbotbalance['id']]);
     $keyboardextendfnished = json_encode([
         'inline_keyboard' => [
@@ -1914,7 +1914,7 @@ $output
     }
 } elseif (preg_match('/changelink_(\w+)/', $datain, $dataget)) {
     $id_invoice = $dataget[1];
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_invoice = ? AND id_user = ? AND bottype = ?");
+    $stmt = saasPrepare($pdo, "SELECT * FROM invoice WHERE id_invoice = ? AND id_user = ? AND bottype = ?");
     $stmt->execute([$id_invoice, $from_id, $ApiToken]);
     $nameloc = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$nameloc) {
@@ -1943,7 +1943,7 @@ $output
     Editmessagetext($from_id, $message_id, $textbotlang['users']['changeLink']['warnchange'], $keyboardextend);
 } elseif (preg_match('/confirmchange_(\w+)/', $datain, $dataget)) {
     $id_invoice = $dataget[1];
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_invoice = ? AND id_user = ? AND bottype = ?");
+    $stmt = saasPrepare($pdo, "SELECT * FROM invoice WHERE id_invoice = ? AND id_user = ? AND bottype = ?");
     $stmt->execute([$id_invoice, $from_id, $ApiToken]);
     $nameloc = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$nameloc) {

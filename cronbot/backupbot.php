@@ -100,11 +100,11 @@ function backupDumpDatabaseWithPdo(PDO $pdo, $targetFile)
 
     try {
         fwrite($handle, "SET NAMES utf8mb4;\nSET FOREIGN_KEY_CHECKS=0;\nSET SQL_MODE='NO_AUTO_VALUE_ON_ZERO';\n\n");
-        $tables = $pdo->query('SHOW FULL TABLES')->fetchAll(PDO::FETCH_NUM);
+        $tables = saasQuery($pdo, 'SHOW FULL TABLES')->fetchAll(PDO::FETCH_NUM);
         foreach ($tables as $table) {
             $name = '`' . str_replace('`', '``', $table[0]) . '`';
             $isView = isset($table[1]) && strtoupper($table[1]) === 'VIEW';
-            $create = $pdo->query('SHOW CREATE TABLE ' . $name)->fetch(PDO::FETCH_NUM);
+            $create = saasQuery($pdo, 'SHOW CREATE TABLE ' . $name)->fetch(PDO::FETCH_NUM);
             fwrite($handle, 'DROP ' . ($isView ? 'VIEW' : 'TABLE') . ' IF EXISTS ' . $name . ";\n" . $create[1] . ";\n\n");
             if ($isView) {
                 continue;
@@ -113,7 +113,7 @@ function backupDumpDatabaseWithPdo(PDO $pdo, $targetFile)
             $offset = 0;
             $chunkSize = 500;
             do {
-                $rows = $pdo->query('SELECT * FROM ' . $name . ' LIMIT ' . $chunkSize . ' OFFSET ' . $offset)->fetchAll(PDO::FETCH_ASSOC);
+                $rows = saasQuery($pdo, 'SELECT * FROM ' . $name . ' LIMIT ' . $chunkSize . ' OFFSET ' . $offset)->fetchAll(PDO::FETCH_ASSOC);
                 if (!$rows) {
                     break;
                 }

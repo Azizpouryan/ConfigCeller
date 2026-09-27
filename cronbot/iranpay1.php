@@ -11,7 +11,7 @@ $ManagePanel = new ManagePanel();
 $setting = select("setting", "*", null, null, "select");
 $paymentreports = select("topicid", "idreport", "report", "paymentreport", "select")['idreport'];
 $textbotlang = languagechange();
-$list_service = $pdo->prepare("SELECT * FROM Payment_report WHERE payment_Status = 'Unpaid' AND Payment_Method = 'Currency Rial 3' ORDER BY RAND() LIMIT 10");
+$list_service = saasPrepare($pdo, "SELECT * FROM Payment_report WHERE payment_Status = 'Unpaid' AND Payment_Method = 'Currency Rial 3' ORDER BY RAND() LIMIT 10");
 $list_service->execute();
 while ($Payment_report = ($list_service)->fetch(PDO::FETCH_ASSOC)) {
     $StatusPayment = verifpay($Payment_report['dec_not_confirmed']);

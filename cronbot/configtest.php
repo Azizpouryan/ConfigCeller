@@ -7,7 +7,7 @@ require_once __DIR__ . '/../panels.php';
 require_once __DIR__ . '/../function.php';
 $ManagePanel = new ManagePanel();
 $textbotlang = languagechange();
-        $stmt = $pdo->prepare("SELECT * FROM invoice WHERE status != 'disabled' AND name_product = :mp1 ORDER BY RAND() LIMIT 15");
+        $stmt = saasPrepare($pdo, "SELECT * FROM invoice WHERE status != 'disabled' AND name_product = :mp1 ORDER BY RAND() LIMIT 15");
         $stmt->execute([':mp1' => $textbotlang['common']['labels']['testServiceName']]);
         while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $resultt  = trim($result['username']);

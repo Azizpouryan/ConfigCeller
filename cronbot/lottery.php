@@ -35,9 +35,9 @@ if (intval($setting['scorestatus']) == 1) {
         $Lottery_prize = $temp;
 
         if ($setting['Lotteryagent'] == "1") {
-            $stmt = $pdo->prepare("SELECT * FROM user WHERE User_Status = 'Active' AND score != '0' ORDER BY score DESC LIMIT 3");
+            $stmt = saasPrepare($pdo, "SELECT * FROM user WHERE User_Status = 'Active' AND score != '0' ORDER BY score DESC LIMIT 3");
         } else {
-            $stmt = $pdo->prepare("SELECT * FROM user WHERE User_Status = 'Active' AND score != '0' AND agent = 'f' ORDER BY score DESC LIMIT 3");
+            $stmt = saasPrepare($pdo, "SELECT * FROM user WHERE User_Status = 'Active' AND score != '0' AND agent = 'f' ORDER BY score DESC LIMIT 3");
         }
         $stmt->execute();
         $winners = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -59,7 +59,7 @@ if (intval($setting['scorestatus']) == 1) {
             }
 
             $prizeAmount = intval($Lottery_prize[$count]);
-            $creditStmt = $pdo->prepare("UPDATE user SET Balance = Balance + :prize WHERE id = :id");
+            $creditStmt = saasPrepare($pdo, "UPDATE user SET Balance = Balance + :prize WHERE id = :id");
             $creditStmt->execute([':prize' => $prizeAmount, ':id' => $result['id']]);
             clearSelectCache('user');
 

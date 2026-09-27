@@ -24,7 +24,7 @@ if (!is_array($list_Exceptions)) {
     $list_Exceptions = [];
 }
 $timecheck = $setting['timeauto_not_verify'] * 60;
-$stmt = $pdo->prepare("SELECT * FROM Payment_report WHERE payment_Status = 'waiting' AND (Payment_Method = 'cart to cart' OR Payment_Method = 'arze digital offline') AND bottype IS NULL");
+$stmt = saasPrepare($pdo, "SELECT * FROM Payment_report WHERE payment_Status = 'waiting' AND (Payment_Method = 'cart to cart' OR Payment_Method = 'arze digital offline') AND bottype IS NULL");
 $stmt->execute();
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     if ($row['at_updated'] == null)
@@ -40,7 +40,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     if ($Payment_report['payment_Status'] == "paid") {
         continue;
     }
-    $stmtPaid = $pdo->prepare("UPDATE Payment_report SET payment_Status = 'paid', dec_not_confirmed = ? WHERE id_order = ? AND payment_Status = 'waiting'");
+    $stmtPaid = saasPrepare($pdo, "UPDATE Payment_report SET payment_Status = 'paid', dec_not_confirmed = ? WHERE id_order = ? AND payment_Status = 'waiting'");
     $stmtPaid->execute([$textbotlang['common']['labels']['autoConfirmedByBot'], $Payment_report['id_order']]);
     clearSelectCache('Payment_report');
     if ($stmtPaid->rowCount() === 0)

@@ -26,10 +26,10 @@ function statusplisio($tx_id)
     }
     return json_decode($response, true);
 }
-$list_service = $pdo->prepare("SELECT * FROM Payment_report WHERE payment_Status = 'Unpaid' AND Payment_Method = 'plisio'");
+$list_service = saasPrepare($pdo, "SELECT * FROM Payment_report WHERE payment_Status = 'Unpaid' AND Payment_Method = 'plisio'");
 $list_service->execute();
 $textbotlang = languagechange();
-$statusCheck = $pdo->prepare("SELECT payment_Status FROM Payment_report WHERE id_order = ? LIMIT 1");
+$statusCheck = saasPrepare($pdo, "SELECT payment_Status FROM Payment_report WHERE id_order = ? LIMIT 1");
 while ($Payment_report = ($list_service)->fetch(PDO::FETCH_ASSOC)) {
     $statusCheck->execute([$Payment_report['id_order']]);
     if ($statusCheck->fetchColumn() != "Unpaid")
@@ -50,7 +50,7 @@ while ($Payment_report = ($list_service)->fetch(PDO::FETCH_ASSOC)) {
             continue;
         DirectPayment($Payment_report['id_order'], "../images.jpg");
         $pricecashback = select("PaySetting", "ValuePay", "NamePay", "chashbackplisio", "select")['ValuePay'];
-        $__q18 = $pdo->prepare("SELECT * FROM user WHERE id = ? LIMIT 1");
+        $__q18 = saasPrepare($pdo, "SELECT * FROM user WHERE id = ? LIMIT 1");
         $__q18->bindValue(1, $Payment_report['id_user'], PDO::PARAM_STR);
         $__q18->execute();
         $Balance_id = $__q18->fetch(PDO::FETCH_ASSOC);

@@ -18,7 +18,7 @@ $dateend = date("Y-m-d") . " 23:59:59";
 
 // Helper function to execute a prepared statement
 function executeQuery($pdo, $sql, $params) {
-    $stmt = $pdo->prepare($sql);
+    $stmt = saasPrepare($pdo, $sql);
     foreach ($params as $key => $value) {
         $stmt->bindValue($key, $value);
     }

@@ -11,7 +11,7 @@ $ManagePanel = new ManagePanel();
 
 $setting = select("setting", "*");
 // buy service 
-$stmt = $pdo->prepare("SELECT * FROM marzban_panel WHERE type = 'marzban'  ORDER BY RAND() LIMIT 25");
+$stmt = saasPrepare($pdo, "SELECT * FROM marzban_panel WHERE type = 'marzban'  ORDER BY RAND() LIMIT 25");
 $stmt->execute();
         while ($panel = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $users = getusers($panel['name_panel'],"on_hold")['users'];
@@ -28,7 +28,7 @@ $stmt->execute();
             $timebuyremin = (time() - $resultss['time_sell'])/86400;
         if ($timebuyremin >= $setting['on_hold_day']) {
         $sql = "SELECT 1 FROM service_other WHERE username = :username  AND type = 'change_location' LIMIT 1";
-        $stmtOther = $pdo->prepare($sql);
+        $stmtOther = saasPrepare($pdo, $sql);
         $stmtOther->bindParam(':username', $line ,PDO::PARAM_STR);
         $stmtOther->execute();
         if($stmtOther->fetchColumn() !== false)continue;

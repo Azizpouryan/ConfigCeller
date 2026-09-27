@@ -70,7 +70,7 @@ $data_for_database = json_encode(array(
         'expire_old' => $get_username_info['expire']
     ));
 $volumepricelast = 0;
-$stmt = $pdo->prepare("INSERT IGNORE INTO service_other (id_user, username, value, type, time, price, output) VALUES (:id_user, :username, :value, :type, :time, :price, :output)");
+$stmt = saasPrepare($pdo, "INSERT IGNORE INTO service_other (id_user, username, value, type, time, price, output) VALUES (:id_user, :username, :value, :type, :time, :price, :output)");
     $value = $data_for_database;
     $dateacc = date('Y/m/d H:i:s');
     $type = "gift_volume";
@@ -119,7 +119,7 @@ $data_for_database = json_encode(array(
         'expire_old' => $get_username_info['expire']
     ));
 $volumepricelast = 0;
-$stmt = $pdo->prepare("INSERT IGNORE INTO service_other (id_user, username, value, type, time, price, output) VALUES (:id_user, :username, :value, :type, :time, :price, :output)");
+$stmt = saasPrepare($pdo, "INSERT IGNORE INTO service_other (id_user, username, value, type, time, price, output) VALUES (:id_user, :username, :value, :type, :time, :price, :output)");
     $value = $data_for_database;
     $dateacc = date('Y/m/d H:i:s');
     $type = "gift_time";

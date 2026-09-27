@@ -52,7 +52,7 @@ $backuser = json_encode([
 
 // keyboard list panel for test 
 
-$stmt = $pdo->prepare("SELECT * FROM marzban_panel WHERE TestAccount = 'ONTestAccount' AND (agent = :mp1 OR agent = 'all')");
+$stmt = saasPrepare($pdo, "SELECT * FROM marzban_panel WHERE TestAccount = 'ONTestAccount' AND (agent = :mp1 OR agent = 'all')");
 $stmt->execute([':mp1' => $userbot['agent']]);
 $list_marzban_panel_usertest = ['inline_keyboard' => []];
 while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -150,7 +150,7 @@ $backadmin = json_encode([
 ]);
 
 //------------------  [ listpanelusers ]----------------//
-$stmt = $pdo->prepare("SELECT * FROM marzban_panel WHERE status = 'active' AND (agent = :mp2 OR agent = 'all')");
+$stmt = saasPrepare($pdo, "SELECT * FROM marzban_panel WHERE status = 'active' AND (agent = :mp2 OR agent = 'all')");
 $stmt->execute([':mp2' => $userbot['agent']]);
 $list_marzban_panel_users = ['inline_keyboard' => []];
 while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -183,7 +183,7 @@ function KeyboardProduct($location, $query, $pricediscount, $datakeyboard, $stat
     global $pdo, $textbotlang;
     $product = ['inline_keyboard' => []];
     $statusshowprice = select("shopSetting", "*", "Namevalue", "statusshowprice", "select")['value'];
-    $stmt = $pdo->prepare($query);
+    $stmt = saasPrepare($pdo, $query);
     $stmt->execute();
     $valuetow = $valuetow != null ? "-$valuetow" : "";
     while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -212,11 +212,11 @@ function KeyboardProduct($location, $query, $pricediscount, $datakeyboard, $stat
 function KeyboardCategory($location, $agent, $backuser = "backuser")
 {
     global $pdo, $textbotlang;
-    $stmt = $pdo->prepare("SELECT * FROM category");
+    $stmt = saasPrepare($pdo, "SELECT * FROM category");
     $stmt->execute();
     $list_category = ['inline_keyboard' => [],];
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $stmts = $pdo->prepare("SELECT * FROM product WHERE (Location = :location OR Location = '/all') AND category = :category AND agent = :agent");
+        $stmts = saasPrepare($pdo, "SELECT * FROM product WHERE (Location = :location OR Location = '/all') AND category = :category AND agent = :agent");
         $stmts->bindParam(':location', $location, PDO::PARAM_STR);
         $stmts->bindParam(':category', $row['remark'], PDO::PARAM_STR);
         $stmts->bindParam(':agent', $agent);

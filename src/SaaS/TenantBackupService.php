@@ -119,6 +119,27 @@ final class TenantBackupService
         ];
     }
 
+    public function list(string $tenantId, int $limit = 50, int $offset = 0): array
+    {
+        $this->assertTenantId($tenantId);
+        $limit = max(1, min($limit, 100));
+        $offset = max(0, $offset);
+        $statement = $this->pdo->prepare(
+            'SELECT public_id, version, mode, status, manifest, checksum, encrypted, created_at, completed_at
+             FROM saas_backup WHERE tenant_id = ? ORDER BY id DESC LIMIT ' . $limit . ' OFFSET ' . $offset
+        );
+        $statement->execute([$tenantId]);
+        $rows = $statement->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($rows as &$row) {
+            $manifest = json_decode((string) ($row['manifest'] ?? '{}'), true);
+            $row['manifest'] = is_array($manifest) ? $manifest : [];
+            // The checksum is useful for integrity checks; the storage path is
+            // intentionally never selected or returned to the browser.
+        }
+        unset($row);
+        return $rows;
+    }
+
     public function preview(string $tenantId, string $backupId): array
     {
         $payload = $this->load($tenantId, $backupId);
@@ -142,7 +163,7 @@ final class TenantBackupService
 
     private function tenant(string $tenantId): ?array
     {
-        $statement = $this->pdo->prepare('SELECT id, tenant_key, name, status, legacy_key, metadata, created_at, updated_at FROM saas_tenant WHERE id = ? LIMIT 1');
+        $statement = $this->pdo->prepare('SELECT id, tenant_key, name, status, core_dispatch_status, legacy_key, metadata, created_at, updated_at FROM saas_tenant WHERE id = ? LIMIT 1');
         $statement->execute([$tenantId]);
         $row = $statement->fetch(PDO::FETCH_ASSOC);
         return is_array($row) ? $row : null;

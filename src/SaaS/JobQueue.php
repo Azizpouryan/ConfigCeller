@@ -74,6 +74,7 @@ final class JobQueue
             throw new RuntimeException('Invalid worker id.');
         }
 
+        $this->recoverStale();
         $this->pdo->beginTransaction();
         try {
             $statement = $this->pdo->query(
@@ -104,6 +105,21 @@ final class JobQueue
             }
             throw $e;
         }
+    }
+
+    /** Return jobs abandoned by a crashed worker to the pending queue. */
+    public function recoverStale(int $timeoutSeconds = 900): int
+    {
+        $timeoutSeconds = max(60, min($timeoutSeconds, 86400));
+        $statement = $this->pdo->prepare(
+            "UPDATE saas_job
+             SET status = IF(attempts < max_attempts, 'pending', 'failed'),
+                 locked_at = NULL, locked_by = NULL, last_error = COALESCE(last_error, 'worker lease expired'), updated_at = ?
+             WHERE status = 'running' AND locked_at IS NOT NULL AND locked_at < ?"
+        );
+        $now = date('Y-m-d H:i:s');
+        $statement->execute([$now, date('Y-m-d H:i:s', time() - $timeoutSeconds)]);
+        return $statement->rowCount();
     }
 
     public function complete(int $jobId, string $workerId): void

@@ -16,7 +16,7 @@ if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0
 try {
     $statement = $pdo->prepare(
         "SELECT b.id, b.tenant_id, b.token_ciphertext, b.webhook_secret_ciphertext, b.status,
-                t.status AS tenant_status, t.legacy_key
+                t.status AS tenant_status, t.core_dispatch_status
          FROM saas_bot b
          INNER JOIN saas_tenant t ON t.id = b.tenant_id
          WHERE b.public_id = ? AND b.deleted_at IS NULL
@@ -54,7 +54,7 @@ try {
     // The existing core is only safe to dispatch for the single legacy tenant
     // at this stage. New tenants remain blocked until their handlers are fully
     // migrated to TenantScopedRepository.
-    if (($bot['legacy_key'] ?? null) !== 'legacy') {
+    if (($bot['core_dispatch_status'] ?? null) !== 'ready') {
         http_response_code(503);
         echo json_encode(['ok' => false, 'error' => 'bot core migration pending']);
         exit;

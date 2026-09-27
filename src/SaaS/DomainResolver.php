@@ -48,6 +48,23 @@ final class DomainResolver
         return $host;
     }
 
+    public function list(string $tenantId): array
+    {
+        $statement = $this->pdo->prepare(
+            'SELECT hostname, domain_type, verification_status, is_primary, verified_at, created_at, updated_at
+             FROM saas_domain WHERE tenant_id = ? ORDER BY is_primary DESC, hostname ASC'
+        );
+        $statement->execute([$tenantId]);
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function createPending(string $tenantId, string $host): array
+    {
+        $token = bin2hex(random_bytes(24));
+        $this->registerPending($tenantId, $host, $token);
+        return ['hostname' => self::normalize($host), 'verification_token' => $token];
+    }
+
     public function registerPending(string $tenantId, string $host, string $verificationToken): void
     {
         $hostname = self::normalize($host);
@@ -70,6 +87,16 @@ final class DomainResolver
             $now,
             $now,
         ]);
+    }
+
+    public function remove(string $tenantId, string $host): void
+    {
+        $hostname = self::normalize($host);
+        $statement = $this->pdo->prepare('DELETE FROM saas_domain WHERE tenant_id = ? AND hostname_hash = ? AND hostname = ?');
+        $statement->execute([$tenantId, hash('sha256', $hostname), $hostname]);
+        if ($statement->rowCount() !== 1) {
+            throw new RuntimeException('Domain not found.');
+        }
     }
 
     public function verify(string $tenantId, string $host, string $verificationToken): void

@@ -56,4 +56,6 @@ return [
     ['reagent_report', 'idx_reagent_saas_bot', '`saas_bot_id`'],
     ['botsaz', 'idx_botsaz_saas_bot', '`saas_bot_id`'],
     ['logs_api', 'idx_logs_api_saas_bot', '`saas_bot_id`'],
+    ['saas_tenant', 'idx_saas_tenant_dispatch', '`core_dispatch_status`, `status`'],
+    ['saas_user', 'uniq_saas_user_username', '`username`', true],
 ];

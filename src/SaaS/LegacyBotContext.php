@@ -32,6 +32,7 @@ final class LegacyBotContext
             $context = new TenantContext();
             $context->set((string) $row['tenant_id'], (int) $row['id']);
             $context->applyToPdo($pdo);
+            $GLOBALS['mirzaSaasTenantContext'] = $context;
             return $context;
         } catch (\Throwable $e) {
             // The resolver is a compatibility bridge. Before migration 013 the

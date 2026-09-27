@@ -31,7 +31,16 @@ try {
     $audit = new \MirzaBot\SaaS\AuditLogger($pdo);
 
     if ($method === 'GET') {
-        $action = (string) ($_GET['action'] ?? 'preview');
+        $action = (string) ($_GET['action'] ?? 'list');
+        if ($action === 'list') {
+            $limit = isset($_GET['limit']) && is_numeric($_GET['limit']) ? min(max((int) $_GET['limit'], 1), 100) : 50;
+            $page = isset($_GET['page']) && is_numeric($_GET['page']) ? max((int) $_GET['page'], 1) : 1;
+            sendJsonResponse(true, 'ok', [
+                'items' => $service->list($auth->tenantId(), $limit, ($page - 1) * $limit),
+                'page' => $page,
+                'limit' => $limit,
+            ]);
+        }
         if ($action !== 'preview') {
             sendJsonResponse(false, 'action invalid', [], 422);
         }

@@ -6,6 +6,7 @@ return [
         tenant_key varchar(100) NOT NULL UNIQUE,
         name varchar(200) NOT NULL,
         status varchar(32) NOT NULL DEFAULT 'active',
+        core_dispatch_status varchar(32) NOT NULL DEFAULT 'pending',
         legacy_key varchar(100) NULL UNIQUE,
         metadata JSON NULL,
         created_at DATETIME NOT NULL,

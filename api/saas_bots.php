@@ -34,6 +34,8 @@ $context = new \MirzaBot\SaaS\TenantContext();
 $context->set($auth->tenantId());
 
 try {
+    $subscription = new \MirzaBot\SaaS\SubscriptionService($pdo);
+    $subscription->requireAccess($auth->tenantId());
     $manager = new \MirzaBot\SaaS\BotManager(
         $pdo,
         $context,
@@ -58,6 +60,10 @@ try {
     $action = (string) ($data['action'] ?? '');
     switch ($action) {
         case 'create':
+            $limit = $subscription->limit($auth->tenantId(), 'bots');
+            if ($limit !== null && count($manager->list()) >= $limit) {
+                throw new RuntimeException('Bot limit reached for the current plan.');
+            }
             $item = $manager->create((string) ($data['token'] ?? ''), (string) ($data['username'] ?? ''));
             $audit->record($auth->tenantId(), $auth->userId(), 'bot.created', 'saas_bot', $item['public_id'], ['username' => $item['username']]);
             sendJsonResponse(true, 'bot created', ['item' => $item], 201);

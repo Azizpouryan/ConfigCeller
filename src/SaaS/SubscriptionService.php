@@ -24,6 +24,9 @@ final class SubscriptionService
         if ($tenant === null) {
             throw new RuntimeException('Tenant not found.');
         }
+        if (($tenant['status'] ?? '') !== 'active') {
+            return ['status' => 'suspended', 'allowed' => false, 'plan' => null, 'subscription' => null];
+        }
 
         $subscription = $this->subscription($tenantId);
         if ($subscription === null && ($tenant['legacy_key'] ?? null) === 'legacy') {

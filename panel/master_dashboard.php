@@ -72,7 +72,7 @@ function master_escape(mixed $value): string
                     <td><?= master_escape($tenant['created_at']) ?></td>
                 </tr>
             <?php endforeach; ?>
-            <?php if ($tenants === []): ?><tr><td colspan="6">Tenantی وجود ندارد.</td></tr><?php endif; ?>
+            <?php if ($tenants === []): ?><tr><td colspan="7">Tenantی وجود ندارد.</td></tr><?php endif; ?>
             </tbody>
         </table></div>
     </div>

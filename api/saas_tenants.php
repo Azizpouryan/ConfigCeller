@@ -27,8 +27,16 @@ $uuid = static function (): string {
 
 try {
     if ($method === 'GET') {
+        $action = (string) ($_GET['action'] ?? 'tenants');
+        if ($action === 'users') {
+            $users = $pdo->query("SELECT id, public_id, username, email, is_master_admin, status, last_login_at, created_at FROM saas_user ORDER BY id DESC")->fetchAll(PDO::FETCH_ASSOC);
+            sendJsonResponse(true, 'ok', ['items' => $users, 'csrf' => csrf_token()]);
+        }
+        if ($action !== 'tenants') {
+            sendJsonResponse(false, 'action invalid', [], 422);
+        }
         $rows = $pdo->query(
-            "SELECT t.id, t.tenant_key, t.name, t.status, t.legacy_key, t.created_at, t.updated_at,
+            "SELECT t.id, t.tenant_key, t.name, t.status, t.core_dispatch_status, t.legacy_key, t.created_at, t.updated_at,
                     s.status AS subscription_status, s.current_period_end, s.grace_until
              FROM saas_tenant t
              LEFT JOIN saas_subscription s ON s.id = (
@@ -50,6 +58,60 @@ try {
 
     $action = (string) ($data['action'] ?? '');
     $audit = new \MirzaBot\SaaS\AuditLogger($pdo);
+    if ($action === 'create_user') {
+        $username = trim((string) ($data['username'] ?? ''));
+        $password = (string) ($data['password'] ?? '');
+        $email = trim((string) ($data['email'] ?? ''));
+        if ($username === '' || strlen($username) > 200 || !preg_match('/^[A-Za-z0-9._@+-]{3,200}$/', $username) || strlen($password) < 12 || strlen($password) > 4096) {
+            sendJsonResponse(false, 'user data invalid', [], 422);
+        }
+        if ($email !== '' && (strlen($email) > 320 || filter_var($email, FILTER_VALIDATE_EMAIL) === false)) {
+            sendJsonResponse(false, 'email invalid', [], 422);
+        }
+        $exists = $pdo->prepare('SELECT id FROM saas_user WHERE username = ? LIMIT 1');
+        $exists->execute([$username]);
+        if ($exists->fetchColumn() !== false) {
+            sendJsonResponse(false, 'username already exists', [], 409);
+        }
+        $publicId = $uuid();
+        $now = date('Y-m-d H:i:s');
+        $pdo->beginTransaction();
+        try {
+        $insert = $pdo->prepare(
+            'INSERT INTO saas_user (public_id, username, email, email_hash, password_hash, is_master_admin, status, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, \'active\', ?, ?)'
+        );
+        $insert->execute([
+            $publicId,
+            $username,
+            $email === '' ? null : $email,
+            $email === '' ? null : hash('sha256', strtolower($email)),
+            password_hash($password, PASSWORD_DEFAULT),
+            !empty($data['is_master_admin']) ? 1 : 0,
+            $now,
+            $now,
+        ]);
+        $userId = (int) $pdo->lastInsertId();
+        if (!empty($data['is_master_admin'])) {
+            $legacyTenant = $pdo->query("SELECT id FROM saas_tenant WHERE legacy_key = 'legacy' LIMIT 1")->fetchColumn();
+            if ($legacyTenant === false) {
+                throw new RuntimeException('Legacy Tenant is missing.');
+            }
+            $membership = $pdo->prepare(
+                'INSERT INTO saas_membership (tenant_id, user_id, role, permissions, status, created_at, updated_at) VALUES (?, ?, ?, ?, \'active\', ?, ?)'
+            );
+            $membership->execute([$legacyTenant, $userId, 'MASTER_ADMIN', '{}', $now, $now]);
+        }
+        $pdo->commit();
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
+        $audit->record(null, $auth->userId(), 'user.created', 'saas_user', (string) $userId, ['username' => $username]);
+        sendJsonResponse(true, 'user created', ['user_id' => $userId, 'public_id' => $publicId, 'username' => $username], 201);
+    }
     if ($action === 'create') {
         $tenantKey = strtolower(trim((string) ($data['tenant_key'] ?? '')));
         $name = trim((string) ($data['name'] ?? ''));
@@ -101,28 +163,70 @@ try {
     }
     if ($action === 'suspend' || $action === 'activate') {
         $status = $action === 'suspend' ? 'suspended' : 'active';
+        $now = date('Y-m-d H:i:s');
         $statement = $pdo->prepare('UPDATE saas_tenant SET status = ?, suspended_at = ?, updated_at = ? WHERE id = ? AND legacy_key IS NULL');
-        $statement->execute([$status, $status === 'suspended' ? date('Y-m-d H:i:s') : null, date('Y-m-d H:i:s'), $tenantId]);
+        $statement->execute([$status, $status === 'suspended' ? $now : null, $now, $tenantId]);
+        if ($statement->rowCount() !== 1) {
+            sendJsonResponse(false, 'tenant not found or cannot be changed', [], 409);
+        }
         if ($action === 'suspend') {
-            $pdo->prepare("UPDATE saas_subscription SET status = 'suspended', suspended_at = COALESCE(suspended_at, ?), updated_at = ? WHERE tenant_id = ?")->execute([date('Y-m-d H:i:s'), date('Y-m-d H:i:s'), $tenantId]);
+            $pdo->prepare("UPDATE saas_subscription SET status = 'suspended', suspended_at = COALESCE(suspended_at, ?), updated_at = ? WHERE tenant_id = ? AND status <> 'suspended'")->execute([$now, $now, $tenantId]);
+        } else {
+            // Re-activation never extends a subscription. It only restores the
+            // previous effective state when its paid/trial period is still valid.
+            $pdo->prepare("UPDATE saas_subscription SET status = CASE WHEN current_period_end >= ? THEN CASE WHEN starts_at > ? THEN 'trial' ELSE 'active' END ELSE 'suspended' END, suspended_at = NULL, updated_at = ? WHERE tenant_id = ? AND status = 'suspended'")->execute([$now, $now, $now, $tenantId]);
         }
         $audit->record($tenantId, $auth->userId(), 'tenant.' . $action . 'd', 'saas_tenant', $tenantId);
         sendJsonResponse(true, 'tenant updated');
     }
-    if ($action === 'add_member') {
+    if ($action === 'add_member' || $action === 'update_member') {
         $userId = (int) ($data['user_id'] ?? 0);
         $role = (string) ($data['role'] ?? 'TENANT_STAFF');
         if ($userId < 1 || !\MirzaBot\SaaS\Role::isKnown($role) || $role === 'MASTER_ADMIN') {
             sendJsonResponse(false, 'membership data invalid', [], 422);
         }
-        $statement = $pdo->prepare(
-            'INSERT INTO saas_membership (tenant_id, user_id, role, permissions, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)
-             ON DUPLICATE KEY UPDATE role = VALUES(role), status = \'active\', updated_at = VALUES(updated_at)'
-        );
+        $userExists = $pdo->prepare("SELECT id FROM saas_user WHERE id = ? AND status = 'active' LIMIT 1");
+        $userExists->execute([$userId]);
+        if ($userExists->fetchColumn() === false) {
+            sendJsonResponse(false, 'user not found', [], 404);
+        }
         $now = date('Y-m-d H:i:s');
-        $statement->execute([$tenantId, $userId, $role, '{}', 'active', $now, $now]);
-        $audit->record($tenantId, $auth->userId(), 'tenant.member_added', 'saas_tenant', $tenantId, ['user_id' => $userId, 'role' => $role]);
-        sendJsonResponse(true, 'member added');
+        if ($action === 'add_member') {
+            $statement = $pdo->prepare(
+                'INSERT INTO saas_membership (tenant_id, user_id, role, permissions, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE role = VALUES(role), status = \'active\', updated_at = VALUES(updated_at)'
+            );
+            $statement->execute([$tenantId, $userId, $role, '{}', 'active', $now, $now]);
+        } else {
+            $statement = $pdo->prepare("UPDATE saas_membership SET role = ?, status = 'active', updated_at = ? WHERE tenant_id = ? AND user_id = ?");
+            $statement->execute([$role, $now, $tenantId, $userId]);
+            if ($statement->rowCount() !== 1) {
+                sendJsonResponse(false, 'membership not found', [], 404);
+            }
+        }
+        $audit->record($tenantId, $auth->userId(), 'tenant.member_' . ($action === 'add_member' ? 'added' : 'updated'), 'saas_membership', (string) $userId, ['role' => $role]);
+        sendJsonResponse(true, 'member updated');
+    }
+    if ($action === 'remove_member') {
+        $userId = (int) ($data['user_id'] ?? 0);
+        if ($userId < 1) {
+            sendJsonResponse(false, 'membership data invalid', [], 422);
+        }
+        $ownerCount = $pdo->prepare("SELECT COUNT(*) FROM saas_membership WHERE tenant_id = ? AND role IN ('TENANT_OWNER', 'TENANT_ADMIN') AND status = 'active'");
+        $ownerCount->execute([$tenantId]);
+        $memberRole = $pdo->prepare("SELECT role FROM saas_membership WHERE tenant_id = ? AND user_id = ? AND status = 'active' LIMIT 1");
+        $memberRole->execute([$tenantId, $userId]);
+        $role = $memberRole->fetchColumn();
+        if ($role === false) {
+            sendJsonResponse(false, 'membership not found', [], 404);
+        }
+        if (in_array((string) $role, ['TENANT_OWNER', 'TENANT_ADMIN'], true) && (int) $ownerCount->fetchColumn() <= 1) {
+            sendJsonResponse(false, 'tenant must retain an active owner or admin', [], 409);
+        }
+        $statement = $pdo->prepare("UPDATE saas_membership SET status = 'removed', updated_at = ? WHERE tenant_id = ? AND user_id = ? AND status = 'active'");
+        $statement->execute([date('Y-m-d H:i:s'), $tenantId, $userId]);
+        $audit->record($tenantId, $auth->userId(), 'tenant.member_removed', 'saas_membership', (string) $userId);
+        sendJsonResponse(true, 'member removed');
     }
 
     sendJsonResponse(false, 'action invalid', [], 422);

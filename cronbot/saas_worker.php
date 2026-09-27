@@ -35,8 +35,20 @@ try {
         try {
             $payload = json_decode((string) $job['payload'], true, 512, JSON_THROW_ON_ERROR);
             $tenantId = (string) ($job['tenant_id'] ?? '');
-            $context = new \MirzaBot\SaaS\TenantContext();
-            $context->set($tenantId);
+            $context = null;
+            if ($tenantId !== '') {
+                if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $tenantId)) {
+                    throw new RuntimeException('Job tenant context is invalid.');
+                }
+                $context = new \MirzaBot\SaaS\TenantContext();
+                $context->set($tenantId, isset($job['bot_id']) && $job['bot_id'] !== null ? (int) $job['bot_id'] : null);
+                $context->applyToPdo($pdo);
+                $GLOBALS['mirzaSaasTenantContext'] = $context;
+            } else {
+                unset($GLOBALS['mirzaSaasTenantContext']);
+                $pdo->exec('SET @mirza_tenant_id = NULL');
+                $pdo->exec('SET @mirza_saas_bot_id = NULL');
+            }
 
             switch ((string) $job['job_type']) {
                 case 'bot.cleanup':

@@ -82,10 +82,10 @@ final class BotManager
             throw new RuntimeException('Bot credentials are unavailable.');
         }
 
-        $tenant = $this->pdo->prepare('SELECT t.legacy_key FROM saas_bot b INNER JOIN saas_tenant t ON t.id = b.tenant_id WHERE b.public_id = ? AND b.tenant_id = ? AND b.deleted_at IS NULL LIMIT 1');
+        $tenant = $this->pdo->prepare("SELECT t.core_dispatch_status FROM saas_bot b INNER JOIN saas_tenant t ON t.id = b.tenant_id WHERE b.public_id = ? AND b.tenant_id = ? AND b.deleted_at IS NULL AND t.status = 'active' LIMIT 1");
         $tenant->execute([$publicId, $this->context->requireTenantId()]);
         $tenantRow = $tenant->fetch(PDO::FETCH_ASSOC);
-        if (!is_array($tenantRow) || ($tenantRow['legacy_key'] ?? null) !== 'legacy') {
+        if (!is_array($tenantRow) || ($tenantRow['core_dispatch_status'] ?? null) !== 'ready') {
             throw new RuntimeException('Central dispatch is not enabled for this Bot yet.');
         }
 

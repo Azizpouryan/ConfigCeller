@@ -29,6 +29,7 @@ php table.php
 - `013_saas_foundation`: ساخت Tenant قدیمی، انتقال هویت Admin، افزودن `tenant_id` و انتقال Botها.
 - `014_tenant_insert_context_triggers`: انتقال Tenant معتبر به INSERTهای Legacy.
 - `015_dispatch_eligibility_and_bot_context`: ثبت وضعیت صریح Core Dispatch و انتقال Bot Context به INSERTها.
+- `016_tenant_scoped_legacy_keys`: تبدیل کلیدهای خطرناک Legacy به کلیدهای Tenant-scoped و آماده‌سازی Clone تنظیمات Tenant.
 
 Migrationها Checksum دارند؛ فایل Migration اجراشده نباید بعداً تغییر داده شود.
 
@@ -49,9 +50,9 @@ Webhook مدیریت‌شده فقط برای Bot فعال، Tenant فعال، S
 /telegram_webhook.php?bot=<public_bot_uuid>
 ```
 
-`core_dispatch_status` برای Tenantهای جدید عمداً `pending` است. این Tenantها تا زمان تکمیل مهاجرت همه Handlerهای Core پاسخ `503 bot core migration pending` می‌گیرند. فقط Tenant قدیمی که Handlerهای Legacy آن Scope شده‌اند `ready` است.
+`core_dispatch_status` به‌صورت پیش‌فرض `pending` است. مسیر ساخت Tenant، پس از Clone تنظیمات Legacy و موفقیت Transaction آن را به `ready` تبدیل می‌کند؛ اگر Bootstrap ناقص باشد Tenant ساخته نمی‌شود. Tenantهایی که مستقیماً در دیتابیس ساخته شوند تا زمان Bootstrap معتبر پاسخ `503 bot core migration pending` می‌گیرند.
 
-این وضعیت را با API یا SQL دستی برای Tenant جدید فعال نکنید؛ فعال‌سازی قبل از مهاجرت کامل باعث نقض Isolation می‌شود.
+این وضعیت را با SQL دستی برای Tenant جدید تغییر ندهید؛ فقط Provisioner باید بعد از Clone موفق آن را فعال کند.
 
 ## 5. Queue و Cron
 

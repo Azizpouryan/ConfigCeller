@@ -16,7 +16,7 @@ return [
     ['service_other', 'idx_serviceother_username', '`username`(150)'],
     ['service_other', 'idx_serviceother_type', '`type`(100)'],
     ['user', 'idx_user_affiliates', '`affiliates`'],
-    ['departman', 'uniq_departman_entry', '`idsupport`(100), `name_departman`(150)', true],
+    ['departman', 'uniq_departman_entry', '`tenant_id`, `idsupport`(100), `name_departman`(150)', true],
     ['admin', 'idx_admin_tenant', '`tenant_id`'],
     ['user', 'idx_user_tenant', '`tenant_id`'],
     ['help', 'idx_help_tenant', '`tenant_id`'],

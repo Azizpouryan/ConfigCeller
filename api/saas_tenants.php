@@ -122,12 +122,19 @@ try {
 
         $pdo->beginTransaction();
         try {
+            $legacyTenant = $pdo->query("SELECT id FROM saas_tenant WHERE legacy_key = 'legacy' LIMIT 1")->fetchColumn();
+            if ($legacyTenant === false) {
+                throw new RuntimeException('Legacy Tenant is missing.');
+            }
             $tenantId = $uuid();
             $now = date('Y-m-d H:i:s');
             $tenant = $pdo->prepare(
-                'INSERT INTO saas_tenant (id, tenant_key, name, status, metadata, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+                'INSERT INTO saas_tenant (id, tenant_key, name, status, core_dispatch_status, metadata, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
             );
-            $tenant->execute([$tenantId, $tenantKey, $name, 'active', '{}', $now, $now]);
+            $tenant->execute([$tenantId, $tenantKey, $name, 'active', 'pending', '{}', $now, $now]);
+
+            $configCounts = (new \MirzaBot\SaaS\TenantProvisioner($pdo))->cloneLegacyConfiguration((string) $legacyTenant, $tenantId);
+            $pdo->prepare("UPDATE saas_tenant SET core_dispatch_status = 'ready', updated_at = ? WHERE id = ?")->execute([$now, $tenantId]);
 
             $member = $pdo->prepare(
                 'INSERT INTO saas_membership (tenant_id, user_id, role, permissions, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
@@ -153,7 +160,7 @@ try {
             throw $e;
         }
 
-        $audit->record($tenantId, $auth->userId(), 'tenant.created', 'saas_tenant', $tenantId, ['tenant_key' => $tenantKey]);
+        $audit->record($tenantId, $auth->userId(), 'tenant.created', 'saas_tenant', $tenantId, ['tenant_key' => $tenantKey, 'configuration_rows' => $configCounts ?? []]);
         sendJsonResponse(true, 'tenant created', ['tenant_id' => $tenantId, 'tenant_key' => $tenantKey], 201);
     }
 

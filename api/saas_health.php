@@ -28,7 +28,11 @@ try {
     $statement->execute($requiredTables);
     $present = array_map('strtolower', $statement->fetchAll(PDO::FETCH_COLUMN));
     $missing = array_values(array_filter($requiredTables, static fn(string $table): bool => !in_array(strtolower($table), $present, true)));
-    $checks['schema'] = ['ok' => $missing === [], 'missing' => $missing];
+    $migrationNames = ['013_saas_foundation', '014_tenant_insert_context_triggers', '015_dispatch_eligibility_and_bot_context', '016_tenant_scoped_legacy_keys'];
+    $migrationStatement = $pdo->query('SELECT migration FROM schema_migrations');
+    $appliedMigrations = array_map('strval', $migrationStatement->fetchAll(PDO::FETCH_COLUMN));
+    $missingMigrations = array_values(array_diff($migrationNames, $appliedMigrations));
+    $checks['schema'] = ['ok' => $missing === [] && $missingMigrations === [], 'missing' => $missing, 'missing_migrations' => $missingMigrations];
 
     $legacyTables = [
         'admin', 'user', 'help', 'setting', 'channels', 'marzban_panel', 'product',
